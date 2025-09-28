@@ -49,7 +49,7 @@ func (k *Kernel) Init() *gin.Engine {
 		ginSwagger.URL("/swagger.json"),
 	))
 
-	router.GET("/healthz", func(c *gin.Context) {
+	router.HEAD("/healthz", func(c *gin.Context) {
 		c.Status(200)
 	})
 
