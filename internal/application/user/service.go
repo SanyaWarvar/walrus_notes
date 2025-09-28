@@ -48,12 +48,16 @@ func NewService(
 
 // todo add reg exp check for password and username and email
 func (srv *Service) RegisterUser(ctx context.Context, credentials request.RegisterCredentials) (*respDto.RegisterResponse, error) {
-	user, err := srv.userService.CreateUserFromAuthCredentials(ctx, credentials)
+	u, err := srv.userService.CreateUserFromAuthCredentials(ctx, credentials)
 	if err != nil {
 		return nil, err
 	}
+	t := true
+	err = srv.userService.UpdateUser(ctx, u.Id, &user.UserUpdateParams{
+		ConfirmedEmail: &t,
+	})
 	return &respDto.RegisterResponse{
-		UserId: user.Id,
+		UserId: u.Id,
 	}, nil
 
 }
