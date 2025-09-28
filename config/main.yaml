@@ -1,0 +1,51 @@
+http:
+  port: 80
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+postgres:
+  username: "postgres"
+  host: "localhost"
+  port: "5432"
+  dbname: "postgres"
+  sslmode: "disable"
+  password: "postgres"
+  schema: "walrus"
+  poolMax: 50
+  poolMin: 20
+  healthCheckPeriod: 10s
+  connectionMaxIdleTime: 600s
+  connectionMaxLifeTime: 1800s
+
+log:
+  level: "INFO"
+  requestLogEnabled: true
+  requestLogWithBody: true
+
+internal:
+  path: "/wn"
+  environment: ".env"
+  logInputParamOnErr: true
+
+cache:
+  url: "localhost:6379"
+  username: ""
+  password: ""
+
+response:
+  exportError: true
+
+email:
+  ownerEmail: "templeapi88@gmail.com"
+  addres: "smtp.gmail.com:587"
+  codeLenght: 6
+  codeExp: "5m"
+  minTTL: "5m"
+
+jwt:
+  accessTtl: "100h"
+  refreshTtl: "100h"
+
+cron:
+  generateStatics: "@every 5s"

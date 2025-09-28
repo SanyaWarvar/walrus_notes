@@ -1,0 +1,412 @@
+definitions:
+  multipart.FileHeader:
+    properties:
+      filename:
+        type: string
+      header:
+        $ref: '#/definitions/textproto.MIMEHeader'
+      size:
+        type: integer
+    type: object
+  rv_internal_domain_dto_request.ChangeProfilePicture:
+    properties:
+      file:
+        $ref: '#/definitions/multipart.FileHeader'
+      userId:
+        type: string
+    required:
+    - file
+    type: object
+  rv_internal_domain_dto_request.ConfimationCodeRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      newPassword:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  rv_internal_domain_dto_request.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    type: object
+  rv_internal_domain_dto_request.RegisterCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  rv_internal_domain_dto_response.ChangePictureResponse:
+    properties:
+      newImgUrl:
+        type: string
+    type: object
+  rv_internal_domain_dto_response.RegisterResponse:
+    properties:
+      userId:
+        type: string
+    type: object
+  rv_internal_domain_dto_response.SendCodeResponse:
+    properties:
+      nextCodeDelay:
+        $ref: '#/definitions/time.Duration'
+    type: object
+  rv_internal_domain_services_token.UserTokens:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    required:
+    - accessToken
+    - refreshToken
+    type: object
+  rv_pkg_response.Response:
+    properties:
+      data: {}
+      meta:
+        $ref: '#/definitions/rv_pkg_response.meta'
+      pagination:
+        $ref: '#/definitions/rv_pkg_response.pagination'
+    type: object
+  rv_pkg_response.meta:
+    properties:
+      code:
+        type: string
+      error:
+        type: string
+      message:
+        type: string
+      requestId:
+        type: string
+    type: object
+  rv_pkg_response.pagination:
+    properties:
+      page:
+        type: integer
+      pages:
+        type: integer
+      perPage:
+        type: integer
+    type: object
+  textproto.MIMEHeader:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  time.Duration:
+    enum:
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
+    type: integer
+    x-enum-varnames:
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
+info:
+  contact: {}
+  description: This is reel views api service.
+  title: REEL VIEWS API
+  version: "1.0"
+paths:
+  /rl/api/v1/auth/code:
+    post:
+      description: register new user
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.LoginRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.SendCodeResponse'
+              type: object
+        "400":
+          description: 'possible codes: incorrect_password'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found, confirm_code_already_send'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: send_confirm_code
+      tags:
+      - auth
+  /rl/api/v1/auth/confirm:
+    post:
+      description: Подтверждение кода для подтверждения почты, либо сброса пароля.
+        Если сброс пароля, то newPassword обязательное поле.
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.ConfimationCodeRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found, confirm_code_incorrect, confirm_code_not_exist,
+            no_new_password'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: confirm_code
+      tags:
+      - auth
+  /rl/api/v1/auth/forgot:
+    post:
+      description: Сброс пароля
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.LoginRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.SendCodeResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found, confirm_code_already_send'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: forgot_password
+      tags:
+      - auth
+  /rl/api/v1/auth/login:
+    post:
+      description: Получение access,refresh токенов по почте и паролю
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.LoginRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_services_token.UserTokens'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "401":
+          description: 'possible codes: incorrect_password'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found '
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: login
+      tags:
+      - auth
+  /rl/api/v1/auth/refresh:
+    post:
+      description: Получение access,refresh токенов по access, refresh токенам
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_services_token.UserTokens'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_services_token.UserTokens'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: bad_refresh_token, bad_access_token, bad_token_claims,
+            token_dont_exist, tokens_dont_match'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: refresh_tokens
+      tags:
+      - auth
+  /rl/api/v1/auth/register:
+    post:
+      description: register new user
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.RegisterCredentials'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.RegisterResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: register_user
+      tags:
+      - auth
+  /rl/api/v1/user/register:
+    post:
+      description: сменить аватарку пользователя
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rv_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/rv_internal_domain_dto_response.ChangePictureResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+        "422":
+          description: 'possible codes: user_not_found'
+          schema:
+            $ref: '#/definitions/rv_pkg_response.Response'
+      summary: change_profile_picture
+      tags:
+      - user
+swagger: "2.0"
