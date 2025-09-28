@@ -85,7 +85,7 @@ func (h *Controller) changeProfilePicture(c *gin.Context) {
 // @Description получить юзера по айди
 // @Tags user
 // @Produce json
-// @Param path id string true "data"
+// @Param id path string true "User ID"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"

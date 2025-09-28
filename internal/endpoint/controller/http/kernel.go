@@ -60,7 +60,7 @@ func (k *Kernel) Init() *gin.Engine {
 		CORSHandler(),
 		ErrorHandler(k.builder),
 	)
-	k.initApi(router.Group("/rl", RequestIdValidationHandler))
+	k.initApi(router.Group("/wn", RequestIdValidationHandler))
 	return router
 }
 

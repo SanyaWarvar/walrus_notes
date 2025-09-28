@@ -32,7 +32,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
                         }
                     },
                     {
@@ -49,13 +49,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_dto_response.SendCodeResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -65,13 +65,13 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: incorrect_password",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: user_not_found, confirm_code_already_send",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -94,7 +94,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.ConfimationCodeRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.ConfimationCodeRequest"
                         }
                     },
                     {
@@ -109,19 +109,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: user_not_found, confirm_code_incorrect, confirm_code_not_exist, no_new_password",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -144,7 +144,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
                         }
                     },
                     {
@@ -161,13 +161,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_dto_response.SendCodeResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -177,13 +177,13 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: user_not_found, confirm_code_already_send",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -206,7 +206,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
                         }
                     },
                     {
@@ -223,13 +223,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_services_token.UserTokens"
+                                            "$ref": "#/definitions/wn_internal_domain_services_token.UserTokens"
                                         }
                                     }
                                 }
@@ -239,19 +239,19 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "401": {
                         "description": "possible codes: incorrect_password",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: user_not_found ",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -274,7 +274,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_services_token.UserTokens"
+                            "$ref": "#/definitions/wn_internal_domain_services_token.UserTokens"
                         }
                     },
                     {
@@ -291,13 +291,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_services_token.UserTokens"
+                                            "$ref": "#/definitions/wn_internal_domain_services_token.UserTokens"
                                         }
                                     }
                                 }
@@ -307,13 +307,13 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: bad_refresh_token, bad_access_token, bad_token_claims, token_dont_exist, tokens_dont_match",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -336,7 +336,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.RegisterCredentials"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.RegisterCredentials"
                         }
                     },
                     {
@@ -353,13 +353,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_dto_response.RegisterResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.RegisterResponse"
                                         }
                                     }
                                 }
@@ -369,13 +369,73 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: not_unique",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/rl/api/v1/user/profile/{id}": {
+            "post": {
+                "description": "получить юзера по айди",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get_user_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.ChangePictureResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: user_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -398,7 +458,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rv_internal_domain_dto_request.ChangeProfilePicture"
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.ChangeProfilePicture"
                         }
                     },
                     {
@@ -422,13 +482,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rv_pkg_response.Response"
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rv_internal_domain_dto_response.ChangePictureResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.ChangePictureResponse"
                                         }
                                     }
                                 }
@@ -438,13 +498,13 @@ const docTemplate = `{
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     },
                     "422": {
                         "description": "possible codes: user_not_found",
                         "schema": {
-                            "$ref": "#/definitions/rv_pkg_response.Response"
+                            "$ref": "#/definitions/wn_pkg_response.Response"
                         }
                     }
                 }
@@ -462,153 +522,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/textproto.MIMEHeader"
                 },
                 "size": {
-                    "type": "integer"
-                }
-            }
-        },
-        "rv_internal_domain_dto_request.ChangeProfilePicture": {
-            "type": "object",
-            "required": [
-                "file"
-            ],
-            "properties": {
-                "file": {
-                    "$ref": "#/definitions/multipart.FileHeader"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_request.ConfimationCodeRequest": {
-            "type": "object",
-            "required": [
-                "code",
-                "email"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "newPassword": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_request.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_request.RegisterCredentials": {
-            "type": "object",
-            "required": [
-                "email",
-                "password",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_response.ChangePictureResponse": {
-            "type": "object",
-            "properties": {
-                "newImgUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_response.RegisterResponse": {
-            "type": "object",
-            "properties": {
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_internal_domain_dto_response.SendCodeResponse": {
-            "type": "object",
-            "properties": {
-                "nextCodeDelay": {
-                    "$ref": "#/definitions/time.Duration"
-                }
-            }
-        },
-        "rv_internal_domain_services_token.UserTokens": {
-            "type": "object",
-            "required": [
-                "accessToken",
-                "refreshToken"
-            ],
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_pkg_response.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "meta": {
-                    "$ref": "#/definitions/rv_pkg_response.meta"
-                },
-                "pagination": {
-                    "$ref": "#/definitions/rv_pkg_response.pagination"
-                }
-            }
-        },
-        "rv_pkg_response.meta": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "error": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "requestId": {
-                    "type": "string"
-                }
-            }
-        },
-        "rv_pkg_response.pagination": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "type": "integer"
-                },
-                "pages": {
-                    "type": "integer"
-                },
-                "perPage": {
                     "type": "integer"
                 }
             }
@@ -644,6 +557,153 @@ const docTemplate = `{
                 "Minute",
                 "Hour"
             ]
+        },
+        "wn_internal_domain_dto_request.ChangeProfilePicture": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.ConfimationCodeRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "email"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.RegisterCredentials": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_response.ChangePictureResponse": {
+            "type": "object",
+            "properties": {
+                "newImgUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_response.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_response.SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "nextCodeDelay": {
+                    "$ref": "#/definitions/time.Duration"
+                }
+            }
+        },
+        "wn_internal_domain_services_token.UserTokens": {
+            "type": "object",
+            "required": [
+                "accessToken",
+                "refreshToken"
+            ],
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_pkg_response.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "meta": {
+                    "$ref": "#/definitions/wn_pkg_response.meta"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/wn_pkg_response.pagination"
+                }
+            }
+        },
+        "wn_pkg_response.meta": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "requestId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_pkg_response.pagination": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "pages": {
+                    "type": "integer"
+                },
+                "perPage": {
+                    "type": "integer"
+                }
+            }
         }
     }
 }`
@@ -654,8 +714,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "REEL VIEWS API",
-	Description:      "This is reel views api service.",
+	Title:            "WALRUS NOTES API",
+	Description:      "This is walrus notes api service.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
