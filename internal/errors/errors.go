@@ -20,6 +20,8 @@ var (
 
 	NoNewPassword = apperror.NewBadRequestError("no new password", "no_new_password")
 	NotUnique     = apperror.NewInvalidDataError("not unique", "not_unique")
+
+	NoteNotFound = apperror.NewInvalidDataError("note not found", "note_not_found")
 )
 
 // коды динамических ошибок:

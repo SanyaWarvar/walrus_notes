@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/rl/api/v1/auth/code": {
+        "/wn/api/v1/auth/code": {
             "post": {
                 "description": "register new user",
                 "produces": [
@@ -77,7 +77,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/auth/confirm": {
+        "/wn/api/v1/auth/confirm": {
             "post": {
                 "description": "Подтверждение кода для подтверждения почты, либо сброса пароля. Если сброс пароля, то newPassword обязательное поле.",
                 "produces": [
@@ -127,7 +127,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/auth/forgot": {
+        "/wn/api/v1/auth/forgot": {
             "post": {
                 "description": "Сброс пароля",
                 "produces": [
@@ -189,7 +189,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/auth/login": {
+        "/wn/api/v1/auth/login": {
             "post": {
                 "description": "Получение access,refresh токенов по почте и паролю",
                 "produces": [
@@ -257,7 +257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/auth/refresh": {
+        "/wn/api/v1/auth/refresh": {
             "post": {
                 "description": "Получение access,refresh токенов по access, refresh токенам",
                 "produces": [
@@ -319,7 +319,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/auth/register": {
+        "/wn/api/v1/auth/register": {
             "post": {
                 "description": "register new user",
                 "produces": [
@@ -381,7 +381,190 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/user/profile/{id}": {
+        "/wn/api/v1/notes/create": {
+            "post": {
+                "description": "Создать заметку",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "create_note",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.NoteId"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: not_unique",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/notes/delete": {
+            "post": {
+                "description": "Удалить заметку",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "delete_note",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteId"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: note_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/notes/update": {
+            "post": {
+                "description": "Обновить заметку",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "update_note",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteWithIdRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: note_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/user/profile/{id}": {
             "post": {
                 "description": "получить юзера по айди",
                 "produces": [
@@ -441,7 +624,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/rl/api/v1/user/register": {
+        "/wn/api/v1/user/register": {
             "post": {
                 "description": "сменить аватарку пользователя",
                 "produces": [
@@ -604,6 +787,45 @@ const docTemplate = `{
                 }
             }
         },
+        "wn_internal_domain_dto_request.NoteId": {
+            "type": "object",
+            "required": [
+                "noteId"
+            ],
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.NoteRequest": {
+            "type": "object",
+            "properties": {
+                "payload": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.NoteWithIdRequest": {
+            "type": "object",
+            "required": [
+                "noteId"
+            ],
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto_request.RegisterCredentials": {
             "type": "object",
             "required": [
@@ -627,6 +849,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "newImgUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_response.NoteId": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }

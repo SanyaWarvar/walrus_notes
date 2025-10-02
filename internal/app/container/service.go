@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/internal/domain/services/file"
+	"wn/internal/domain/services/note"
 	smtpSrv "wn/internal/domain/services/smtp"
 	tokenSrv "wn/internal/domain/services/token"
 	userSrv "wn/internal/domain/services/user"
@@ -21,6 +22,7 @@ type services struct {
 	smtp  *smtpSrv.Service
 	token *tokenSrv.Service
 	file  *file.Service
+	note  *note.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -74,4 +76,16 @@ func (s *services) getFileService() *file.Service {
 
 	}
 	return s.file
+}
+
+func (s *services) getNoteService() *note.Service {
+	if s.note == nil {
+		s.note = note.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+			s.c.getRepositories().getNoteRepository(),
+		)
+
+	}
+	return s.note
 }

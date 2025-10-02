@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/internal/application/auth"
+	"wn/internal/application/note"
 	userApp "wn/internal/application/user"
 )
 
@@ -17,6 +18,7 @@ type applications struct {
 
 	user *userApp.Service
 	auth *auth.Service
+	note *note.Service
 }
 
 func (s *applications) getUserApplicationService() *userApp.Service {
@@ -44,4 +46,16 @@ func (s *applications) getAuthApplicationService() *auth.Service {
 		)
 	}
 	return s.auth
+}
+
+func (s *applications) getNoteApplicationService() *note.Service {
+	if s.note == nil {
+		s.note = note.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+
+			s.c.getServices().getNoteService(),
+		)
+	}
+	return s.note
 }

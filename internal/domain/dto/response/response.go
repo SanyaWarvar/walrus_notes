@@ -17,3 +17,7 @@ type SendCodeResponse struct {
 type ChangePictureResponse struct {
 	NewImgurl string `json:"newImgUrl"`
 }
+
+type NoteId struct {
+	Id uuid.UUID `json:"id"`
+}

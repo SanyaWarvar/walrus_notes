@@ -64,6 +64,31 @@ definitions:
     required:
     - email
     type: object
+  wn_internal_domain_dto_request.NoteId:
+    properties:
+      noteId:
+        type: string
+    required:
+    - noteId
+    type: object
+  wn_internal_domain_dto_request.NoteRequest:
+    properties:
+      payload:
+        type: string
+      title:
+        type: string
+    type: object
+  wn_internal_domain_dto_request.NoteWithIdRequest:
+    properties:
+      noteId:
+        type: string
+      payload:
+        type: string
+      title:
+        type: string
+    required:
+    - noteId
+    type: object
   wn_internal_domain_dto_request.RegisterCredentials:
     properties:
       email:
@@ -80,6 +105,11 @@ definitions:
   wn_internal_domain_dto_response.ChangePictureResponse:
     properties:
       newImgUrl:
+        type: string
+    type: object
+  wn_internal_domain_dto_response.NoteId:
+    properties:
+      id:
         type: string
     type: object
   wn_internal_domain_dto_response.RegisterResponse:
@@ -136,7 +166,7 @@ info:
   title: WALRUS NOTES API
   version: "1.0"
 paths:
-  /rl/api/v1/auth/code:
+  /wn/api/v1/auth/code:
     post:
       description: register new user
       parameters:
@@ -174,7 +204,7 @@ paths:
       summary: send_confirm_code
       tags:
       - auth
-  /rl/api/v1/auth/confirm:
+  /wn/api/v1/auth/confirm:
     post:
       description: Подтверждение кода для подтверждения почты, либо сброса пароля.
         Если сброс пароля, то newPassword обязательное поле.
@@ -209,7 +239,7 @@ paths:
       summary: confirm_code
       tags:
       - auth
-  /rl/api/v1/auth/forgot:
+  /wn/api/v1/auth/forgot:
     post:
       description: Сброс пароля
       parameters:
@@ -247,7 +277,7 @@ paths:
       summary: forgot_password
       tags:
       - auth
-  /rl/api/v1/auth/login:
+  /wn/api/v1/auth/login:
     post:
       description: Получение access,refresh токенов по почте и паролю
       parameters:
@@ -289,7 +319,7 @@ paths:
       summary: login
       tags:
       - auth
-  /rl/api/v1/auth/refresh:
+  /wn/api/v1/auth/refresh:
     post:
       description: Получение access,refresh токенов по access, refresh токенам
       parameters:
@@ -328,7 +358,7 @@ paths:
       summary: refresh_tokens
       tags:
       - auth
-  /rl/api/v1/auth/register:
+  /wn/api/v1/auth/register:
     post:
       description: register new user
       parameters:
@@ -366,7 +396,126 @@ paths:
       summary: register_user
       tags:
       - auth
-  /rl/api/v1/user/profile/{id}:
+  /wn/api/v1/notes/create:
+    post:
+      description: Создать заметку
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.NoteRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto_response.NoteId'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: not_unique'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: create_note
+      tags:
+      - notes
+  /wn/api/v1/notes/delete:
+    post:
+      description: Удалить заметку
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.NoteId'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: note_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: delete_note
+      tags:
+      - notes
+  /wn/api/v1/notes/update:
+    post:
+      description: Обновить заметку
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.NoteWithIdRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: note_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: update_note
+      tags:
+      - notes
+  /wn/api/v1/user/profile/{id}:
     post:
       description: получить юзера по айди
       parameters:
@@ -403,7 +552,7 @@ paths:
       summary: get_user_by_id
       tags:
       - user
-  /rl/api/v1/user/register:
+  /wn/api/v1/user/register:
     post:
       description: сменить аватарку пользователя
       parameters:

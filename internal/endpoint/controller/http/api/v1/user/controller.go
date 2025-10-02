@@ -57,7 +57,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found"
-// @Router /rl/api/v1/user/register [post]
+// @Router /wn/api/v1/user/register [post]
 func (h *Controller) changeProfilePicture(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req request.ChangeProfilePicture
@@ -90,7 +90,7 @@ func (h *Controller) changeProfilePicture(c *gin.Context) {
 // @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_path, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found"
-// @Router /rl/api/v1/user/profile/{id} [post]
+// @Router /wn/api/v1/user/profile/{id} [post]
 func (h *Controller) getUserById(c *gin.Context) {
 	ctx := c.Request.Context()
 	id, err := uuid.Parse(c.Param("id"))
