@@ -30,7 +30,7 @@ type (
 
 	JwtConfig struct {
 		JwtSecret  string        `env:"JWT_SECRET"`
-		AccessTTL  time.Duration `yaml:"accessTtl"`
+		AccessTTL  time.Duration `yaml:"accessTtl" env:"ENV_ACCESS_TTL"`
 		RefreshTTL time.Duration `yaml:"refreshTtl"`
 	}
 
