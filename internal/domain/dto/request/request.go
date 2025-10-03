@@ -45,8 +45,9 @@ type ChangeProfilePicture struct {
 // NoteRequest
 // @Schema
 type NoteRequest struct {
-	Title   string `json:"title"`
-	Payload string `json:"payload"`
+	Title    string    `json:"title"`
+	Payload  string    `json:"payload"`
+	LayoutId uuid.UUID `json;"layoutId"`
 }
 
 // NoteWithIdRequest
@@ -61,4 +62,21 @@ type NoteWithIdRequest struct {
 // @Schema
 type NoteId struct {
 	NoteId uuid.UUID `json:"noteId" binding:"required"`
+}
+
+// NewLayoutRequest
+// @Schema
+type NewLayoutRequest struct {
+	Title string `json:"title" binding:"required"`
+}
+
+// LayoutIdRequest
+// @Schema
+type LayoutIdRequest struct {
+	LayoutId uuid.UUID `json:"layoutId"`
+}
+
+type GetNotesFromLayoutRequest struct {
+	LayoutId uuid.UUID `json:"layoutId"`
+	Page     int       `json:"page"`
 }

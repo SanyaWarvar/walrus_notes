@@ -1,6 +1,7 @@
 package container
 
 import (
+	"wn/internal/infrastructure/repository/layout"
 	"wn/internal/infrastructure/repository/file"
 	"wn/internal/infrastructure/repository/note"
 	tokensRepo "wn/internal/infrastructure/repository/tokens"
@@ -17,10 +18,11 @@ func (c *Container) getRepositories() *repositories {
 type repositories struct {
 	c *Container
 
-	user  *userRepo.Repository
-	token *tokensRepo.Repository
-	file  *file.Repository
-	note  *note.Repository
+	user   *userRepo.Repository
+	token  *tokensRepo.Repository
+	file   *file.Repository
+	note   *note.Repository
+	layout *layout.Repository
 }
 
 func (r *repositories) getUserRepository() *userRepo.Repository {
@@ -49,4 +51,11 @@ func (r *repositories) getNoteRepository() *note.Repository {
 		r.note = note.NewRepository(r.c.getDBPool())
 	}
 	return r.note
+}
+
+func (r *repositories) getLayoutRepository() *layout.Repository {
+	if r.layout == nil {
+		r.layout = layout.NewRepository(r.c.getDBPool())
+	}
+	return r.layout
 }

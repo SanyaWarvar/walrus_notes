@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/internal/application/auth"
+	"wn/internal/application/layout"
 	"wn/internal/application/note"
 	userApp "wn/internal/application/user"
 )
@@ -16,9 +17,10 @@ func (c *Container) getApplication() *applications {
 type applications struct {
 	c *Container
 
-	user *userApp.Service
-	auth *auth.Service
-	note *note.Service
+	user   *userApp.Service
+	auth   *auth.Service
+	note   *note.Service
+	layout *layout.Service
 }
 
 func (s *applications) getUserApplicationService() *userApp.Service {
@@ -29,6 +31,7 @@ func (s *applications) getUserApplicationService() *userApp.Service {
 
 			s.c.getServices().getUserService(),
 			s.c.getServices().getFileService(),
+			s.c.getServices().getLayoutService(),
 		)
 	}
 	return s.user
@@ -58,4 +61,16 @@ func (s *applications) getNoteApplicationService() *note.Service {
 		)
 	}
 	return s.note
+}
+
+func (s *applications) getLayoutApplicationService() *layout.Service {
+	if s.layout == nil {
+		s.layout = layout.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+
+			s.c.getServices().getLayoutService(),
+		)
+	}
+	return s.layout
 }

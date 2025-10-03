@@ -7,10 +7,17 @@ create table if not exists notes(
 	have_access uuid[]
 );
 
-create table if not exists layout(
-	layout_id uuid primary key,
+create table if not exists layouts(
+	id uuid primary key,
+	title varchar,
 	owner_id uuid not null,
 	have_access uuid[]
+);
+
+create table if not exists layout_note(
+	note_id uuid references notes(id),
+	layout_id uuid references layouts(id),
+	primary key (note_id, layout_id)
 );
 
 create table if not exists note_position(
@@ -24,7 +31,9 @@ create table if not exists note_position(
 create table if not exists links(
 	id uuid primary key,
     layout_id uuid,
-	x_position DOUBLE PRECISION,
-	y_position DOUBLE precision,
+	x1_position DOUBLE PRECISION,
+	y1_position DOUBLE precision,
+	x2_position DOUBLE PRECISION,
+	y2_position DOUBLE precision,
 	color varchar
 );  

@@ -3,6 +3,7 @@ package container
 import (
 	v1 "wn/internal/endpoint/controller/http/api/v1"
 	"wn/internal/endpoint/controller/http/api/v1/auth"
+	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
 	"wn/internal/endpoint/controller/http/api/v1/user"
 )
@@ -29,6 +30,12 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 				c.getLogger(),
 				c.getResponseBuilder(),
 				c.getApplication().getNoteApplicationService(),
+			),
+
+			layout.NewController(
+				c.getLogger(),
+				c.getResponseBuilder(),
+				c.getApplication().getLayoutApplicationService(),
 			),
 		)
 	}

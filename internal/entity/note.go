@@ -23,14 +23,17 @@ type NotePosition struct {
 }
 
 type Layout struct {
-	LayoutID   uuid.UUID   `json:"layoutId" db:"layout_id"`
-	OwnerID    uuid.UUID   `json:"ownerId" db:"owner_id"`
+	Id         uuid.UUID   `json:"id" db:"id"`
+	Title      string      `json:"title"`
+	OwnerId    uuid.UUID   `json:"ownerId" db:"owner_id"`
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
 }
 
 type Link struct {
-	Id        uuid.UUID `json:"id" db:"id"`
-	XPosition float64   `json:"xPosition" db:"x_position"`
-	YPosition float64   `json:"yPosition" db:"y_position"`
-	Color     string    `json:"color" db:"color"`
+	Id         uuid.UUID `json:"id" db:"id"`
+	X1Position float64   `json:"x1Position" db:"x1_position"`
+	Y1Position float64   `json:"y1Position" db:"y1_position"`
+	X2Position float64   `json:"x2Position" db:"x2_position"`
+	Y2Position float64   `json:"y2Position" db:"y2_position"`
+	Color      string    `json:"color" db:"color"`
 }

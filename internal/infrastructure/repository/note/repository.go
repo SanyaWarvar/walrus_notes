@@ -8,6 +8,7 @@ import (
 	"wn/pkg/database/postgres"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type Repository struct {
@@ -65,4 +66,51 @@ func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) er
 		return apperrors.NoteNotFound
 	}
 	return nil
+}
+
+func (repo *Repository) GetNoteCountInLayout(ctx context.Context, layoutId uuid.UUID) (int, error) {
+	query := `
+		select count(*) from layout_note where layout_id = $1
+	`
+	var n int
+	err := repo.conn.QueryRow(ctx, query, layoutId).Scan(&n)
+	return n, err
+}
+
+// todo check access
+func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
+	query := `
+		select n.* from notes n
+		join layout_note ln on ln.note_id = n.id
+		where ln.layout_id = $1 and $2 = ANY(n.have_access)
+		offset $3
+		limit $4
+	`
+	rows, err := repo.conn.Query(ctx, query, layoutId, userId, offset, limit)
+	if err != nil {
+		return nil, errors.Wrap(err, "repo.conn.Query")
+	}
+	defer rows.Close()
+
+	var notes []entity.Note
+	for rows.Next() {
+		var item entity.Note
+		err := rows.Scan(
+			&item.Id,
+			&item.Title,
+			&item.Payload,
+			&item.CreatedAt,
+			&item.OwnerId,
+			&item.HaveAccess,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "rows.Scan")
+		}
+		notes = append(notes, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "rows.Err")
+	}
+	return notes, nil
 }

@@ -55,6 +55,13 @@ definitions:
     - code
     - email
     type: object
+  wn_internal_domain_dto_request.GetNotesFromLayoutRequest:
+    properties:
+      layoutId:
+        type: string
+      page:
+        type: integer
+    type: object
   wn_internal_domain_dto_request.LoginRequest:
     properties:
       email:
@@ -63,6 +70,13 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  wn_internal_domain_dto_request.NewLayoutRequest:
+    properties:
+      title:
+        type: string
+    required:
+    - title
     type: object
   wn_internal_domain_dto_request.NoteId:
     properties:
@@ -73,6 +87,8 @@ definitions:
     type: object
   wn_internal_domain_dto_request.NoteRequest:
     properties:
+      layoutId:
+        type: string
       payload:
         type: string
       title:
@@ -396,6 +412,79 @@ paths:
       summary: register_user
       tags:
       - auth
+  /wn/api/v1/layout/create:
+    post:
+      description: Создать новый layout
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.NewLayoutRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto_response.NoteId'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: create_layout
+      tags:
+      - layouts
+  /wn/api/v1/layout/my:
+    post:
+      description: Получить все layout-ы, к которым имеет доступ пользователь
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.NoteId'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: get_my_layouts
+      tags:
+      - notes
   /wn/api/v1/notes/create:
     post:
       description: Создать заметку
@@ -475,6 +564,44 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_note
+      tags:
+      - notes
+  /wn/api/v1/notes/layout:
+    get:
+      description: Получить все заметки из layout-а
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.GetNotesFromLayoutRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: note_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: get_notes_from_layout
       tags:
       - notes
   /wn/api/v1/notes/update:

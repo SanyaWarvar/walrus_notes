@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/internal/domain/services/file"
+	"wn/internal/domain/services/layout"
 	"wn/internal/domain/services/note"
 	smtpSrv "wn/internal/domain/services/smtp"
 	tokenSrv "wn/internal/domain/services/token"
@@ -18,11 +19,12 @@ func (c *Container) getServices() *services {
 type services struct {
 	c *Container
 
-	user  *userSrv.Service
-	smtp  *smtpSrv.Service
-	token *tokenSrv.Service
-	file  *file.Service
-	note  *note.Service
+	user   *userSrv.Service
+	smtp   *smtpSrv.Service
+	token  *tokenSrv.Service
+	file   *file.Service
+	note   *note.Service
+	layout *layout.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -84,8 +86,21 @@ func (s *services) getNoteService() *note.Service {
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
 			s.c.getRepositories().getNoteRepository(),
+			s.c.getRepositories().getLayoutRepository(),
 		)
 
 	}
 	return s.note
+}
+
+func (s *services) getLayoutService() *layout.Service {
+	if s.layout == nil {
+		s.layout = layout.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+			s.c.getRepositories().getLayoutRepository(),
+		)
+
+	}
+	return s.layout
 }

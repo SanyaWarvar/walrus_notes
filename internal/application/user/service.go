@@ -24,12 +24,17 @@ type fileService interface {
 	NewFile(ctx context.Context, file *multipart.FileHeader) (string, error)
 }
 
+type layoutService interface {
+	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID) (uuid.UUID, error)
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	userService userService
-	fileService fileService
+	userService   userService
+	fileService   fileService
+	layoutService layoutService
 }
 
 func NewService(
@@ -37,29 +42,42 @@ func NewService(
 	logger applogger.Logger,
 	userService userService,
 	fileService fileService,
+	layoutService layoutService,
 ) *Service {
 	return &Service{
-		tx:          tx,
-		logger:      logger,
-		userService: userService,
-		fileService: fileService,
+		tx:            tx,
+		logger:        logger,
+		userService:   userService,
+		fileService:   fileService,
+		layoutService: layoutService,
 	}
 }
 
 // todo add reg exp check for password and username and email
 func (srv *Service) RegisterUser(ctx context.Context, credentials request.RegisterCredentials) (*respDto.RegisterResponse, error) {
-	u, err := srv.userService.CreateUserFromAuthCredentials(ctx, credentials)
-	if err != nil {
+	var u *userDto.User
+	var err error
+	if err = srv.tx.Transaction(ctx, func(ctx context.Context) error {
+		u, err = srv.userService.CreateUserFromAuthCredentials(ctx, credentials)
+		if err != nil {
+			return err
+		}
+		t := true
+		err = srv.userService.UpdateUser(ctx, u.Id, &user.UserUpdateParams{
+			ConfirmedEmail: &t,
+		})
+		if err != nil {
+			return err
+		}
+		_, err = srv.layoutService.CreateLayout(ctx, "All Notes", u.Id)
+		return err
+	}); err != nil {
 		return nil, err
 	}
-	t := true
-	err = srv.userService.UpdateUser(ctx, u.Id, &user.UserUpdateParams{
-		ConfirmedEmail: &t,
-	})
+
 	return &respDto.RegisterResponse{
 		UserId: u.Id,
 	}, nil
-
 }
 
 func (srv *Service) ChangeProfilePicture(ctx context.Context, req request.ChangeProfilePicture, host string) (*respDto.ChangePictureResponse, error) {

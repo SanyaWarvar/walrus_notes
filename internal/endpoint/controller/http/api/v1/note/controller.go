@@ -2,6 +2,8 @@ package note
 
 import (
 	"context"
+	"fmt"
+	"wn/internal/domain/dto"
 	"wn/internal/domain/dto/request"
 	req "wn/internal/domain/dto/request"
 	resp "wn/internal/domain/dto/response"
@@ -20,6 +22,7 @@ type srv interface {
 	CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error
 	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID) error
+	GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
 }
 
 type Controller struct {
@@ -45,6 +48,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/create", h.createNote)
 		notesAuth.POST("/update", h.updateNote)
 		notesAuth.POST("/delete", h.deleteNote)
+		notesAuth.GET("/layout", h.getNotesFromLayout)
 	}
 }
 
@@ -156,4 +160,47 @@ func (h *Controller) updateNote(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+// @Summary get_notes_from_layout
+// @Description Получить все заметки из layout-а
+// @Tags notes
+// @Produce json
+// @Param data body request.GetNotesFromLayoutRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: note_not_found"
+// @Router /wn/api/v1/notes/layout [get]
+func (h *Controller) getNotesFromLayout(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.GetNotesFromLayoutRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	notes, count, err := h.noteService.GetNotesFromLayout(ctx, req, userId)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	fmt.Println(count)
+	c.AbortWithStatusJSON(
+		200,
+		h.builder.BuildSuccessPaginationResponse(
+			ctx,
+			req.Page,
+			constants.PageSize,
+			count/constants.PageSize,
+			notes,
+		))
 }
