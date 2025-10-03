@@ -59,8 +59,8 @@ func (s *services) getSMTPService() *smtpSrv.Service {
 func (s *services) getTokenService() *tokenSrv.Service {
 	if s.token == nil {
 		s.token = tokenSrv.NewService(
-			s.c.getConfig().Jwt.AccessTTL,
 			s.c.getConfig().Jwt.RefreshTTL,
+			s.c.getConfig().Jwt.AccessTTL,
 			s.c.getConfig().Jwt.JwtSecret,
 			s.c.getRepositories().getTokenRepository(),
 		)
