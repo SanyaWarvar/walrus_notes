@@ -1,7 +1,6 @@
 package token
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -25,26 +24,19 @@ type CustomClaims struct {
 }
 
 func parseToken(secret, token string, skipExpireCheck bool) (*CustomClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(
+	// Создаем кастомный парсер с нужными настройками
+	parser := jwt.NewParser()
+
+	if skipExpireCheck {
+		// Отключаем проверку времени для этого случая
+		parser = jwt.NewParser(jwt.WithoutClaimsValidation())
+	}
+
+	parsedToken, err := parser.ParseWithClaims(
 		token, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		},
 	)
-
-	// Если нужно пропустить проверку Expire и есть ошибка
-	if skipExpireCheck && err != nil {
-		// В jwt/v5 проверяем через errors.Is
-		if errors.Is(err, jwt.ErrTokenExpired) {
-			// Токен просрочен, но мы игнорируем эту ошибку
-			// Проверяем, что токен в целом валиден (подпись и т.д.)
-			if parsedToken != nil && parsedToken.Valid {
-				claims, ok := parsedToken.Claims.(*CustomClaims)
-				if ok {
-					return claims, nil
-				}
-			}
-		}
-	}
 
 	if err != nil {
 		return nil, err
@@ -54,8 +46,16 @@ func parseToken(secret, token string, skipExpireCheck bool) (*CustomClaims, erro
 	if !ok {
 		return nil, apperrors.TokenClaimsError
 	}
-	if !parsedToken.Valid {
-		return nil, fmt.Errorf("token is not valid")
+
+	// При отключенной проверке времени, вручную проверяем подпись
+	if skipExpireCheck {
+		if !parsedToken.Valid {
+			return nil, fmt.Errorf("token signature is not valid")
+		}
+	} else {
+		if !parsedToken.Valid {
+			return nil, fmt.Errorf("token is not valid")
+		}
 	}
 
 	return claims, nil
