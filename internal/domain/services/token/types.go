@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -23,16 +24,32 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func parseToken(secret, token string) (*CustomClaims, error) {
-
+func parseToken(secret, token string, skipExpireCheck bool) (*CustomClaims, error) {
 	parsedToken, err := jwt.ParseWithClaims(
 		token, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		},
 	)
+
+	// Если нужно пропустить проверку Expire и есть ошибка
+	if skipExpireCheck && err != nil {
+		// В jwt/v5 проверяем через errors.Is
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			// Токен просрочен, но мы игнорируем эту ошибку
+			// Проверяем, что токен в целом валиден (подпись и т.д.)
+			if parsedToken != nil && parsedToken.Valid {
+				claims, ok := parsedToken.Claims.(*CustomClaims)
+				if ok {
+					return claims, nil
+				}
+			}
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	claims, ok := parsedToken.Claims.(*CustomClaims)
 	if !ok {
 		return nil, apperrors.TokenClaimsError

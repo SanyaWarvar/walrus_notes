@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 	"wn/internal/domain/dto/auth"
 	"wn/internal/domain/dto/request"
 	dto "wn/internal/domain/dto/response"
@@ -12,7 +13,6 @@ import (
 	userRepository "wn/internal/infrastructure/repository/user"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,7 +26,7 @@ type userService interface {
 
 type tokenService interface {
 	GenerateUserTokens(ctx context.Context, id uuid.UUID, role string) (*token.UserTokens, error)
-	ParseToken(token string) (*token.CustomClaims, error)
+	ParseToken(token string, withExpCheck bool) (*token.CustomClaims, error)
 	RefreshTokens(ctx context.Context, access, refresh string) (*token.UserTokens, error)
 }
 

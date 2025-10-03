@@ -55,8 +55,8 @@ func (s *Service) CreateUserTokens(id uuid.UUID, role string) (*UserTokens, uuid
 	return &UserTokens{Access: access, Refresh: refresh}, jtiAccess, jtiRefresh, nil
 }
 
-func (s *Service) ParseToken(token string) (*CustomClaims, error) {
-	return parseToken(s.secret, token)
+func (s *Service) ParseToken(token string, withExpCheck bool) (*CustomClaims, error) {
+	return parseToken(s.secret, token, withExpCheck)
 }
 
 func (s *Service) GenerateUserTokens(ctx context.Context, userId uuid.UUID, role string) (*UserTokens, error) {
@@ -75,11 +75,11 @@ func (s *Service) GenerateUserTokens(ctx context.Context, userId uuid.UUID, role
 }
 
 func (s *Service) RefreshTokens(ctx context.Context, access, refresh string) (*UserTokens, error) {
-	aToken, err := parseToken(s.secret, access)
+	aToken, err := parseToken(s.secret, access, true)
 	if err != nil {
 		return nil, err
 	}
-	rToken, err := parseToken(s.secret, refresh)
+	rToken, err := parseToken(s.secret, refresh, true)
 	if err != nil {
 		return nil, err
 	}
