@@ -55,13 +55,6 @@ definitions:
     - code
     - email
     type: object
-  wn_internal_domain_dto_request.GetNotesFromLayoutRequest:
-    properties:
-      layoutId:
-        type: string
-      page:
-        type: integer
-    type: object
   wn_internal_domain_dto_request.LoginRequest:
     properties:
       email:
@@ -452,7 +445,7 @@ paths:
       tags:
       - layouts
   /wn/api/v1/layout/my:
-    post:
+    get:
       description: Получить все layout-ы, к которым имеет доступ пользователь
       parameters:
       - description: data
@@ -484,7 +477,7 @@ paths:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: get_my_layouts
       tags:
-      - notes
+      - layouts
   /wn/api/v1/notes/create:
     post:
       description: Создать заметку
@@ -570,12 +563,16 @@ paths:
     get:
       description: Получить все заметки из layout-а
       parameters:
-      - description: data
-        in: body
-        name: data
+      - description: page
+        in: query
+        name: page
         required: true
-        schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.GetNotesFromLayoutRequest'
+        type: integer
+      - description: layoutId
+        in: query
+        name: layoutId
+        required: true
+        type: string
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -594,7 +591,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_query, invalid_X-Request-Id'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":

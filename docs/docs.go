@@ -445,13 +445,13 @@ const docTemplate = `{
             }
         },
         "/wn/api/v1/layout/my": {
-            "post": {
+            "get": {
                 "description": "Получить все layout-ы, к которым имеет доступ пользователь",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "notes"
+                    "layouts"
                 ],
                 "summary": "get_my_layouts",
                 "parameters": [
@@ -633,13 +633,18 @@ const docTemplate = `{
                 "summary": "get_notes_from_layout",
                 "parameters": [
                     {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.GetNotesFromLayoutRequest"
-                        }
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "layoutId",
+                        "name": "layoutId",
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -664,7 +669,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_query, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -941,17 +946,6 @@ const docTemplate = `{
                 },
                 "newPassword": {
                     "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.GetNotesFromLayoutRequest": {
-            "type": "object",
-            "properties": {
-                "layoutId": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer"
                 }
             }
         },

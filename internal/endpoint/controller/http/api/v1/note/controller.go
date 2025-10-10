@@ -2,7 +2,7 @@ package note
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 	"wn/internal/domain/dto"
 	"wn/internal/domain/dto/request"
 	req "wn/internal/domain/dto/request"
@@ -166,22 +166,34 @@ func (h *Controller) updateNote(c *gin.Context) {
 // @Description Получить все заметки из layout-а
 // @Tags notes
 // @Produce json
-// @Param data body request.GetNotesFromLayoutRequest true "data"
+// @Param page query int true "page"
+// @Param layoutId query string true "layoutId"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_query, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: note_not_found"
 // @Router /wn/api/v1/notes/layout [get]
 func (h *Controller) getNotesFromLayout(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.GetNotesFromLayoutRequest
-	err := c.BindJSON(&req)
+	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil {
-		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
 		return
 	}
+
+	layoutId, err := uuid.Parse(c.Query("layoutId"))
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
+		return
+	}
+
+	req := request.GetNotesFromLayoutRequest{
+		Page:     page,
+		LayoutId: layoutId,
+	}
+
 	userId, err := util.GetUserId(ctx)
 	if err != nil {
 		_ = c.Error(apperrors.InvalidAuthorizationHeader)
@@ -193,7 +205,7 @@ func (h *Controller) getNotesFromLayout(c *gin.Context) {
 		_ = c.Error(err)
 		return
 	}
-	fmt.Println(count)
+
 	c.AbortWithStatusJSON(
 		200,
 		h.builder.BuildSuccessPaginationResponse(

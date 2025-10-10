@@ -85,7 +85,7 @@ func (h *Controller) createLayout(c *gin.Context) {
 
 // @Summary get_my_layouts
 // @Description Получить все layout-ы, к которым имеет доступ пользователь
-// @Tags notes
+// @Tags layouts
 // @Produce json
 // @Param data body request.NoteId true "data"
 // @Param X-Request-Id header string true "Request id identity"
@@ -93,7 +93,7 @@ func (h *Controller) createLayout(c *gin.Context) {
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
-// @Router /wn/api/v1/layout/my [post]
+// @Router /wn/api/v1/layout/my [get]
 func (h *Controller) getMyLayouts(c *gin.Context) {
 	ctx := c.Request.Context()
 
