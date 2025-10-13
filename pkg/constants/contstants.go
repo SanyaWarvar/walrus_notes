@@ -36,5 +36,5 @@ const (
 )
 
 const (
-	PageSize = 5
+	PageSize = 50
 )

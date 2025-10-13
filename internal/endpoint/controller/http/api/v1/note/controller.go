@@ -23,6 +23,9 @@ type srv interface {
 	UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error
 	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID) error
 	GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
+	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
+	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
+	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error
 }
 
 type Controller struct {
@@ -49,6 +52,9 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/update", h.updateNote)
 		notesAuth.POST("/delete", h.deleteNote)
 		notesAuth.GET("/layout", h.getNotesFromLayout)
+		notesAuth.GET("/layout/graph/posed", h.getNotesFromLayoutWithPosition)
+		notesAuth.GET("/layout/graph/unposed", h.getNotesFromLayoutWithoutPosition)
+		notesAuth.POST("/layout/graph/note", h.updateNotePosition)
 	}
 }
 
@@ -215,4 +221,112 @@ func (h *Controller) getNotesFromLayout(c *gin.Context) {
 			count/constants.PageSize,
 			notes,
 		))
+}
+
+// @Summary get_unposed_notes
+// @Description Получить заметки, которые не имеют позиции в графе
+// @Tags graph
+// @Produce json
+// @Param layoutId query string true "layoutId"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/layout/graph/unposed [get]
+func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
+	ctx := c.Request.Context()
+	layoutId, err := uuid.Parse(c.Query("layoutId"))
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
+		return
+	}
+	var req request.GetNotesFromLayoutWithoutPagRequest
+	req.LayoutId = layoutId
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	notes, err := h.noteService.GetNotesWithoutPosition(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, notes))
+}
+
+// @Summary get_posed_notes
+// @Description Получить заметки, которые имеют позиции в графе
+// @Tags graph
+// @Produce json
+// @Param layoutId query string true "layoutId"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/layout/graph/posed [get]
+func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	layoutId, err := uuid.Parse(c.Query("layoutId"))
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
+		return
+	}
+	var req request.GetNotesFromLayoutWithoutPagRequest
+	req.LayoutId = layoutId
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	notes, err := h.noteService.GetNotesWithPosition(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, notes))
+}
+
+// @Summary update_note_position
+// @Description Обновить позицию заметки в графе
+// @Tags graph
+// @Produce json
+// @Param data body request.UpdateNotePositionRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/layout/graph/note [post]
+func (h *Controller) updateNotePosition(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.UpdateNotePositionRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.noteService.UpdateNotePosition(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
 }

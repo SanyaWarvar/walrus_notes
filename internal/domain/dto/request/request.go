@@ -76,7 +76,24 @@ type LayoutIdRequest struct {
 	LayoutId uuid.UUID `json:"layoutId"`
 }
 
+// GetNotesFromLayoutRequest
+// @Schema
 type GetNotesFromLayoutRequest struct {
 	LayoutId uuid.UUID `json:"layoutId"`
 	Page     int       `json:"page"`
+}
+
+// GetNotesFromLayoutWithoutPagRequest
+// @Schema
+type GetNotesFromLayoutWithoutPagRequest struct {
+	LayoutId uuid.UUID `json:"layoutId" binding:"required"`
+}
+
+// UpdateNotePositionRequest
+// @Schema
+type UpdateNotePositionRequest struct {
+	LayoutId uuid.UUID `json:"layoutId" binding:"required"`
+	NoteId   uuid.UUID `json:"noteId" binding:"required"`
+	XPos     *float64  `json:"xPos"`
+	YPos     *float64  `json:"yPos"`
 }

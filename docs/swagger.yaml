@@ -111,6 +111,20 @@ definitions:
     - password
     - username
     type: object
+  wn_internal_domain_dto_request.UpdateNotePositionRequest:
+    properties:
+      layoutId:
+        type: string
+      noteId:
+        type: string
+      xPos:
+        type: number
+      yPos:
+        type: number
+    required:
+    - layoutId
+    - noteId
+    type: object
   wn_internal_domain_dto_response.ChangePictureResponse:
     properties:
       newImgUrl:
@@ -601,6 +615,106 @@ paths:
       summary: get_notes_from_layout
       tags:
       - notes
+  /wn/api/v1/notes/layout/graph/note:
+    post:
+      description: Обновить позицию заметки в графе
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.UpdateNotePositionRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: update_note_position
+      tags:
+      - graph
+  /wn/api/v1/notes/layout/graph/posed:
+    get:
+      description: Получить заметки, которые имеют позиции в графе
+      parameters:
+      - description: layoutId
+        in: query
+        name: layoutId
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: get_posed_notes
+      tags:
+      - graph
+  /wn/api/v1/notes/layout/graph/unposed:
+    get:
+      description: Получить заметки, которые не имеют позиции в графе
+      parameters:
+      - description: layoutId
+        in: query
+        name: layoutId
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: get_unposed_notes
+      tags:
+      - graph
   /wn/api/v1/notes/update:
     post:
       description: Обновить заметку

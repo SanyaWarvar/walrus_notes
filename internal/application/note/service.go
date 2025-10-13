@@ -15,6 +15,9 @@ type noteService interface {
 	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error
 	GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error)
+	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
+	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
+	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 }
 
 type Service struct {
@@ -50,4 +53,17 @@ func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId uuid.
 
 func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {
 	return srv.noteService.GetNotesWithPagination(ctx, req.Page, req.LayoutId, userId)
+}
+
+func (srv *Service) GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
+	return srv.noteService.GetNotesWithPosition(ctx, req.LayoutId, userId)
+}
+
+func (srv *Service) GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
+	return srv.noteService.GetNotesWithoutPosition(ctx, req.LayoutId, userId)
+}
+
+func (srv *Service) UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error {
+	return srv.noteService.UpdateNotePosition(ctx, req.LayoutId, req.NoteId, req.XPos, req.YPos)
+
 }

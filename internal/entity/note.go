@@ -15,9 +15,14 @@ type Note struct {
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
 }
 
+type NoteWithPosition struct {
+	Note         `json:"note"`
+	NotePosition `json:"notePosition"`
+}
+
 type NotePosition struct {
 	NoteId    uuid.UUID `json:"noteId" db:"note_id"`
-	LayoutIdd uuid.UUID `json:"layoutId" db:"layout_id"`
+	LayoutId  uuid.UUID `json:"layoutId" db:"layout_id"`
 	XPosition float64   `json:"xPosition" db:"x_position"`
 	YPosition float64   `json:"yPosition" db:"y_position"`
 }

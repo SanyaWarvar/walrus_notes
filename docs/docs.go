@@ -683,6 +683,155 @@ const docTemplate = `{
                 }
             }
         },
+        "/wn/api/v1/notes/layout/graph/note": {
+            "post": {
+                "description": "Обновить позицию заметки в графе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "graph"
+                ],
+                "summary": "update_note_position",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.UpdateNotePositionRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/notes/layout/graph/posed": {
+            "get": {
+                "description": "Получить заметки, которые имеют позиции в графе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "graph"
+                ],
+                "summary": "get_posed_notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "layoutId",
+                        "name": "layoutId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/notes/layout/graph/unposed": {
+            "get": {
+                "description": "Получить заметки, которые не имеют позиции в графе",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "graph"
+                ],
+                "summary": "get_unposed_notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "layoutId",
+                        "name": "layoutId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/notes/update": {
             "post": {
                 "description": "Обновить заметку",
@@ -1032,6 +1181,27 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.UpdateNotePositionRequest": {
+            "type": "object",
+            "required": [
+                "layoutId",
+                "noteId"
+            ],
+            "properties": {
+                "layoutId": {
+                    "type": "string"
+                },
+                "noteId": {
+                    "type": "string"
+                },
+                "xPos": {
+                    "type": "number"
+                },
+                "yPos": {
+                    "type": "number"
                 }
             }
         },

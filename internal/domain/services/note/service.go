@@ -18,6 +18,9 @@ type noteRepo interface {
 	UpdateNote(ctx context.Context, newItem *entity.Note) error
 	GetNoteCountInLayout(ctx context.Context, layoutId uuid.UUID) (int, error)
 	GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error)
+	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
+	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
+	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 }
 
 type layoutRepo interface {
@@ -91,4 +94,26 @@ func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layout
 	}
 	notesDto := dto.NotesFromEntities(notes)
 	return notesDto, count, err
+}
+
+func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error) {
+	notes, err := srv.noteRepo.GetNotesWithoutPosition(ctx, layoutId, userId)
+	if err != nil {
+		return nil, err
+	}
+	notesDto := dto.NotesFromEntities(notes)
+	return notesDto, err
+}
+
+func (srv *Service) GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error) {
+	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, layoutId, userId)
+	if err != nil {
+		return nil, err
+	}
+	notesDto := dto.NotesFromEntitiesWithPosition(notes)
+	return notesDto, err
+}
+
+func (srv *Service) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
+	return srv.noteRepo.UpdateNotePosition(ctx, layoutId, noteId, xPos, yPos)
 }

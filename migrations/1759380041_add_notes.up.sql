@@ -17,12 +17,6 @@ create table if not exists layouts(
 create table if not exists layout_note(
 	note_id uuid references notes(id),
 	layout_id uuid references layouts(id),
-	primary key (note_id, layout_id)
-);
-
-create table if not exists note_position(
-	note_id uuid,
-	layout_id uuid,
 	x_position DOUBLE PRECISION,
 	y_position DOUBLE precision,
 	primary key (note_id, layout_id)

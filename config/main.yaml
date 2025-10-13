@@ -44,7 +44,7 @@ email:
   minTTL: "5m"
 
 jwt:
-  accessTtl: "1m"
+  accessTtl: "100000h"
   refreshTtl: "100h"
 
 cron:
