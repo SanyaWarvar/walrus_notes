@@ -889,67 +889,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/wn/api/v1/user/profile/{id}": {
-            "post": {
-                "description": "получить юзера по айди",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "get_user_by_id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request id identity",
-                        "name": "X-Request-Id",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/wn_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.ChangePictureResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "possible codes: bind_path, invalid_X-Request-Id",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "possible codes: user_not_found",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/wn/api/v1/user/register": {
+        "/wn/api/v1/user/picture": {
             "post": {
                 "description": "сменить аватарку пользователя",
                 "produces": [
@@ -1005,6 +945,66 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: user_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/user/profile/{id}": {
+            "get": {
+                "description": "получить юзера по айди",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "get_user_by_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto_user.User"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_path, invalid_X-Request-Id",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1234,6 +1234,29 @@ const docTemplate = `{
             "properties": {
                 "nextCodeDelay": {
                     "$ref": "#/definitions/time.Duration"
+                }
+            }
+        },
+        "wn_internal_domain_dto_user.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "imgUrl": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
