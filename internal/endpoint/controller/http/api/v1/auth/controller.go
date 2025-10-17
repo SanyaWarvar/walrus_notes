@@ -21,7 +21,7 @@ type userService interface {
 type authService interface {
 	SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*resp.SendCodeResponse, error)
 	ConfirmCode(ctx context.Context, req request.ConfimationCodeRequest) error
-	Login(ctx context.Context, req request.LoginRequest) (*token.UserTokens, error)
+	Login(ctx context.Context, req request.LoginRequest) (*resp.LoginResponse, error)
 	RefreshTokens(ctx context.Context, req token.UserTokens) (*token.UserTokens, error)
 }
 
@@ -147,7 +147,7 @@ func (h *Controller) confirmCode(c *gin.Context) {
 // @Produce json
 // @Param data body request.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=token.UserTokens}
+// @Success 200 {object} response.Response{data=resp.LoginResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 401 {object} response.Response{} "possible codes: incorrect_password"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found "
@@ -160,13 +160,13 @@ func (h *Controller) login(c *gin.Context) {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
 		return
 	}
-	tokens, err := h.authService.Login(ctx, req)
+	resp, err := h.authService.Login(ctx, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
 
-	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, tokens))
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
 }
 
 // @Summary refresh_tokens

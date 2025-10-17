@@ -98,12 +98,20 @@ func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCode
 	}
 }
 
-func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*token.UserTokens, error) {
+func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*dto.LoginResponse, error) {
 	u, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
-	return srv.tokenService.GenerateUserTokens(ctx, u.Id, u.Role)
+	tokens, err := srv.tokenService.GenerateUserTokens(ctx, u.Id, u.Role)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.LoginResponse{
+		UserId:  u.Id,
+		Access:  tokens.Access,
+		Refresh: tokens.Refresh,
+	}, nil
 }
 
 func (srv *Service) RefreshTokens(ctx context.Context, req token.UserTokens) (*token.UserTokens, error) {

@@ -130,6 +130,15 @@ definitions:
       newImgUrl:
         type: string
     type: object
+  wn_internal_domain_dto_response.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+      userId:
+        type: string
+    type: object
   wn_internal_domain_dto_response.NoteId:
     properties:
       id:
@@ -340,7 +349,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_services_token.UserTokens'
+                  $ref: '#/definitions/wn_internal_domain_dto_response.LoginResponse'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'

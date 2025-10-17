@@ -21,3 +21,9 @@ type ChangePictureResponse struct {
 type NoteId struct {
 	Id uuid.UUID `json:"id"`
 }
+
+type LoginResponse struct {
+	Access  string    `json:"accessToken"`
+	Refresh string    `json:"refreshToken"`
+	UserId  uuid.UUID `json:"userId"`
+}

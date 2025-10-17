@@ -229,7 +229,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_services_token.UserTokens"
+                                            "$ref": "#/definitions/wn_internal_domain_dto_response.LoginResponse"
                                         }
                                     }
                                 }
@@ -1209,6 +1209,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "newImgUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_response.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
