@@ -13,6 +13,7 @@ import (
 )
 
 type noteRepo interface {
+	DeleteLayoutNotes(ctx context.Context, noteId uuid.UUID) error
 	DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error
 	CreateNote(ctx context.Context, item *entity.Note) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, newItem *entity.Note) error
@@ -50,7 +51,15 @@ func NewService(
 }
 
 func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
-	return srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
+	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
+		err := srv.noteRepo.DeleteLayoutNotes(ctx, noteId)
+
+		if err != nil {
+			return err
+		}
+		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
+		return err
+	})
 }
 
 // todo add check access

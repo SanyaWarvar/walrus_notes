@@ -50,6 +50,15 @@ func (repo *Repository) DeleteNoteById(ctx context.Context, noteId, userId uuid.
 	return nil
 }
 
+func (repo *Repository) DeleteLayoutNotes(ctx context.Context, noteId uuid.UUID) error {
+	query := `
+		DELETE FROM layout_note 
+		WHERE note_id = $1
+	`
+	_, err := repo.conn.Exec(ctx, query, noteId)
+	return err
+}
+
 func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) error {
 	query := `
 		UPDATE notes
