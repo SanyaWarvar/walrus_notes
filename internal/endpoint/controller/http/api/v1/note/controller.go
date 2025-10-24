@@ -26,6 +26,9 @@ type srv interface {
 	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error
+
+	CreateLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
+	DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
 }
 
 type Controller struct {
@@ -51,10 +54,19 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/create", h.createNote)
 		notesAuth.POST("/update", h.updateNote)
 		notesAuth.POST("/delete", h.deleteNote)
-		notesAuth.GET("/layout", h.getNotesFromLayout)
-		notesAuth.GET("/layout/graph/posed", h.getNotesFromLayoutWithPosition)
-		notesAuth.GET("/layout/graph/unposed", h.getNotesFromLayoutWithoutPosition)
-		notesAuth.POST("/layout/graph/note", h.updateNotePosition)
+		layout := notesAuth.Group("/layout")
+		{
+			layout.GET("", h.getNotesFromLayout)
+			layout.GET("/graph/posed", h.getNotesFromLayoutWithPosition)
+			layout.GET("/graph/unposed", h.getNotesFromLayoutWithoutPosition)
+			layout.POST("/graph/note", h.updateNotePosition)
+		}
+
+		links := layout.Group("/links")
+		{
+			links.POST("/create", h.createLinkBetweenNotes)
+			links.POST("/delete", h.deleteLinkBetweenNotes)
+		}
 	}
 }
 
@@ -323,6 +335,76 @@ func (h *Controller) updateNotePosition(c *gin.Context) {
 	}
 
 	err = h.noteService.UpdateNotePosition(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+// @Summary create_link_between_notes
+// @Description Связать заметки
+// @Tags links
+// @Produce json
+// @Param data body request.LinkBetweenNotesRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/layout/links/create [post]
+func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.LinkBetweenNotesRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.noteService.CreateLink(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+// @Summary delete_link_between_notes
+// @Description Обновить позицию заметки в графе
+// @Tags links
+// @Produce json
+// @Param data body request.LinkBetweenNotesRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/layout/links/delete [post]
+func (h *Controller) deleteLinkBetweenNotes(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req request.LinkBetweenNotesRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.noteService.DeleteLink(ctx, userId, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

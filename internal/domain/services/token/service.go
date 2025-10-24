@@ -2,7 +2,6 @@ package token
 
 import (
 	"context"
-	"fmt"
 	"time"
 	apperrors "wn/internal/errors"
 	"wn/internal/infrastructure/repository/tokens"
@@ -28,7 +27,7 @@ func NewService(
 	a := refreshTokenTTL.Seconds()
 	b := accessTokenTTL.Seconds()
 	_, _ = a, b
-	fmt.Println(a, b)
+
 	return &Service{
 		refreshTokenTTL: refreshTokenTTL,
 		accessTokenTTL:  accessTokenTTL,

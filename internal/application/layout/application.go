@@ -38,7 +38,11 @@ func NewService(
 func (srv *Service) CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error) {
 	return srv.layoutService.CreateLayout(ctx, req.Title, userId)
 }
-func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error) {
 
+func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error) {
 	return srv.layoutService.GetAvailableLayouts(ctx, userId)
+}
+
+func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error {
+	return srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
 }

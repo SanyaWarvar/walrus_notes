@@ -9,6 +9,7 @@ import (
 	"wn/pkg/util"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type layoutRepo interface {
@@ -17,22 +18,34 @@ type layoutRepo interface {
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]entity.Layout, error)
 }
 
+type linksRepo interface {
+	DeleteLinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
+	DeleteLinksFromLayout(ctx context.Context, layoutId uuid.UUID) error
+	DeleteLinksWithNote(ctx context.Context, noteId uuid.UUID) error
+	LinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
+	GetAllLinks(ctx context.Context, layoutId uuid.UUID, noteIds []uuid.UUID) ([]entity.Link, error)
+	DeleteLayoutNote(ctx context.Context, layoutId uuid.UUID, userId uuid.UUID) error
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
 	layoutRepo layoutRepo
+	linksRepo  linksRepo
 }
 
 func NewService(
 	tx trx.TransactionManager,
 	logger applogger.Logger,
 	layoutRepo layoutRepo,
+	linksRepo linksRepo,
 ) *Service {
 	return &Service{
 		tx:         tx,
 		logger:     logger,
 		layoutRepo: layoutRepo,
+		linksRepo:  linksRepo,
 	}
 }
 
@@ -47,7 +60,24 @@ func (srv *Service) CreateLayout(ctx context.Context, title string, ownerId uuid
 }
 
 func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error {
-	return srv.layoutRepo.DeleteLayoutById(ctx, layoutId, ownerId)
+	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
+		err := srv.linksRepo.DeleteLayoutNote(ctx, layoutId, ownerId)
+		if err != nil {
+			return errors.Wrap(err, "srv.linksRepo.DeleteLayoutNote")
+		}
+
+		err = srv.linksRepo.DeleteLinksFromLayout(ctx, layoutId)
+		if err != nil {
+			return errors.Wrap(err, "srv.linksRepo.DeleteLinksFromLayout")
+		}
+
+		err = srv.layoutRepo.DeleteLayoutById(ctx, layoutId, ownerId)
+		if err != nil {
+			return errors.Wrap(err, "srv.layoutRepo.DeleteLayoutById")
+		}
+
+		return nil
+	})
 }
 
 func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error) {
@@ -55,7 +85,7 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 	if err != nil {
 		return nil, err
 	}
-	
+
 	output := make([]dto.Layout, 0, len(entities))
 	for _, item := range entities {
 		output = append(output, dto.Layout{

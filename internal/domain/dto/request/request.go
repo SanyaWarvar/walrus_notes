@@ -97,3 +97,9 @@ type UpdateNotePositionRequest struct {
 	XPos     *float64  `json:"xPos"`
 	YPos     *float64  `json:"yPos"`
 }
+
+type LinkBetweenNotesRequest struct {
+	LayoutId     uuid.UUID `json:"layoutId" binding:"required"`
+	FirstNoteId  uuid.UUID `json:"firstNoteId" binding:"required"`
+	SecondNoteId uuid.UUID `json:"secondNoteId" binding:"required"`
+}

@@ -35,10 +35,7 @@ type Layout struct {
 }
 
 type Link struct {
-	Id         uuid.UUID `json:"id" db:"id"`
-	X1Position float64   `json:"x1Position" db:"x1_position"`
-	Y1Position float64   `json:"y1Position" db:"y1_position"`
-	X2Position float64   `json:"x2Position" db:"x2_position"`
-	Y2Position float64   `json:"y2Position" db:"y2_position"`
-	Color      string    `json:"color" db:"color"`
+	LayoutId     uuid.UUID `json:"layoutId"`
+	FirstNoteId  uuid.UUID `json:"firstNoteId"`
+	SecondNoteId uuid.UUID `json:"secondNoteId"`
 }

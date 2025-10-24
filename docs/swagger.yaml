@@ -55,6 +55,24 @@ definitions:
     - code
     - email
     type: object
+  wn_internal_domain_dto_request.LayoutIdRequest:
+    properties:
+      layoutId:
+        type: string
+    type: object
+  wn_internal_domain_dto_request.LinkBetweenNotesRequest:
+    properties:
+      firstNoteId:
+        type: string
+      layoutId:
+        type: string
+      secondNoteId:
+        type: string
+    required:
+    - firstNoteId
+    - layoutId
+    - secondNoteId
+    type: object
   wn_internal_domain_dto_request.LoginRequest:
     properties:
       email:
@@ -482,6 +500,40 @@ paths:
       summary: create_layout
       tags:
       - layouts
+  /wn/api/v1/layout/delete:
+    post:
+      description: удалить layout
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.LayoutIdRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: delete_layout
+      tags:
+      - layouts
   /wn/api/v1/layout/my:
     get:
       description: Получить все layout-ы, к которым имеет доступ пользователь
@@ -739,6 +791,74 @@ paths:
       summary: get_unposed_notes
       tags:
       - graph
+  /wn/api/v1/notes/layout/links/create:
+    post:
+      description: Связать заметки
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: create_link_between_notes
+      tags:
+      - links
+  /wn/api/v1/notes/layout/links/delete:
+    post:
+      description: Обновить позицию заметки в графе
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: delete_link_between_notes
+      tags:
+      - links
   /wn/api/v1/notes/update:
     post:
       description: Обновить заметку

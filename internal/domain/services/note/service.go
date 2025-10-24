@@ -24,6 +24,14 @@ type noteRepo interface {
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 }
 
+type linksRepo interface {
+	DeleteLinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
+	DeleteLinksFromLayout(ctx context.Context, layoutId uuid.UUID) error
+	DeleteLinksWithNote(ctx context.Context, noteId uuid.UUID) error
+	LinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
+	GetAllLinks(ctx context.Context, layoutId uuid.UUID, noteIds []uuid.UUID) ([]entity.Link, error)
+}
+
 type layoutRepo interface {
 	LinkNoteWithLayout(ctx context.Context, noteId, layoutId uuid.UUID) error
 }
@@ -34,6 +42,7 @@ type Service struct {
 
 	noteRepo   noteRepo
 	layoutRepo layoutRepo
+	linksRepo  linksRepo
 }
 
 func NewService(
@@ -41,12 +50,14 @@ func NewService(
 	logger applogger.Logger,
 	noteRepo noteRepo,
 	layoutRepo layoutRepo,
+	linksRepo linksRepo,
 ) *Service {
 	return &Service{
 		tx:         tx,
 		logger:     logger,
 		noteRepo:   noteRepo,
 		layoutRepo: layoutRepo,
+		linksRepo:  linksRepo,
 	}
 }
 
@@ -58,7 +69,16 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID
 			return err
 		}
 		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
-		return err
+		if err != nil {
+			return err
+		}
+
+		err = srv.linksRepo.DeleteLinksWithNote(ctx, noteId)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 }
 
@@ -119,10 +139,19 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, layoutId, userId u
 	if err != nil {
 		return nil, err
 	}
-	notesDto := dto.NotesFromEntitiesWithPosition(notes)
+	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	notesDto := dto.NotesFromEntitiesWithPosition(notes, links)
 	return notesDto, err
 }
 
 func (srv *Service) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
 	return srv.noteRepo.UpdateNotePosition(ctx, layoutId, noteId, xPos, yPos)
+}
+
+func (srv *Service) CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {
+	return srv.linksRepo.LinkNotes(ctx, layoutId, noteId1, noteId2)
+}
+
+func (srv *Service) DeleteLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {
+	return srv.linksRepo.DeleteLinkNotes(ctx, layoutId, noteId1, noteId2)
 }

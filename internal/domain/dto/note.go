@@ -13,6 +13,7 @@ type Note struct {
 	OwnerId    uuid.UUID   `json:"ownerId"`
 	HaveAccess []uuid.UUID `json:"haveAccess"`
 	Position   *Position   `json:"position,omitempty"`
+	LinkedWith []uuid.UUID `json:"linkedWith,omitempty"`
 }
 
 func NotesFromEntities(entities []entity.Note) []Note {
@@ -29,8 +30,9 @@ func NotesFromEntities(entities []entity.Note) []Note {
 	return output
 }
 
-func NotesFromEntitiesWithPosition(entities []entity.NoteWithPosition) []Note {
+func NotesFromEntitiesWithPosition(entities []entity.NoteWithPosition, links []entity.Link) []Note {
 	output := make([]Note, 0, len(entities))
+	transformedLinks := TransformLinks(links)
 	for _, item := range entities {
 		output = append(output, Note{
 			Id:         item.Id,
@@ -42,7 +44,17 @@ func NotesFromEntitiesWithPosition(entities []entity.NoteWithPosition) []Note {
 				XPos: item.XPosition,
 				YPos: item.YPosition,
 			},
+			LinkedWith: transformedLinks[item.Id],
 		})
+	}
+	return output
+}
+
+func TransformLinks(links []entity.Link) map[uuid.UUID][]uuid.UUID {
+	output := make(map[uuid.UUID][]uuid.UUID, len(links))
+	for _, item := range links {
+		output[item.FirstNoteId] = append(output[item.FirstNoteId], item.SecondNoteId)
+		output[item.SecondNoteId] = append(output[item.SecondNoteId], item.FirstNoteId)
 	}
 	return output
 }
