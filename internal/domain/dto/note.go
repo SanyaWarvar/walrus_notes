@@ -54,7 +54,6 @@ func TransformLinks(links []entity.Link) map[uuid.UUID][]uuid.UUID {
 	output := make(map[uuid.UUID][]uuid.UUID, len(links))
 	for _, item := range links {
 		output[item.FirstNoteId] = append(output[item.FirstNoteId], item.SecondNoteId)
-		output[item.SecondNoteId] = append(output[item.SecondNoteId], item.FirstNoteId)
 	}
 	return output
 }
