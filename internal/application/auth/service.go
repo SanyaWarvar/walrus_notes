@@ -3,9 +3,10 @@ package auth
 import (
 	"context"
 	"time"
+	"wn/internal/domain/dto"
 	"wn/internal/domain/dto/auth"
 	"wn/internal/domain/dto/request"
-	dto "wn/internal/domain/dto/response"
+	resp "wn/internal/domain/dto/response"
 	"wn/internal/domain/dto/user"
 	"wn/internal/domain/enum"
 	"wn/internal/domain/services/token"
@@ -25,7 +26,7 @@ type userService interface {
 }
 
 type tokenService interface {
-	GenerateUserTokens(ctx context.Context, id uuid.UUID, role string) (*token.UserTokens, error)
+	GenerateUserTokens(ctx context.Context, userId, mainLayoutId uuid.UUID, role string) (*token.UserTokens, error)
 	ParseToken(token string, withExpCheck bool) (*token.CustomClaims, error)
 	RefreshTokens(ctx context.Context, access, refresh string) (*token.UserTokens, error)
 }
@@ -35,13 +36,18 @@ type smtpService interface {
 	ConfirmCode(ctx context.Context, email string, code string) (*auth.ConfirmationCode, error)
 }
 
+type layoutService interface {
+	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	userService  userService
-	smtpService  smtpService
-	tokenService tokenService
+	userService   userService
+	smtpService   smtpService
+	tokenService  tokenService
+	layoutService layoutService
 }
 
 func NewService(
@@ -50,24 +56,26 @@ func NewService(
 	userService userService,
 	smtpService smtpService,
 	tokenService tokenService,
+	layoutService layoutService,
 ) *Service {
 	return &Service{
-		tx:           tx,
-		logger:       logger,
-		userService:  userService,
-		smtpService:  smtpService,
-		tokenService: tokenService,
+		tx:            tx,
+		logger:        logger,
+		userService:   userService,
+		smtpService:   smtpService,
+		tokenService:  tokenService,
+		layoutService: layoutService,
 	}
 }
 
 // todo add check is confirmed email
 
-func (srv *Service) SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*dto.SendCodeResponse, error) {
+func (srv *Service) SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*resp.SendCodeResponse, error) {
 	_, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
-	return &dto.SendCodeResponse{NextCodeDelay: codeDelay},
+	return &resp.SendCodeResponse{NextCodeDelay: codeDelay},
 		srv.smtpService.SendConfirmEmailCode(ctx, req.Email, action)
 }
 
@@ -98,16 +106,26 @@ func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCode
 	}
 }
 
-func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*dto.LoginResponse, error) {
+func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*resp.LoginResponse, error) {
 	u, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
-	tokens, err := srv.tokenService.GenerateUserTokens(ctx, u.Id, u.Role)
+
+	layouts, err := srv.layoutService.GetAvailableLayouts(ctx, u.Id)
+	var layoutId uuid.UUID
+	for _, layout := range layouts{
+		if layout.OwnerId == u.Id && layout.IsMain {
+			layoutId = layout.Id
+			break
+		}
+	}
+
+	tokens, err := srv.tokenService.GenerateUserTokens(ctx, u.Id, layoutId, u.Role)
 	if err != nil {
 		return nil, err
 	}
-	return &dto.LoginResponse{
+	return &resp.LoginResponse{
 		UserId:  u.Id,
 		Access:  tokens.Access,
 		Refresh: tokens.Refresh,

@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"
 	"wn/pkg/token"
 	"wn/pkg/util"
-	"strings"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/google/uuid"
@@ -62,6 +62,8 @@ func AuthorizationHandler() gin.HandlerFunc {
 		}
 		ctx := context.WithValue(c.Request.Context(), constants.UserRoleCtx, token.GetUserRole(claims))
 		ctx = context.WithValue(ctx, constants.UserIdCtx, token.GetUserId(claims).String())
+		ctx = context.WithValue(ctx, "mainLayoutId", token.GetMainLayoutId(claims).String())
+
 		c.Request = c.Request.WithContext(ctx)
 	}
 }

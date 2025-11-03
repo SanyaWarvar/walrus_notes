@@ -2,13 +2,15 @@ package token
 
 import (
 	"errors"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 )
 
 type CustomClaims struct {
-	UserId uuid.UUID `json:"userId"`
-	Role   string    `json:"role"`
+	UserId       uuid.UUID `json:"userId"`
+	Role         string    `json:"role"`
+	MainLayoutId uuid.UUID `json:"mainLayoutId"`
 	jwt.StandardClaims
 }
 
@@ -38,4 +40,8 @@ func GetUserId(claims *CustomClaims) uuid.UUID {
 
 func GetTokenId(claims *CustomClaims) string {
 	return claims.Id
+}
+
+func GetMainLayoutId(claims *CustomClaims) uuid.UUID {
+	return claims.MainLayoutId
 }

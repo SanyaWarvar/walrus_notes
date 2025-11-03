@@ -19,9 +19,9 @@ import (
 )
 
 type srv interface {
-	CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID) (uuid.UUID, error)
+	CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error
-	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID) error
+	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID, mainLayoutId uuid.UUID) error
 	GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
 	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
@@ -97,7 +97,13 @@ func (h *Controller) createNote(c *gin.Context) {
 		return
 	}
 
-	noteId, err := h.noteService.CreateNote(ctx, req, userId)
+	mainLayoutId, err := uuid.Parse(ctx.Value("mainLayoutId").(string))
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	noteId, err := h.noteService.CreateNote(ctx, req, userId, mainLayoutId)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -135,7 +141,13 @@ func (h *Controller) deleteNote(c *gin.Context) {
 		return
 	}
 
-	err = h.noteService.DeleteNote(ctx, req, userId)
+	mainLayoutId, err := uuid.Parse(ctx.Value("mainLayoutId").(string))
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.noteService.DeleteNote(ctx, req, userId, mainLayoutId)
 	if err != nil {
 		_ = c.Error(err)
 		return

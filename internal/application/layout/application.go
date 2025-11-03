@@ -11,7 +11,7 @@ import (
 )
 
 type layoutService interface {
-	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID) (uuid.UUID, error)
+	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error)
 	DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 }
@@ -36,7 +36,7 @@ func NewService(
 }
 
 func (srv *Service) CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error) {
-	return srv.layoutService.CreateLayout(ctx, req.Title, userId)
+	return srv.layoutService.CreateLayout(ctx, req.Title, userId, false)
 }
 
 func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error) {

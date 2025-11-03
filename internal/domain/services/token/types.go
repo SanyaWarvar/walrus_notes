@@ -18,8 +18,9 @@ type UserTokens struct {
 }
 
 type CustomClaims struct {
-	UserId uuid.UUID `json:"userId"`
-	Role   string    `json:"role"`
+	UserId       uuid.UUID `json:"userId"`
+	Role         string    `json:"role"`
+	MainLayoutId uuid.UUID `json:"mainLayoutId"`
 	jwt.RegisteredClaims
 }
 
@@ -61,9 +62,9 @@ func parseToken(secret, token string, skipExpireCheck bool) (*CustomClaims, erro
 	return claims, nil
 }
 
-func generateToken(id, userId uuid.UUID, role string, ttl time.Duration, secret string) (string, error) {
+func generateToken(id, userId, mainLayoutId uuid.UUID, role string, ttl time.Duration, secret string) (string, error) {
 	claims := CustomClaims{
-		userId, role,
+		userId, role, mainLayoutId,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			Subject:   userId.String(),

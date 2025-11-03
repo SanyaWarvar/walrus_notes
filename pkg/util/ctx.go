@@ -13,7 +13,7 @@ func GetUserRole(c context.Context) (string, error) {
 }
 
 func GetUserId(c context.Context) (uuid.UUID, error) {
-	id, err := getUUIDFromContext(c, constants.UserIdCtx)
+	id, err := GetUUIDFromContext(c, constants.UserIdCtx)
 	if err != nil {
 		return [16]byte{}, fmt.Errorf("GetUserId: %w", err)
 	}
@@ -62,7 +62,7 @@ func getStringFromContext(c context.Context, context string) (string, error) {
 	return val, nil
 }
 
-func getUUIDFromContext(c context.Context, context string) (*uuid.UUID, error) {
+func GetUUIDFromContext(c context.Context, context string) (*uuid.UUID, error) {
 	idFromCtx, err := getStringFromContext(c, context)
 	if err != nil {
 		return nil, err

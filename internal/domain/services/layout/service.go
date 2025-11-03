@@ -49,12 +49,13 @@ func NewService(
 	}
 }
 
-func (srv *Service) CreateLayout(ctx context.Context, title string, ownerId uuid.UUID) (uuid.UUID, error) {
+func (srv *Service) CreateLayout(ctx context.Context, title string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error) {
 	item := entity.Layout{
 		Id:         util.NewUUID(),
 		Title:      title,
 		OwnerId:    ownerId,
 		HaveAccess: []uuid.UUID{ownerId},
+		IsMain:     isMain,
 	}
 	return srv.layoutRepo.CreateLayout(ctx, &item)
 }
@@ -92,6 +93,7 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 			Id:      item.Id,
 			OwnerId: item.OwnerId,
 			Title:   item.Title,
+			IsMain:  item.IsMain,
 		})
 	}
 

@@ -22,11 +22,11 @@ func NewRepository(conn postgres.Connection) *Repository {
 func (repo *Repository) CreateLayout(ctx context.Context, item *entity.Layout) (uuid.UUID, error) {
 	query := `
 		INSERT INTO layouts VALUES
-		($1, $2, $3, $4)
+		($1, $2, $3, $4, $5)
 		RETURNING id
 	`
 	var id uuid.UUID
-	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.OwnerId, item.HaveAccess).Scan(&id)
+	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.OwnerId, item.HaveAccess, item.IsMain).Scan(&id)
 	if err != nil {
 		if common.IsUniqueErr(err) {
 			return id, apperrors.NotUnique
@@ -70,6 +70,7 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 			&layout.Title,
 			&layout.OwnerId,
 			&layout.HaveAccess,
+			&layout.IsMain,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")

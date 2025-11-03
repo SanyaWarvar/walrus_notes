@@ -25,7 +25,7 @@ type fileService interface {
 }
 
 type layoutService interface {
-	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID) (uuid.UUID, error)
+	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error)
 }
 
 type Service struct {
@@ -69,7 +69,7 @@ func (srv *Service) RegisterUser(ctx context.Context, credentials request.Regist
 		if err != nil {
 			return err
 		}
-		_, err = srv.layoutService.CreateLayout(ctx, "All Notes", u.Id)
+		_, err = srv.layoutService.CreateLayout(ctx, "All Notes", u.Id, true)
 		return err
 	}); err != nil {
 		return nil, err

@@ -61,13 +61,13 @@ func NewService(
 	}
 }
 
-func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
+func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId, mainLayoutId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 		err := srv.noteRepo.DeleteLayoutNotes(ctx, noteId)
-
 		if err != nil {
 			return err
 		}
+		
 		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
 		if err != nil {
 			return err
@@ -83,7 +83,7 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID
 }
 
 // todo add check access
-func (srv *Service) CreateNote(ctx context.Context, title, payload string, ownerId, layoutId uuid.UUID) (uuid.UUID, error) {
+func (srv *Service) CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error) {
 	n := entity.Note{
 		Id:         util.NewUUID(),
 		Title:      title,
@@ -95,6 +95,12 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 	id, err := srv.noteRepo.CreateNote(ctx, &n)
 	if err != nil {
 		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
+	}
+	if layoutId != mainLayoutId {
+		err = srv.layoutRepo.LinkNoteWithLayout(ctx, id, mainLayoutId)
+		if err != nil {
+			return uuid.Nil, errors.Wrap(err, "srv.layoutRepo.LinkNoteWithLayout")
+		}
 	}
 	return id, srv.layoutRepo.LinkNoteWithLayout(ctx, id, layoutId)
 }

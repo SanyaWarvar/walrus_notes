@@ -11,8 +11,8 @@ import (
 )
 
 type noteService interface {
-	DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error
-	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId uuid.UUID) (uuid.UUID, error)
+	DeleteNoteById(ctx context.Context, noteId, userId, mainLayoutId uuid.UUID) error
+	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error
 	GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error)
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
@@ -41,16 +41,16 @@ func NewService(
 	}
 }
 
-func (srv *Service) CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID) (uuid.UUID, error) {
-	return srv.noteService.CreateNote(ctx, req.Title, req.Payload, userId, req.LayoutId)
+func (srv *Service) CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error) {
+	return srv.noteService.CreateNote(ctx, req.Title, req.Payload, userId, req.LayoutId, mainLayoutId)
 }
 
 func (srv *Service) UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error {
 	return srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId, userId)
 }
 
-func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID) error {
-	return srv.noteService.DeleteNoteById(ctx, req.NoteId, userId)
+func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId, mainLayoutId uuid.UUID) error {
+	return srv.noteService.DeleteNoteById(ctx, req.NoteId, userId, mainLayoutId)
 }
 
 func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {

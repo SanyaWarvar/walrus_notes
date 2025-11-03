@@ -62,6 +62,7 @@ type Layout struct {
 	Id      uuid.UUID `json:"id"`
 	Title   string    `json:"title"`
 	OwnerId uuid.UUID `json:"ownerId"`
+	IsMain  bool      `json:"isMain"`
 }
 
 type Position struct {

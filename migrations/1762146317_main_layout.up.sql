@@ -1,0 +1,1 @@
+alter table layouts add column is_main boolean default 'f';
