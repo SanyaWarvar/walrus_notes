@@ -123,7 +123,7 @@ func (h *Controller) getMyLayouts(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id", cant_delete_main_layout
 // @Router /wn/api/v1/layout/delete [post]
 func (h *Controller) deleteLayout(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -138,6 +138,15 @@ func (h *Controller) deleteLayout(c *gin.Context) {
 	userId, err := util.GetUserId(ctx)
 	if err != nil {
 		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+	mainLayoutId, err := uuid.Parse(ctx.Value("mainLayoutId").(string))
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+	if mainLayoutId == req.LayoutId {
+		_ = c.Error(apperror.NewBadRequestError("cant delete main layout", "cant_delete_main_layout"))
 		return
 	}
 
