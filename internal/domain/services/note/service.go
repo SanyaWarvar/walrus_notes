@@ -22,6 +22,7 @@ type noteRepo interface {
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
+	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 }
 
 type linksRepo interface {
@@ -67,7 +68,7 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId, mainLayo
 		if err != nil {
 			return err
 		}
-		
+
 		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
 		if err != nil {
 			return err
@@ -127,7 +128,8 @@ func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layout
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "srv.noteRepo.GetNotesByLayoutId")
 	}
-	notesDto := dto.NotesFromEntities(notes)
+	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, count, err
 }
 
@@ -136,7 +138,8 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userI
 	if err != nil {
 		return nil, err
 	}
-	notesDto := dto.NotesFromEntities(notes)
+	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, err
 }
 
@@ -160,4 +163,15 @@ func (srv *Service) CreateLink(ctx context.Context, layoutId, noteId1, noteId2 u
 
 func (srv *Service) DeleteLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {
 	return srv.linksRepo.DeleteLinkNotes(ctx, layoutId, noteId1, noteId2)
+}
+
+// todo добавлять беклинки?
+func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {
+	notes, err := srv.noteRepo.SearchNotes(ctx, userId, search)
+	if err != nil {
+		return nil, err
+	}
+
+	notesDto := dto.NotesFromEntities(notes, nil)
+	return notesDto, err
 }

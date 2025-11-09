@@ -15,9 +15,17 @@ type Note struct {
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
 }
 
+func (n Note) GetId() uuid.UUID {
+	return n.Id
+}
+
 type NoteWithPosition struct {
 	Note         `json:"note"`
 	NotePosition `json:"notePosition"`
+}
+
+func (n NoteWithPosition) GetId() uuid.UUID {
+	return n.Id
 }
 
 type NotePosition struct {

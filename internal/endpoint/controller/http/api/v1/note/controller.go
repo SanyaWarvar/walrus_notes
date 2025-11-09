@@ -26,6 +26,7 @@ type srv interface {
 	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error
+	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
 
 	CreateLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
 	DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
@@ -54,6 +55,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/create", h.createNote)
 		notesAuth.POST("/update", h.updateNote)
 		notesAuth.POST("/delete", h.deleteNote)
+		notesAuth.GET("/search", h.searchNotes)
 		layout := notesAuth.Group("/layout")
 		{
 			layout.GET("", h.getNotesFromLayout)
@@ -423,4 +425,35 @@ func (h *Controller) deleteLinkBetweenNotes(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+// @Summary search_notes
+// @Description Найти заметку
+// @Tags notes
+// @Produce json
+// @Param search query string true "search"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/notes/search [post]
+func (h *Controller) searchNotes(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	search := c.Query("search")
+
+	notes, err := h.noteService.SearchNotes(ctx, userId, search)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, notes))
 }

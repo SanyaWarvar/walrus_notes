@@ -286,3 +286,39 @@ func (repo *Repository) GetAllLinks(ctx context.Context, layoutId uuid.UUID, not
 	}
 	return links, nil
 }
+
+func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error) {
+	query := `
+		select n.* from notes n
+		join layout_note ln on ln.note_id = n.id
+		where $1 = ANY(n.have_access) 
+			AND (n.title ilike '%' || $2 || '%' or n.payload ilike '%' || $2 || '%')
+	`
+	rows, err := repo.conn.Query(ctx, query, userId, search)
+	if err != nil {
+		return nil, errors.Wrap(err, "repo.conn.Query")
+	}
+	defer rows.Close()
+
+	var notes []entity.Note
+	for rows.Next() {
+		var item entity.Note
+		err := rows.Scan(
+			&item.Id,
+			&item.Title,
+			&item.Payload,
+			&item.CreatedAt,
+			&item.OwnerId,
+			&item.HaveAccess,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "rows.Scan")
+		}
+		notes = append(notes, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "rows.Err")
+	}
+	return notes, nil
+}

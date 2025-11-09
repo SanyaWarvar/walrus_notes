@@ -528,7 +528,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id", cant_delete_main_layout'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_layout
@@ -859,6 +859,39 @@ paths:
       summary: delete_link_between_notes
       tags:
       - links
+  /wn/api/v1/notes/search:
+    post:
+      description: Найти заметку
+      parameters:
+      - description: search
+        in: query
+        name: search
+        required: true
+        type: string
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: search_notes
+      tags:
+      - notes
   /wn/api/v1/notes/update:
     post:
       description: Обновить заметку

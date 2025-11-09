@@ -479,7 +479,7 @@
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id\", cant_delete_main_layout",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -945,6 +945,55 @@
                         "schema": {
                             "$ref": "#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/notes/search": {
+            "post": {
+                "description": "Найти заметку",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "search_notes",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",

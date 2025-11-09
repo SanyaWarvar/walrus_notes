@@ -20,6 +20,7 @@ type noteService interface {
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 	CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error
 	DeleteLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error
+	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
 }
 
 type Service struct {
@@ -75,4 +76,8 @@ func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req req.Li
 
 func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error {
 	return srv.noteService.DeleteLink(ctx, req.LayoutId, req.FirstNoteId, req.SecondNoteId)
+}
+
+func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {
+	return srv.noteService.SearchNotes(ctx, userId, search)
 }

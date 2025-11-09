@@ -16,8 +16,9 @@ type Note struct {
 	LinkedWith []uuid.UUID `json:"linkedWith,omitempty"`
 }
 
-func NotesFromEntities(entities []entity.Note) []Note {
+func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {
 	output := make([]Note, 0, len(entities))
+	transformedLinks := TransformLinks(links)
 	for _, item := range entities {
 		output = append(output, Note{
 			Id:         item.Id,
@@ -25,6 +26,7 @@ func NotesFromEntities(entities []entity.Note) []Note {
 			Payload:    item.Payload,
 			OwnerId:    item.OwnerId,
 			HaveAccess: item.HaveAccess,
+			LinkedWith: transformedLinks[item.Id],
 		})
 	}
 	return output
