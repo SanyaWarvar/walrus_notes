@@ -25,6 +25,7 @@ type noteRepo interface {
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
+	CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error
 }
 
 type linksRepo interface {
@@ -183,11 +184,31 @@ func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 	var item dto.DraftNote
 	err := json.Unmarshal(msg.Payload, &item)
 	if err != nil {
-		return nil, err
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
 	}
 	err = srv.noteRepo.UpdateDraftById(ctx, userId, item.NoteId, item.NewDraft)
 	return &dto.SocketMessage{
-		Event:   "UPDATE_DRAFT",
-		Payload: []byte("{\"status\": \"ok\"}"),
+		Event:   "UPDATE_DRAFT_RESPONSE",
+		Payload: []byte("{\"status\": \"true\"}"),
+	}, nil
+}
+
+func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) (*dto.SocketMessage, error) {
+	ctx := context.Background()
+	var item dto.CommitDraftNote
+	err := json.Unmarshal(msg.Payload, &item)
+	if err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+	err = srv.noteRepo.CommitDraft(ctx, userId, item.NoteId)
+	return &dto.SocketMessage{
+		Event:   "COMMIT_DRAFT_RESPONSE",
+		Payload: []byte("{\"status\": \"true\"}"),
 	}, nil
 }

@@ -15,3 +15,7 @@ type DraftNote struct {
 	NoteId   uuid.UUID `json:"noteId"`
 	NewDraft string    `json:"newDraft"`
 }
+
+type CommitDraftNote struct {
+	NoteId uuid.UUID `json:"noteId"`
+}

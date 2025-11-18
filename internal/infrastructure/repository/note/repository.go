@@ -96,6 +96,16 @@ func (repo *Repository) UpdateDraftById(ctx context.Context, userId, noteId uuid
 	return err
 }
 
+func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error {
+	query := `
+		update notes 
+		set payload = draft, draft = ''
+		where id = $1 and $2 = any(have_access)
+	`
+	_, err := repo.conn.Exec(ctx, query, noteId, userId)
+	return err
+}
+
 // todo check access to layout
 func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
 	query := `
