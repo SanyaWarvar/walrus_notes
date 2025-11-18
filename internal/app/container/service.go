@@ -5,6 +5,7 @@ import (
 	"wn/internal/domain/services/layout"
 	"wn/internal/domain/services/note"
 	smtpSrv "wn/internal/domain/services/smtp"
+	"wn/internal/domain/services/socket"
 	tokenSrv "wn/internal/domain/services/token"
 	userSrv "wn/internal/domain/services/user"
 )
@@ -19,12 +20,13 @@ func (c *Container) getServices() *services {
 type services struct {
 	c *Container
 
-	user   *userSrv.Service
-	smtp   *smtpSrv.Service
-	token  *tokenSrv.Service
-	file   *file.Service
-	note   *note.Service
-	layout *layout.Service
+	user          *userSrv.Service
+	smtp          *smtpSrv.Service
+	token         *tokenSrv.Service
+	file          *file.Service
+	note          *note.Service
+	layout        *layout.Service
+	socketManager *socket.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -105,4 +107,11 @@ func (s *services) getLayoutService() *layout.Service {
 
 	}
 	return s.layout
+}
+
+func (s *services) getSocketService() *socket.Service {
+	if s.socketManager == nil {
+		s.socketManager = socket.NewService(s.c.getLogger())
+	}
+	return s.socketManager
 }

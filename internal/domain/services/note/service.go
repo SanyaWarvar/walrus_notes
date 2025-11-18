@@ -2,6 +2,7 @@ package note
 
 import (
 	"context"
+	"encoding/json"
 	"wn/internal/domain/dto"
 	"wn/internal/entity"
 	"wn/pkg/applogger"
@@ -23,6 +24,7 @@ type noteRepo interface {
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
+	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
 }
 
 type linksRepo interface {
@@ -174,4 +176,18 @@ func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search st
 
 	notesDto := dto.NotesFromEntities(notes, nil)
 	return notesDto, err
+}
+
+func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) (*dto.SocketMessage, error) {
+	ctx := context.Background()
+	var item dto.DraftNote
+	err := json.Unmarshal(msg.Payload, &item)
+	if err != nil {
+		return nil, err
+	}
+	err = srv.noteRepo.UpdateDraftById(ctx, userId, item.NoteId, item.NewDraft)
+	return &dto.SocketMessage{
+		Event:   "UPDATE_DRAFT",
+		Payload: []byte("{\"status\": \"ok\"}"),
+	}, nil
 }

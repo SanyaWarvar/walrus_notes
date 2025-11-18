@@ -22,11 +22,11 @@ func NewRepository(conn postgres.Connection) *Repository {
 func (repo *Repository) CreateNote(ctx context.Context, item *entity.Note) (uuid.UUID, error) {
 	query := `
 		INSERT INTO notes VALUES
-		($1, $2, $3, $4, $5, $6)
+		($1, $2, $3, $4, $5, $6, &7)
 		RETURNING id
 	`
 	var id uuid.UUID
-	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.Payload, item.CreatedAt, item.OwnerId, item.HaveAccess).Scan(&id)
+	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.Payload, item.CreatedAt, item.OwnerId, item.HaveAccess, item.Draft).Scan(&id)
 	if err != nil {
 		if common.IsUniqueErr(err) {
 			return id, apperrors.NotUnique
@@ -86,6 +86,16 @@ func (repo *Repository) GetNoteCountInLayout(ctx context.Context, layoutId uuid.
 	return n, err
 }
 
+func (repo *Repository) UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error {
+	query := `
+		update notes 
+		set draft = $1
+		where id = $2 and $3 = any(have_access)
+	`
+	_, err := repo.conn.Exec(ctx, query, newDraft, noteId, userId)
+	return err
+}
+
 // todo check access to layout
 func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
 	query := `
@@ -111,6 +121,7 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -157,6 +168,7 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -196,6 +208,7 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 			&item.LayoutId,
 			&item.XPosition,
 			&item.YPosition,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -310,6 +323,7 @@ func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, searc
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")

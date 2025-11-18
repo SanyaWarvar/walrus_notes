@@ -54,6 +54,9 @@ func (c *Container) Start() error {
 	if err := c.getWorkers().start(); err != nil {
 		return err
 	}
+	c.getServices().getSocketService().RegisterHandler(
+		"UPDATE_DRAFT_REQUEST", c.getServices().getNoteService().HandleCreateDraft,
+	)
 	return nil
 }
 

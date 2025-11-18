@@ -13,6 +13,7 @@ type Note struct {
 	CreatedAt  time.Time   `json:"createdAt" db:"created_at"`
 	OwnerId    uuid.UUID   `json:"ownerId" db:"owner_id"`
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
+	Draft      string      `json:"draft" db:"draft"`
 }
 
 func (n Note) GetId() uuid.UUID {

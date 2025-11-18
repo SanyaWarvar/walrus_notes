@@ -14,6 +14,7 @@ type Note struct {
 	HaveAccess []uuid.UUID `json:"haveAccess"`
 	Position   *Position   `json:"position,omitempty"`
 	LinkedWith []uuid.UUID `json:"linkedWith,omitempty"`
+	Draft      string      `json:"draft"`
 }
 
 func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {
@@ -27,6 +28,7 @@ func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {
 			OwnerId:    item.OwnerId,
 			HaveAccess: item.HaveAccess,
 			LinkedWith: transformedLinks[item.Id],
+			Draft:      item.Draft,
 		})
 	}
 	return output
@@ -47,6 +49,7 @@ func NotesFromEntitiesWithPosition(entities []entity.NoteWithPosition, links []e
 				YPos: item.YPosition,
 			},
 			LinkedWith: transformedLinks[item.Id],
+			Draft:      item.Draft,
 		})
 	}
 	return output

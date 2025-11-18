@@ -4,6 +4,7 @@ import (
 	"wn/internal/endpoint/controller/http/api/v1/auth"
 	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
+	"wn/internal/endpoint/controller/http/api/v1/socket"
 	"wn/internal/endpoint/controller/http/api/v1/user"
 
 	"github.com/gin-gonic/gin"
@@ -12,10 +13,11 @@ import (
 type Dispatcher struct {
 	apiPath string
 
-	auth   *auth.Controller
-	user   *user.Controller
-	note   *note.Controller
-	layout *layout.Controller
+	auth    *auth.Controller
+	user    *user.Controller
+	note    *note.Controller
+	layout  *layout.Controller
+	sockets *socket.Controller
 }
 
 func NewDispatcher(
@@ -25,6 +27,7 @@ func NewDispatcher(
 	user *user.Controller,
 	note *note.Controller,
 	layout *layout.Controller,
+	sockets *socket.Controller,
 ) *Dispatcher {
 	return &Dispatcher{
 		apiPath: apiPath,
@@ -32,6 +35,7 @@ func NewDispatcher(
 		user:    user,
 		note:    note,
 		layout:  layout,
+		sockets: sockets,
 	}
 }
 
@@ -44,6 +48,7 @@ func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc
 			d.user.Init(api, authorizedGroup)
 			d.note.Init(api, authorizedGroup)
 			d.layout.Init(api, authorizedGroup)
+			d.sockets.ConnectionController(api)
 		}
 	}
 }

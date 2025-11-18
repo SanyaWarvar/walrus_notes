@@ -5,6 +5,7 @@ import (
 	"wn/internal/endpoint/controller/http/api/v1/auth"
 	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
+	"wn/internal/endpoint/controller/http/api/v1/socket"
 	"wn/internal/endpoint/controller/http/api/v1/user"
 )
 
@@ -36,6 +37,12 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 				c.getLogger(),
 				c.getResponseBuilder(),
 				c.getApplication().getLayoutApplicationService(),
+			),
+
+			socket.NewController(
+				c.getLogger(),
+				c.getResponseBuilder(),
+				c.getServices().getSocketService(),
 			),
 		)
 	}
