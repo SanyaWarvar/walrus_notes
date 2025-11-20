@@ -219,7 +219,6 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 			&item.LayoutId,
 			&item.XPosition,
 			&item.YPosition,
-			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
