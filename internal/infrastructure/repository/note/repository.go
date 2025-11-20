@@ -214,6 +214,7 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
+			&item.Draft,
 			&item.NoteId,
 			&item.LayoutId,
 			&item.XPosition,
