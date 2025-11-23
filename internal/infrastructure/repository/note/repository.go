@@ -7,6 +7,7 @@ import (
 	"wn/internal/infrastructure/repository/common"
 	"wn/pkg/database/postgres"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
@@ -20,19 +21,32 @@ func NewRepository(conn postgres.Connection) *Repository {
 }
 
 func (repo *Repository) CreateNote(ctx context.Context, item *entity.Note) (uuid.UUID, error) {
-	query := `
-		INSERT INTO notes VALUES
-		($1, $2, $3, $4, $5, $6, &7)
-		RETURNING id
-	`
-	var id uuid.UUID
-	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.Payload, item.CreatedAt, item.OwnerId, item.HaveAccess, item.Draft).Scan(&id)
+	query, args, err := sq.Insert("notes").Columns(
+		"id",
+		"title",
+		"payload",
+		"created_at",
+		"owner_id",
+		"have_access",
+		"draft",
+	).Values(
+		item.Id,
+		item.Title,
+		item.Payload,
+		item.CreatedAt,
+		item.OwnerId,
+		item.HaveAccess,
+		item.Draft,
+	).PlaceholderFormat(sq.Dollar).ToSql()
+
+	_, err = repo.conn.Exec(ctx, query, args...)
 	if err != nil {
 		if common.IsUniqueErr(err) {
-			return id, apperrors.NotUnique
+			return uuid.Nil, apperrors.NotUnique
 		}
+		return uuid.Nil, err
 	}
-	return id, err
+	return item.Id, err
 }
 
 func (repo *Repository) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
