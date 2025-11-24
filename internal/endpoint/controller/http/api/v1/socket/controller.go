@@ -31,7 +31,7 @@ func NewController(
 		services: services,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				// Настрой CORS по необходимости
+				fmt.Println(r.Body, r.URL.Query())
 				return true
 			},
 			ReadBufferSize:  1024,
