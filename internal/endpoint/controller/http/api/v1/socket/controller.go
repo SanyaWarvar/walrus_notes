@@ -67,7 +67,7 @@ func (h *Controller) createConnection(c *gin.Context) {
 	wsConn := socket.NewWSConnection(conn, userId)
 	// Передаем управление доменному сервису
 	ctx := c.Request.Context()
-	h.services.HandleConnection(ctx, wsConn)
+	go h.services.HandleConnection(ctx, wsConn)
 
 	// Не отправляем ответ через builder, т.к. соединение уже установлено
 	// и управление передано доменному сервису
