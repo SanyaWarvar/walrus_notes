@@ -98,9 +98,6 @@ func (s *Service) HandleConnection(ctx context.Context, conn Connection) {
 	// Основной цикл обработки
 	for {
 		select {
-		case <-ctx.Done():
-			// Контекст отменен
-			return
 
 		case <-pingTicker.C:
 			// Отправляем пинг каждые 10 секунд
@@ -197,7 +194,7 @@ func (w *WSConnection) ID() ConnectionID {
 }
 
 func (w *WSConnection) UserID() uuid.UUID {
-	return w.UserID()
+	return w.userID
 }
 
 func (w *WSConnection) Send(msg *dto.SocketMessage) error {
@@ -209,7 +206,7 @@ func (w *WSConnection) Send(msg *dto.SocketMessage) error {
 func (w *WSConnection) SendPing() error {
 	return w.Send(&dto.SocketMessage{
 		Event:   "PING",
-		Payload: []byte{},
+		Payload: []byte("{}"),
 	})
 }
 
