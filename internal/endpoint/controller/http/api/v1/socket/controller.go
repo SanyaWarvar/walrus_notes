@@ -1,8 +1,10 @@
 package socket
 
 import (
+	"fmt"
 	"net/http"
 	"wn/internal/domain/services/socket"
+	"wn/pkg/apperror"
 	"wn/pkg/applogger"
 	"wn/pkg/response"
 
@@ -48,21 +50,28 @@ func (h *Controller) ConnectionController(api *gin.RouterGroup) {
 
 // createConnection - HTTP хендлер для установки вебсокет соединения
 func (h *Controller) createConnection(c *gin.Context) {
-	// Апгрейд соединения до вебсокета
+	userID := c.Query("user_id")
+	fmt.Println(1)
+	if userID == "" {
+		_ = c.Error(apperror.NewBadRequestError("empty user_id", "bind_query"))
+		return
+	}
+	fmt.Println(1.5)
+	userId, err := uuid.Parse(userID)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), "bind_query"))
+		return
+	}
+	fmt.Println(2)
 	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		_ = c.Error(err)
 		return
 	}
-	userID := c.Query("user_id")
-	if userID == "" {
-		_ = c.Error(err)
-		return
-	}
-
+	fmt.Println(3)
 	// Создаем доменное представление соединения
-	wsConn := socket.NewWSConnection(conn, userID)
-
+	wsConn := socket.NewWSConnection(conn, userId)
+	fmt.Println(4)
 	// Передаем управление доменному сервису
 	ctx := c.Request.Context()
 	h.services.HandleConnection(ctx, wsConn)

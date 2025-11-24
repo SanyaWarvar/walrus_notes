@@ -140,11 +140,11 @@ func (s *Service) broadcastMessage(msg *dto.SocketMessage) {
 type WSConnection struct {
 	conn   *websocket.Conn
 	id     ConnectionID
-	userID string
+	userID uuid.UUID
 	mu     sync.Mutex
 }
 
-func NewWSConnection(conn *websocket.Conn, userID string) *WSConnection {
+func NewWSConnection(conn *websocket.Conn, userID uuid.UUID) *WSConnection {
 	return &WSConnection{
 		conn:   conn,
 		id:     ConnectionID(uuid.New().String()),
@@ -157,7 +157,7 @@ func (w *WSConnection) ID() ConnectionID {
 }
 
 func (w *WSConnection) UserID() uuid.UUID {
-	return uuid.MustParse(w.userID)
+	return w.UserID()
 }
 
 func (w *WSConnection) Send(msg *dto.SocketMessage) error {
