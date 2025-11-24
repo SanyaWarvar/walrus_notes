@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/config"
+	"wn/internal/domain/dto"
 	"wn/internal/endpoint/controller/http"
 	v1 "wn/internal/endpoint/controller/http/api/v1"
 	"wn/pkg/applogger"
@@ -11,6 +12,8 @@ import (
 	"wn/pkg/response"
 	"wn/pkg/restclient"
 	"wn/pkg/trx"
+
+	"github.com/google/uuid"
 )
 
 type Container struct {
@@ -56,6 +59,9 @@ func (c *Container) Start() error {
 	}
 	c.getServices().getSocketService().RegisterHandler("UPDATE_DRAFT_REQUEST", c.getServices().getNoteService().HandleCreateDraft)
 	c.getServices().getSocketService().RegisterHandler("COMMIT_DRAFT_REQUEST", c.getServices().getNoteService().HandleCommitDraft)
+	c.getServices().getSocketService().RegisterHandler("PONG", func(msg *dto.SocketMessage, userId uuid.UUID) (*dto.SocketMessage, error) {
+		return nil, nil
+	})
 	return nil
 }
 

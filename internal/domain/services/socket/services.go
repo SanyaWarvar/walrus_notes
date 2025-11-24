@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 	"wn/internal/domain/dto"
 	"wn/pkg/applogger"
 
@@ -17,6 +18,7 @@ type Connection interface {
 	ID() ConnectionID
 	UserID() uuid.UUID
 	Send(msg *dto.SocketMessage) error
+	SendPing() error
 	Close() error
 	ReadMessage() (*dto.SocketMessage, error)
 }
@@ -73,20 +75,58 @@ func (s *Service) HandleConnection(ctx context.Context, conn Connection) {
 		s.unregister <- conn
 	}()
 
-	// Обрабатываем входящие сообщения
+	// Создаем тикер для пинга каждые 10 секунд
+	pingTicker := time.NewTicker(10 * time.Second)
+	defer pingTicker.Stop()
+
+	// Канал для обработки сообщений
+	messageChan := make(chan *dto.SocketMessage)
+	errorChan := make(chan error)
+
+	// Запускаем горутину для чтения сообщений
+	go func() {
+		for {
+			msg, err := conn.ReadMessage()
+			if err != nil {
+				errorChan <- err
+				return
+			}
+			messageChan <- msg
+		}
+	}()
+
+	// Основной цикл обработки
 	for {
-		msg, err := conn.ReadMessage()
-		if err != nil {
+		select {
+		case <-ctx.Done():
+			// Контекст отменен
+			return
+
+		case <-pingTicker.C:
+			// Отправляем пинг каждые 10 секунд
+			if err := conn.SendPing(); err != nil {
+				s.lgr.Errorf("send ping error: %s", err.Error())
+				return
+			}
+			s.lgr.Debugf("ping sent to connection %s", conn.ID())
+
+		case msg := <-messageChan:
+			// Обрабатываем входящее сообщение
+			processedMsg, err := s.handleMessage(conn.ID(), msg)
+			if err != nil {
+				s.lgr.Errorf("handle message error: %s", err)
+			}
+			if processedMsg != nil {
+				if err := conn.Send(processedMsg); err != nil {
+					s.lgr.Errorf("send message error: %s", err.Error())
+					return
+				}
+			}
+
+		case err := <-errorChan:
+			// Ошибка чтения сообщения
 			s.lgr.Errorf("read message error: %s", err.Error())
 			return
-		}
-
-		// Обрабатываем сообщение
-		if msg, err = s.handleMessage(conn.ID(), msg); err != nil {
-			s.lgr.Errorf("handle message error: %s", err)
-		}
-		if msg != nil {
-			conn.Send(msg)
 		}
 	}
 }
@@ -164,6 +204,13 @@ func (w *WSConnection) Send(msg *dto.SocketMessage) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.conn.WriteJSON(msg)
+}
+
+func (w *WSConnection) SendPing() error {
+	return w.Send(&dto.SocketMessage{
+		Event:   "PING",
+		Payload: []byte{},
+	})
 }
 
 func (w *WSConnection) ReadMessage() (*dto.SocketMessage, error) {
