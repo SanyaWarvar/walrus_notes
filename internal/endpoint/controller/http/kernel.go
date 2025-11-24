@@ -60,10 +60,11 @@ func (k *Kernel) Init() *gin.Engine {
 		CORSHandler(),
 		ErrorHandler(k.builder),
 	)
-	k.initApi(router.Group("/wn", RequestIdValidationHandler))
+
+	k.initApi(router.Group("/wn", RequestIdValidationHandler), router.Group("/wn"))
 	return router
 }
 
-func (k *Kernel) initApi(router *gin.RouterGroup) {
-	k.dispatcher.Init(router.Group("api"), AuthorizationHandler())
+func (k *Kernel) initApi(router, lowRouter *gin.RouterGroup) {
+	k.dispatcher.Init(router.Group("api"), AuthorizationHandler(), lowRouter.Group("api"))
 }

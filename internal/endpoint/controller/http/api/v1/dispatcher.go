@@ -39,7 +39,7 @@ func NewDispatcher(
 	}
 }
 
-func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc) {
+func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc, ws *gin.RouterGroup) {
 	api := router.Group("/v1")
 	{
 		d.auth.Init(api)
@@ -48,7 +48,7 @@ func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc
 			d.user.Init(api, authorizedGroup)
 			d.note.Init(api, authorizedGroup)
 			d.layout.Init(api, authorizedGroup)
-			d.sockets.ConnectionController(api)
+			d.sockets.ConnectionController(ws)
 		}
 	}
 }
