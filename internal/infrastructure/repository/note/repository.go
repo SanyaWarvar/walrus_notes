@@ -126,6 +126,7 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 		select n.* from notes n
 		join layout_note ln on ln.note_id = n.id
 		where ln.layout_id = $1 and $2 = ANY(n.have_access)
+		order by created_at desc, layout_id 
 		offset $3
 		limit $4
 	`
