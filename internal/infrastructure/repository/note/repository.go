@@ -173,8 +173,11 @@ func (repo *Repository) DeleteLayoutNote(ctx context.Context, layoutId uuid.UUID
 
 func (repo *Repository) DeleteNoteWithoutLayout(ctx context.Context, userId uuid.UUID) error {
 	query := `
-		delete from notes n 
-		left join layout_note ln on ln.note_id = n.id where ln.layout_id is null and $1 = any(n.have_access)
+	DELETE FROM notes n 
+	WHERE NOT EXISTS (
+		SELECT 1 FROM layout_note ln 
+		WHERE ln.note_id = n.id
+	) and $1 = any(n.have_access);
 	`
 	_, err := repo.conn.Exec(ctx, query, userId)
 	return err
