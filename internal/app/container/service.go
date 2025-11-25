@@ -103,6 +103,7 @@ func (s *services) getLayoutService() *layout.Service {
 			s.c.getLogger(),
 			s.c.getRepositories().getLayoutRepository(),
 			s.c.getRepositories().getNoteRepository(),
+			s.c.getRepositories().getNoteRepository(),
 		)
 
 	}

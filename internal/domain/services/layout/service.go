@@ -27,12 +27,17 @@ type linksRepo interface {
 	DeleteLayoutNote(ctx context.Context, layoutId uuid.UUID, userId uuid.UUID) error
 }
 
+type noteRepo interface {
+	DeleteNoteWithoutLayout(ctx context.Context, userId uuid.UUID) error
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
 	layoutRepo layoutRepo
 	linksRepo  linksRepo
+	noteRepo   noteRepo
 }
 
 func NewService(
@@ -40,12 +45,14 @@ func NewService(
 	logger applogger.Logger,
 	layoutRepo layoutRepo,
 	linksRepo linksRepo,
+	noteRepo noteRepo,
 ) *Service {
 	return &Service{
 		tx:         tx,
 		logger:     logger,
 		layoutRepo: layoutRepo,
 		linksRepo:  linksRepo,
+		noteRepo:   noteRepo,
 	}
 }
 
@@ -75,6 +82,11 @@ func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid
 		err = srv.layoutRepo.DeleteLayoutById(ctx, layoutId, ownerId)
 		if err != nil {
 			return errors.Wrap(err, "srv.layoutRepo.DeleteLayoutById")
+		}
+
+		err = srv.noteRepo.DeleteNoteWithoutLayout(ctx, ownerId)
+		if err != nil {
+			return errors.Wrap(err, "srv.noteRepo.DeleteNoteWithoutLayout")
 		}
 
 		return nil
