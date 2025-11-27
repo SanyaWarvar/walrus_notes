@@ -139,8 +139,12 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userI
 	return notesDto, err
 }
 
-func (srv *Service) GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error) {
-	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, layoutId, userId)
+func (srv *Service) GetNotesWithPosition(ctx context.Context, mainLayoutId, layoutId, userId uuid.UUID) ([]dto.Note, error) {
+	t := layoutId
+	if mainLayoutId == t {
+		t = uuid.Nil
+	}
+	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, t, userId)
 	if err != nil {
 		return nil, err
 	}

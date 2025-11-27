@@ -15,7 +15,7 @@ type noteService interface {
 	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error
 	GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error)
-	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
+	GetNotesWithPosition(ctx context.Context, mainLayoutId, layoutId, userId uuid.UUID) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
 	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
 	CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error
@@ -60,7 +60,7 @@ func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFrom
 }
 
 func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
-	notes, err := srv.noteService.GetNotesWithPosition(ctx, req.LayoutId, userId)
+	notes, err := srv.noteService.GetNotesWithPosition(ctx, mainLayoutId, req.LayoutId, userId)
 	if err != nil {
 		return nil, err
 	}
