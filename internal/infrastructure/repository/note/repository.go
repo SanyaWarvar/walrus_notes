@@ -29,6 +29,7 @@ func (repo *Repository) CreateNote(ctx context.Context, item *entity.Note) (uuid
 		"owner_id",
 		"have_access",
 		"draft",
+		"layout_id",
 	).Values(
 		item.Id,
 		item.Title,
@@ -37,6 +38,7 @@ func (repo *Repository) CreateNote(ctx context.Context, item *entity.Note) (uuid
 		item.OwnerId,
 		item.HaveAccess,
 		item.Draft,
+		item.LayoutId,
 	).PlaceholderFormat(sq.Dollar).ToSql()
 
 	_, err = repo.conn.Exec(ctx, query, args...)
