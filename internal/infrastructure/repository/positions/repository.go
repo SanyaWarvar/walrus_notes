@@ -17,7 +17,7 @@ func NewRepository(conn postgres.Connection) *Repository {
 
 func (repo *Repository) CreateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error {
 	query := `
-		insert into positions p (note_id, x_position, y_position)
+		insert into positions (note_id, x_position, y_position)
 		values ($1, $2, $3)
 	`
 	_, err := repo.conn.Exec(ctx, query, noteId, xPos, yPos)
