@@ -151,8 +151,8 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
-			&item.Draft,
 			&item.LayoutId,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -188,8 +188,8 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
-			&item.Draft,
 			&item.LayoutId,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -240,8 +240,8 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
-			&item.Draft,
 			&item.LayoutId,
+			&item.Draft,
 			&item.NoteId,
 			&item.XPosition,
 			&item.YPosition,
@@ -289,8 +289,8 @@ func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, searc
 			&item.CreatedAt,
 			&item.OwnerId,
 			&item.HaveAccess,
-			&item.Draft,
 			&item.LayoutId,
+			&item.Draft,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
