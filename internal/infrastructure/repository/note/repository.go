@@ -209,8 +209,11 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 		"p.note_id",
 		"p.x_position",
 		"p.y_position",
-	).From("notes n").Join("positions p on p.note_id = n.id").
-		Where("$2 = ANY(n.have_access) and x_position is not null and y_position is not null").
+	).From("notes n").
+		Join("positions p ON p.note_id = n.id").
+		Where("? = ANY(n.have_access)", userId).
+		Where(sq.NotEq{"p.x_position": nil}).
+		Where(sq.NotEq{"p.y_position": nil}).
 		PlaceholderFormat(sq.Dollar)
 
 	if layoutId != uuid.Nil {
