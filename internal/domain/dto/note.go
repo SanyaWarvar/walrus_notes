@@ -51,6 +51,7 @@ func NotesFromEntitiesWithPosition(entities []entity.NoteWithPosition, links []e
 			},
 			LinkedWith: transformedLinks[item.Id],
 			Draft:      item.Draft,
+			LayoutId:   item.LayoutId,
 		})
 	}
 	return output
