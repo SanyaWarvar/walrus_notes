@@ -45,7 +45,6 @@ type Layout struct {
 }
 
 type Link struct {
-	LayoutId     uuid.UUID `json:"layoutId"`
 	FirstNoteId  uuid.UUID `json:"firstNoteId"`
 	SecondNoteId uuid.UUID `json:"secondNoteId"`
 }

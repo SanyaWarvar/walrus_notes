@@ -45,7 +45,7 @@ email:
 
 jwt:
   accessTtl: "100000h"
-  refreshTtl: "100h"
+  refreshTtl: "1000h"
 
 cron:
   generateStatics: "@every 5s"

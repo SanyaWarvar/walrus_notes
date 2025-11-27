@@ -19,14 +19,13 @@ type layoutRepo interface {
 }
 
 type linksRepo interface {
-	DeleteLinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
-	DeleteLinksFromLayout(ctx context.Context, layoutId uuid.UUID) error
 	DeleteLinksWithNote(ctx context.Context, noteId uuid.UUID) error
-	LinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
-	GetAllLinks(ctx context.Context, layoutId uuid.UUID, noteIds []uuid.UUID) ([]entity.Link, error)
+	LinkNotes(ctx context.Context, firstNoteId, secondNoteId uuid.UUID) error
+	GetAllLinks(ctx context.Context, noteIds []uuid.UUID) ([]entity.Link, error)
 }
 
 type noteRepo interface {
+	DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error
 }
 
 type Service struct {
@@ -68,7 +67,7 @@ func (srv *Service) CreateLayout(ctx context.Context, title string, ownerId uuid
 func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 
-		err := srv.linksRepo.DeleteLinksFromLayout(ctx, layoutId)
+		err := srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId, ownerId)
 		if err != nil {
 			return errors.Wrap(err, "srv.linksRepo.DeleteLinksFromLayout")
 		}

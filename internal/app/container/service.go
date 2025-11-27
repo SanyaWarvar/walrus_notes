@@ -89,7 +89,8 @@ func (s *services) getNoteService() *note.Service {
 			s.c.getLogger(),
 			s.c.getRepositories().getNoteRepository(),
 			s.c.getRepositories().getLayoutRepository(),
-			s.c.getRepositories().getNoteRepository(),
+			s.c.getRepositories().getLinksRepository(),
+			s.c.getRepositories().getPositionsRepository(),
 		)
 
 	}
@@ -102,7 +103,7 @@ func (s *services) getLayoutService() *layout.Service {
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
 			s.c.getRepositories().getLayoutRepository(),
-			s.c.getRepositories().getNoteRepository(),
+			s.c.getRepositories().getLinksRepository(),
 			s.c.getRepositories().getNoteRepository(),
 		)
 

@@ -20,3 +20,9 @@ create table if not exists positions(
 	x_position DOUBLE PRECISION,
 	y_position DOUBLE PRECISION
 );
+
+create table if not exists links(
+    first_note_id uuid references notes(id),
+    second_note_id uuid references notes(id),
+    primary key(first_note_id, second_note_id)
+);

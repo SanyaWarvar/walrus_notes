@@ -21,18 +21,20 @@ type noteRepo interface {
 	GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error)
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
-	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
 	CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error
 }
 
+type positionsRepo interface {
+	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
+}
+
 type linksRepo interface {
-	DeleteLinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
-	DeleteLinksFromLayout(ctx context.Context, layoutId uuid.UUID) error
 	DeleteLinksWithNote(ctx context.Context, noteId uuid.UUID) error
-	LinkNotes(ctx context.Context, layoutId, firstNoteId, secondNoteId uuid.UUID) error
-	GetAllLinks(ctx context.Context, layoutId uuid.UUID, noteIds []uuid.UUID) ([]entity.Link, error)
+	DeleteLink(ctx context.Context, firstNoteId, secondNoteId uuid.UUID) error
+	LinkNotes(ctx context.Context, firstNoteId, secondNoteId uuid.UUID) error
+	GetAllLinks(ctx context.Context, noteIds []uuid.UUID) ([]entity.Link, error)
 }
 
 type layoutRepo interface {
@@ -42,9 +44,10 @@ type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	noteRepo   noteRepo
-	layoutRepo layoutRepo
-	linksRepo  linksRepo
+	noteRepo      noteRepo
+	layoutRepo    layoutRepo
+	linksRepo     linksRepo
+	positionsRepo positionsRepo
 }
 
 func NewService(
@@ -53,29 +56,32 @@ func NewService(
 	noteRepo noteRepo,
 	layoutRepo layoutRepo,
 	linksRepo linksRepo,
+	positionsRepo positionsRepo,
 ) *Service {
 	return &Service{
-		tx:         tx,
-		logger:     logger,
-		noteRepo:   noteRepo,
-		layoutRepo: layoutRepo,
-		linksRepo:  linksRepo,
+		tx:            tx,
+		logger:        logger,
+		noteRepo:      noteRepo,
+		layoutRepo:    layoutRepo,
+		linksRepo:     linksRepo,
+		positionsRepo: positionsRepo,
 	}
 }
 
-func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId, mainLayoutId uuid.UUID) error {
+func (srv *Service) DeleteLink(ctx context.Context, noteId1, noteId2 uuid.UUID) error {
+	return srv.linksRepo.DeleteLink(ctx, noteId1, noteId2)
+}
+
+func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
-
-		err := srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
+		err := srv.linksRepo.DeleteLinksWithNote(ctx, noteId)
 		if err != nil {
 			return err
 		}
-
-		err = srv.linksRepo.DeleteLinksWithNote(ctx, noteId)
+		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
 		if err != nil {
 			return err
 		}
-
 		return nil
 	})
 }
@@ -91,15 +97,18 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 		HaveAccess: []uuid.UUID{ownerId},
 		LayoutId:   layoutId,
 	}
-	id, err := srv.noteRepo.CreateNote(ctx, &n)
-	if err != nil {
-		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
-	}
-	err = srv.noteRepo.UpdateNotePosition(ctx, n.Id, nil, nil)
-	if err != nil {
-		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
-	}
-	return id, err
+
+	return n.Id, srv.tx.Transaction(ctx, func(ctx context.Context) error {
+		_, err := srv.noteRepo.CreateNote(ctx, &n)
+		if err != nil {
+			return errors.Wrap(err, "srv.noteRepo.CreateNote")
+		}
+		err = srv.positionsRepo.UpdateNotePosition(ctx, n.Id, nil, nil)
+		if err != nil {
+			return errors.Wrap(err, "srv.noteRepo.CreateNote")
+		}
+		return nil
+	})
 }
 
 func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error {
@@ -124,7 +133,7 @@ func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layout
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "srv.noteRepo.GetNotesByLayoutId")
 	}
-	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, count, err
 }
@@ -134,7 +143,7 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userI
 	if err != nil {
 		return nil, err
 	}
-	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, err
 }
@@ -148,21 +157,17 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, mainLayoutId, layo
 	if err != nil {
 		return nil, err
 	}
-	links, err := srv.linksRepo.GetAllLinks(ctx, layoutId, getIds(notes))
+	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntitiesWithPosition(notes, links)
 	return notesDto, err
 }
 
-func (srv *Service) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
-	return srv.noteRepo.UpdateNotePosition(ctx, noteId, xPos, yPos)
+func (srv *Service) UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error {
+	return srv.positionsRepo.UpdateNotePosition(ctx, noteId, xPos, yPos)
 }
 
-func (srv *Service) CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {
-	return srv.linksRepo.LinkNotes(ctx, layoutId, noteId1, noteId2)
-}
-
-func (srv *Service) DeleteLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {
-	return srv.linksRepo.DeleteLinkNotes(ctx, layoutId, noteId1, noteId2)
+func (srv *Service) CreateLink(ctx context.Context, noteId1, noteId2 uuid.UUID) error {
+	return srv.linksRepo.LinkNotes(ctx, noteId1, noteId2)
 }
 
 // todo добавлять беклинки?
