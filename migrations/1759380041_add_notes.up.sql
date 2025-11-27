@@ -1,3 +1,10 @@
+create table if not exists layouts(
+	id uuid primary key,
+	title varchar,
+	owner_id uuid not null references users(id),
+	have_access uuid[]
+);
+
 create table if not exists notes(
 	id uuid primary key,
 	title varchar,
@@ -6,13 +13,6 @@ create table if not exists notes(
 	owner_id uuid not null references users(id),
 	have_access uuid[],
 	layout_id uuid references layouts(id)
-);
-
-create table if not exists layouts(
-	id uuid primary key,
-	title varchar,
-	owner_id uuid not null references users(id),
-	have_access uuid[]
 );
 
 create table if not exists positions(
