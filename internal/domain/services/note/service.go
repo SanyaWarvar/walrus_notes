@@ -21,7 +21,7 @@ type noteRepo interface {
 	GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error)
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
-	UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error
+	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
 	CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error
@@ -80,7 +80,7 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId, mainLayo
 	})
 }
 
-// todo add check access
+// todo trx
 func (srv *Service) CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error) {
 	n := entity.Note{
 		Id:         util.NewUUID(),
@@ -92,6 +92,10 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 		LayoutId:   layoutId,
 	}
 	id, err := srv.noteRepo.CreateNote(ctx, &n)
+	if err != nil {
+		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
+	}
+	err = srv.noteRepo.UpdateNotePosition(ctx, n.Id, nil, nil)
 	if err != nil {
 		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
 	}
@@ -146,7 +150,7 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, layoutId, userId u
 }
 
 func (srv *Service) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
-	return srv.noteRepo.UpdateNotePosition(ctx, layoutId, noteId, xPos, yPos)
+	return srv.noteRepo.UpdateNotePosition(ctx, noteId, xPos, yPos)
 }
 
 func (srv *Service) CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error {

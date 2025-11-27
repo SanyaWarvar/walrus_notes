@@ -230,7 +230,7 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 	return notes, nil
 }
 
-func (repo *Repository) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
+func (repo *Repository) UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error {
 	query := `
 		update positions p
 		set x_position = $1, y_position = $2
