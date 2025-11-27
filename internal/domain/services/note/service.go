@@ -27,6 +27,7 @@ type noteRepo interface {
 }
 
 type positionsRepo interface {
+	CreateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 }
 
@@ -103,7 +104,7 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 		if err != nil {
 			return errors.Wrap(err, "srv.noteRepo.CreateNote")
 		}
-		err = srv.positionsRepo.UpdateNotePosition(ctx, n.Id, nil, nil)
+		err = srv.positionsRepo.CreateNotePosition(ctx, n.Id, nil, nil)
 		if err != nil {
 			return errors.Wrap(err, "srv.noteRepo.CreateNote")
 		}
