@@ -39,7 +39,7 @@ func (repo *Repository) GetAllLinks(ctx context.Context, noteIds []uuid.UUID) ([
 	query := `
 		select first_note_id, second_note_id
 		from links
-		where layout_id = $1 and (first_note_id = ANY($2) or second_note_id = ANY($2))
+		where first_note_id = ANY($1) or second_note_id = ANY($1)
 	`
 	rows, err := repo.conn.Query(ctx, query, noteIds)
 	if err != nil {
