@@ -23,7 +23,7 @@ type srv interface {
 	UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error
 	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID, mainLayoutId uuid.UUID) error
 	GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
-	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
+	GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
 	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
@@ -299,6 +299,12 @@ func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
 func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 	ctx := c.Request.Context()
 
+	mainLayoutId, err := uuid.Parse(ctx.Value("mainLayoutId").(string))
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
 	layoutId, err := uuid.Parse(c.Query("layoutId"))
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
@@ -313,7 +319,7 @@ func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 		return
 	}
 
-	notes, err := h.noteService.GetNotesWithPosition(ctx, userId, req)
+	notes, err := h.noteService.GetNotesWithPosition(ctx, userId, mainLayoutId, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

@@ -4,7 +4,8 @@ create table if not exists notes(
 	payload text,
 	created_at timestamptz,
 	owner_id uuid not null references users(id),
-	have_access uuid[]
+	have_access uuid[],
+	layout_id uuid references layouts(id)
 );
 
 create table if not exists layouts(
@@ -14,20 +15,8 @@ create table if not exists layouts(
 	have_access uuid[]
 );
 
-create table if not exists layout_note(
-	note_id uuid references notes(id),
-	layout_id uuid references layouts(id),
+create table if not exists positions(
+	note_id uuid  primary key references notes(id),
 	x_position DOUBLE PRECISION,
-	y_position DOUBLE precision,
-	primary key (note_id, layout_id)
+	y_position DOUBLE PRECISION
 );
-
-create table if not exists links(
-	id uuid primary key,
-    layout_id uuid references layouts(id),
-	x1_position DOUBLE PRECISION,
-	y1_position DOUBLE precision,
-	x2_position DOUBLE PRECISION,
-	y2_position DOUBLE precision,
-	color varchar
-);  

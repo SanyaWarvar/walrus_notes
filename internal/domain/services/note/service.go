@@ -14,7 +14,6 @@ import (
 )
 
 type noteRepo interface {
-	DeleteLayoutNotes(ctx context.Context, noteId uuid.UUID) error
 	DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error
 	CreateNote(ctx context.Context, item *entity.Note) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, newItem *entity.Note) error
@@ -37,7 +36,6 @@ type linksRepo interface {
 }
 
 type layoutRepo interface {
-	LinkNoteWithLayout(ctx context.Context, noteId, layoutId uuid.UUID) error
 }
 
 type Service struct {
@@ -67,12 +65,8 @@ func NewService(
 
 func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId, mainLayoutId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
-		err := srv.noteRepo.DeleteLayoutNotes(ctx, noteId)
-		if err != nil {
-			return err
-		}
 
-		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
+		err := srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
 		if err != nil {
 			return err
 		}
@@ -95,18 +89,13 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 		CreatedAt:  util.GetCurrentUTCTime(),
 		OwnerId:    ownerId,
 		HaveAccess: []uuid.UUID{ownerId},
+		LayoutId:   layoutId,
 	}
 	id, err := srv.noteRepo.CreateNote(ctx, &n)
 	if err != nil {
 		return uuid.Nil, errors.Wrap(err, "srv.noteRepo.CreateNote")
 	}
-	if layoutId != mainLayoutId {
-		err = srv.layoutRepo.LinkNoteWithLayout(ctx, id, mainLayoutId)
-		if err != nil {
-			return uuid.Nil, errors.Wrap(err, "srv.layoutRepo.LinkNoteWithLayout")
-		}
-	}
-	return id, srv.layoutRepo.LinkNoteWithLayout(ctx, id, layoutId)
+	return id, err
 }
 
 func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error {
@@ -211,4 +200,139 @@ func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 		Event:   "COMMIT_DRAFT_RESPONSE",
 		Payload: []byte("{\"status\": \"true\"}"),
 	}, nil
+}
+
+func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
+	// Группируем заметки по layoutId
+	clusters := map[uuid.UUID][]dto.Note{}
+	for i := range notes {
+		clusters[notes[i].LayoutId] = append(clusters[notes[i].LayoutId], notes[i])
+	}
+
+	var result []dto.Note
+
+	for _, clusterNotes := range clusters {
+		if len(clusterNotes) == 0 {
+			continue
+		}
+
+		// Вычисляем bounding box для кластера
+		minX, minY, maxX, maxY := calculateClusterBounds(clusterNotes)
+
+		// Создаем смещение для этого кластера
+		clusterOffsetX := minX
+		clusterOffsetY := minY
+		clusterWidth := maxX - minX
+		clusterHeight := maxY - minY
+
+		// Нормализуем координаты относительно кластера
+		for i := range clusterNotes {
+			if clusterNotes[i].Position != nil {
+				// Преобразуем глобальные координаты в локальные (0-1 относительно кластера)
+				localX := (clusterNotes[i].Position.XPos - clusterOffsetX) / clusterWidth
+				localY := (clusterNotes[i].Position.YPos - clusterOffsetY) / clusterHeight
+
+				// Обновляем позицию (можно также масштабировать если нужно)
+				clusterNotes[i].Position.XPos = localX
+				clusterNotes[i].Position.YPos = localY
+			}
+
+			result = append(result, clusterNotes[i])
+		}
+	}
+
+	return result
+}
+
+// Альтернативный вариант - расположить кластеры в сетке
+func (srv *Service) GenerateClusterGrid(notes []dto.Note, gridCols int) []dto.Note {
+	clusters := map[uuid.UUID][]dto.Note{}
+	for i := range notes {
+		clusters[notes[i].LayoutId] = append(clusters[notes[i].LayoutId], notes[i])
+	}
+
+	var result []dto.Note
+	clusterIndex := 0
+
+	for _, clusterNotes := range clusters {
+		if len(clusterNotes) == 0 {
+			continue
+		}
+
+		// Вычисляем позицию кластера в сетке
+		row := clusterIndex / gridCols
+		col := clusterIndex % gridCols
+		clusterBaseX := float64(col) * 1000 // смещение по X для кластера
+		clusterBaseY := float64(row) * 1000 // смещение по Y для кластера
+
+		// Вычисляем bounding box для нормализации
+		minX, minY, maxX, maxY := calculateClusterBounds(clusterNotes)
+		clusterWidth := maxX - minX
+		clusterHeight := maxY - minY
+
+		// Нормализуем и смещаем координаты
+		for i := range clusterNotes {
+			if clusterNotes[i].Position != nil {
+				// Нормализуем к диапазону 0-1
+				normalizedX := (clusterNotes[i].Position.XPos - minX) / clusterWidth
+				normalizedY := (clusterNotes[i].Position.YPos - minY) / clusterHeight
+
+				// Масштабируем и смещаем в позицию кластера
+				// (например, каждая ячейка сетки 800x600)
+				clusterNotes[i].Position.XPos = clusterBaseX + normalizedX*800
+				clusterNotes[i].Position.YPos = clusterBaseY + normalizedY*600
+			}
+
+			result = append(result, clusterNotes[i])
+		}
+
+		clusterIndex++
+	}
+
+	return result
+}
+
+func calculateClusterBounds(notes []dto.Note) (minX, minY, maxX, maxY float64) {
+	if len(notes) == 0 {
+		return 0, 0, 0, 0
+	}
+
+	// Инициализируем первыми валидными координатами
+	for _, note := range notes {
+		if note.Position != nil {
+			minX = note.Position.XPos
+			minY = note.Position.YPos
+			maxX = note.Position.XPos
+			maxY = note.Position.YPos
+			break
+		}
+	}
+
+	// Находим границы кластера
+	for _, note := range notes {
+		if note.Position != nil {
+			if note.Position.XPos < minX {
+				minX = note.Position.XPos
+			}
+			if note.Position.YPos < minY {
+				minY = note.Position.YPos
+			}
+			if note.Position.XPos > maxX {
+				maxX = note.Position.XPos
+			}
+			if note.Position.YPos > maxY {
+				maxY = note.Position.YPos
+			}
+		}
+	}
+
+	// Защита от вырожденного случая (все точки в одном месте)
+	if maxX == minX {
+		maxX = minX + 1
+	}
+	if maxY == minY {
+		maxY = minY + 1
+	}
+
+	return minX, minY, maxX, maxY
 }

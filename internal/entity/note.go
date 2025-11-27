@@ -14,6 +14,7 @@ type Note struct {
 	OwnerId    uuid.UUID   `json:"ownerId" db:"owner_id"`
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
 	Draft      string      `json:"draft" db:"draft"`
+	LayoutId   uuid.UUID   `json:"layoutId"`
 }
 
 func (n Note) GetId() uuid.UUID {
@@ -31,7 +32,6 @@ func (n NoteWithPosition) GetId() uuid.UUID {
 
 type NotePosition struct {
 	NoteId    uuid.UUID `json:"noteId" db:"note_id"`
-	LayoutId  uuid.UUID `json:"layoutId" db:"layout_id"`
 	XPosition float64   `json:"xPosition" db:"x_position"`
 	YPosition float64   `json:"yPosition" db:"y_position"`
 }

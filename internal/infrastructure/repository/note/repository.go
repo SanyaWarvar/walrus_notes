@@ -64,15 +64,6 @@ func (repo *Repository) DeleteNoteById(ctx context.Context, noteId, userId uuid.
 	return nil
 }
 
-func (repo *Repository) DeleteLayoutNotes(ctx context.Context, noteId uuid.UUID) error {
-	query := `
-		DELETE FROM layout_note 
-		WHERE note_id = $1
-	`
-	_, err := repo.conn.Exec(ctx, query, noteId)
-	return err
-}
-
 func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) error {
 	query := `
 		UPDATE notes
@@ -93,7 +84,7 @@ func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) er
 
 func (repo *Repository) GetNoteCountInLayout(ctx context.Context, layoutId uuid.UUID) (int, error) {
 	query := `
-		select count(*) from layout_note where layout_id = $1
+		select count(*) from notes where layout_id = $1
 	`
 	var n int
 	err := repo.conn.QueryRow(ctx, query, layoutId).Scan(&n)
@@ -124,8 +115,7 @@ func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUI
 func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		join layout_note ln on ln.note_id = n.id
-		where ln.layout_id = $1 and $2 = ANY(n.have_access)
+		where n.layout_id = $1 and $2 = ANY(n.have_access)
 		order by created_at desc, layout_id 
 		offset $3
 		limit $4
@@ -147,6 +137,7 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 			&item.OwnerId,
 			&item.HaveAccess,
 			&item.Draft,
+			&item.LayoutId,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -160,34 +151,11 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 	return notes, nil
 }
 
-func (repo *Repository) DeleteLayoutNote(ctx context.Context, layoutId uuid.UUID, userId uuid.UUID) error {
-	query := `
-		delete from layout_note ln
-		where ln.layout_id = $1 and $2 = ANY(
-			select unnest(have_access) from layouts l where l.id = $1
-		)
-	`
-	_, err := repo.conn.Exec(ctx, query, layoutId, userId)
-	return err
-}
-
-func (repo *Repository) DeleteNoteWithoutLayout(ctx context.Context, userId uuid.UUID) error {
-	query := `
-	DELETE FROM notes n 
-	WHERE NOT EXISTS (
-		SELECT 1 FROM layout_note ln 
-		WHERE ln.note_id = n.id
-	) and $1 = any(n.have_access);
-	`
-	_, err := repo.conn.Exec(ctx, query, userId)
-	return err
-}
-
 func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		join layout_note ln on ln.note_id = n.id
-		where ln.layout_id = $1 and $2 = ANY(n.have_access) and x_position is null and y_position is null
+		join positions p on p.note_id = n.id
+		where n.layout_id = $1 and $2 = ANY(n.have_access) and x_position is null and y_position is null
 	`
 	rows, err := repo.conn.Query(ctx, query, layoutId, userId)
 	if err != nil {
@@ -206,6 +174,7 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 			&item.OwnerId,
 			&item.HaveAccess,
 			&item.Draft,
+			&item.LayoutId,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -221,9 +190,9 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 
 func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error) {
 	query := `
-		select n.*, ln.note_id, ln.layout_id, ln.x_position, ln.y_position from notes n
-		join layout_note ln on ln.note_id = n.id
-		where ln.layout_id = $1 and $2 = ANY(n.have_access) and x_position is not null and y_position is not null
+		select n.*, p.note_id, p.x_position, p.y_position from notes n
+		join positions p on p.note_id = n.id
+		where n.layout_id = $1 and $2 = ANY(n.have_access) and x_position is not null and y_position is not null
 	`
 	rows, err := repo.conn.Query(ctx, query, layoutId, userId)
 	if err != nil {
@@ -242,8 +211,8 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 			&item.OwnerId,
 			&item.HaveAccess,
 			&item.Draft,
-			&item.NoteId,
 			&item.LayoutId,
+			&item.NoteId,
 			&item.XPosition,
 			&item.YPosition,
 		)
@@ -261,11 +230,11 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 
 func (repo *Repository) UpdateNotePosition(ctx context.Context, layoutId, noteId uuid.UUID, xPos, yPos *float64) error {
 	query := `
-		update layout_note ln
+		update positions p
 		set x_position = $1, y_position = $2
-		where ln.layout_id = $3 and ln.note_id = $4
+		where p.note_id = $3
 	`
-	_, err := repo.conn.Exec(ctx, query, xPos, yPos, layoutId, noteId)
+	_, err := repo.conn.Exec(ctx, query, xPos, yPos, noteId)
 	return err
 }
 
@@ -340,7 +309,6 @@ func (repo *Repository) GetAllLinks(ctx context.Context, layoutId uuid.UUID, not
 func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		join layout_note ln on ln.note_id = n.id
 		where $1 = ANY(n.have_access) 
 			AND (n.title ilike '%' || $2 || '%' or n.payload ilike '%' || $2 || '%')
 	`
@@ -361,6 +329,7 @@ func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, searc
 			&item.OwnerId,
 			&item.HaveAccess,
 			&item.Draft,
+			&item.LayoutId,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")

@@ -15,6 +15,7 @@ type Note struct {
 	Position   *Position   `json:"position,omitempty"`
 	LinkedWith []uuid.UUID `json:"linkedWith,omitempty"`
 	Draft      string      `json:"draft"`
+	LayoutId   uuid.UUID   `json:"layoutId"`
 }
 
 func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {

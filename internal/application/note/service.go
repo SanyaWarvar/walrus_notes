@@ -21,6 +21,7 @@ type noteService interface {
 	CreateLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error
 	DeleteLink(ctx context.Context, layoutId, noteId1, noteId2 uuid.UUID) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
+	GenerateCluster(notes []dto.Note) []dto.Note
 }
 
 type Service struct {
@@ -58,8 +59,15 @@ func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFrom
 	return srv.noteService.GetNotesWithPagination(ctx, req.Page, req.LayoutId, userId)
 }
 
-func (srv *Service) GetNotesWithPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
-	return srv.noteService.GetNotesWithPosition(ctx, req.LayoutId, userId)
+func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
+	notes, err := srv.noteService.GetNotesWithPosition(ctx, req.LayoutId, userId)
+	if err != nil {
+		return nil, err
+	}
+	if mainLayoutId == req.LayoutId {
+		return srv.noteService.GenerateCluster(notes), nil
+	}
+	return notes, err
 }
 
 func (srv *Service) GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {

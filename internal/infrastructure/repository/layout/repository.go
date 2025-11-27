@@ -84,12 +84,3 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 
 	return layouts, nil
 }
-
-func (repo *Repository) LinkNoteWithLayout(ctx context.Context, noteId, layoutId uuid.UUID) error {
-	query := `
-		INSERT INTO layout_note VALUES
-		($1, $2, $3, $4)
-	`
-	_, err := repo.conn.Exec(ctx, query, noteId, layoutId, nil, nil)
-	return err
-}
