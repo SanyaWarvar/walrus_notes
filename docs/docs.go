@@ -624,6 +624,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/wn/api/v1/layout/update": {
+            "post": {
+                "description": "обновить информацию о layout",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "layouts"
+                ],
+                "summary": "update layout",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.UpdateLayout"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/notes/create": {
             "post": {
                 "description": "Создать заметку",
@@ -1409,6 +1460,9 @@ const docTemplate = `{
         "wn_internal_domain_dto.Layout": {
             "type": "object",
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1556,9 +1610,13 @@ const docTemplate = `{
         "wn_internal_domain_dto_request.NewLayoutRequest": {
             "type": "object",
             "required": [
+                "color",
                 "title"
             ],
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -1621,6 +1679,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.UpdateLayout": {
+            "type": "object",
+            "required": [
+                "layoutId"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "layoutId": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }

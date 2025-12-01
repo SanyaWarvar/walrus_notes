@@ -42,6 +42,7 @@ type Layout struct {
 	OwnerId    uuid.UUID   `json:"ownerId" db:"owner_id"`
 	HaveAccess []uuid.UUID `json:"haveAccess" db:"have_access"`
 	IsMain     bool        `json:"isMain"`
+	Color      string      `json:"color"`
 }
 
 type Link struct {

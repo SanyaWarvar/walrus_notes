@@ -3,7 +3,9 @@ package layout
 import (
 	"context"
 	"wn/internal/domain/dto"
+	"wn/internal/domain/dto/request"
 	"wn/internal/entity"
+	apperrors "wn/internal/errors"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 	"wn/pkg/util"
@@ -16,6 +18,7 @@ type layoutRepo interface {
 	CreateLayout(ctx context.Context, item *entity.Layout) (uuid.UUID, error)
 	DeleteLayoutById(ctx context.Context, layoutId, userId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]entity.Layout, error)
+	UpdateLayout(ctx context.Context, userId, layoutId uuid.UUID, color, title string) (int, error)
 }
 
 type linksRepo interface {
@@ -53,13 +56,14 @@ func NewService(
 	}
 }
 
-func (srv *Service) CreateLayout(ctx context.Context, title string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error) {
+func (srv *Service) CreateLayout(ctx context.Context, title, color string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error) {
 	item := entity.Layout{
 		Id:         util.NewUUID(),
 		Title:      title,
 		OwnerId:    ownerId,
 		HaveAccess: []uuid.UUID{ownerId},
 		IsMain:     isMain,
+		Color:      color,
 	}
 	return srv.layoutRepo.CreateLayout(ctx, &item)
 }
@@ -94,8 +98,20 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 			OwnerId: item.OwnerId,
 			Title:   item.Title,
 			IsMain:  item.IsMain,
+			Color:   item.Color,
 		})
 	}
 
 	return output, nil
+}
+
+func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
+	updatedRows, err := srv.layoutRepo.UpdateLayout(ctx, userId, req.LayoutId, req.Color, req.Title)
+	if err != nil {
+		return errors.Wrap(err, "srv.layoutRepo.UpdateLayout")
+	}
+	if updatedRows < 1 {
+		return apperrors.LayoutNotFound
+	}
+	return nil
 }

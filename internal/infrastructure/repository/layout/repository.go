@@ -7,6 +7,7 @@ import (
 	"wn/internal/infrastructure/repository/common"
 	"wn/pkg/database/postgres"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
@@ -22,11 +23,11 @@ func NewRepository(conn postgres.Connection) *Repository {
 func (repo *Repository) CreateLayout(ctx context.Context, item *entity.Layout) (uuid.UUID, error) {
 	query := `
 		INSERT INTO layouts VALUES
-		($1, $2, $3, $4, $5)
+		($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
 	var id uuid.UUID
-	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.OwnerId, item.HaveAccess, item.IsMain).Scan(&id)
+	err := repo.conn.QueryRow(ctx, query, item.Id, item.Title, item.OwnerId, item.HaveAccess, item.IsMain, item.Color).Scan(&id)
 	if err != nil {
 		if common.IsUniqueErr(err) {
 			return id, apperrors.NotUnique
@@ -71,6 +72,7 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 			&layout.OwnerId,
 			&layout.HaveAccess,
 			&layout.IsMain,
+			&layout.Color,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
@@ -83,4 +85,28 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 	}
 
 	return layouts, nil
+}
+
+func (repo *Repository) UpdateLayout(ctx context.Context, userId, layoutId uuid.UUID, color, title string) (int, error) {
+	builder := squirrel.Update("layouts ").
+		Where(squirrel.Eq{"id": layoutId}).
+		Where("? = ANY(have_access)", userId).
+		PlaceholderFormat(squirrel.Dollar)
+
+	if color != "" {
+		builder = builder.Set("color", color)
+	}
+	if title != "" {
+		builder = builder.Set("title", title)
+	}
+
+	sql, args, err := builder.ToSql()
+	if err != nil {
+		return 0, errors.Wrap(err, "builder.ToSql")
+	}
+	res, err := repo.conn.Exec(ctx, sql, args...)
+	if err != nil {
+		return 0, errors.Wrap(err, "repo.conn.Exec")
+	}
+	return int(res.RowsAffected()), nil
 }

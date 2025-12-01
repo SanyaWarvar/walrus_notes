@@ -36,6 +36,8 @@ definitions:
     - Hour
   wn_internal_domain_dto.Layout:
     properties:
+      color:
+        type: string
       id:
         type: string
       isMain:
@@ -132,9 +134,12 @@ definitions:
     type: object
   wn_internal_domain_dto_request.NewLayoutRequest:
     properties:
+      color:
+        type: string
       title:
         type: string
     required:
+    - color
     - title
     type: object
   wn_internal_domain_dto_request.NoteId:
@@ -176,6 +181,17 @@ definitions:
     - email
     - password
     - username
+    type: object
+  wn_internal_domain_dto_request.UpdateLayout:
+    properties:
+      color:
+        type: string
+      layoutId:
+        type: string
+      title:
+        type: string
+    required:
+    - layoutId
     type: object
   wn_internal_domain_dto_request.UpdateNotePositionRequest:
     properties:
@@ -667,6 +683,40 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: get_my_layouts
+      tags:
+      - layouts
+  /wn/api/v1/layout/update:
+    post:
+      description: обновить информацию о layout
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.UpdateLayout'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: update layout
       tags:
       - layouts
   /wn/api/v1/notes/create:

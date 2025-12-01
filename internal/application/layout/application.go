@@ -11,9 +11,10 @@ import (
 )
 
 type layoutService interface {
-	CreateLayout(ctx context.Context, title string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error)
+	CreateLayout(ctx context.Context, title, color string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error)
 	DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
+	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
 }
 
 type Service struct {
@@ -36,7 +37,7 @@ func NewService(
 }
 
 func (srv *Service) CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error) {
-	return srv.layoutService.CreateLayout(ctx, req.Title, userId, false)
+	return srv.layoutService.CreateLayout(ctx, req.Title, req.Color, userId, false)
 }
 
 func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error) {
@@ -45,4 +46,8 @@ func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([
 
 func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error {
 	return srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
+}
+
+func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
+	return srv.layoutService.UpdateLayout(ctx, req, userId)
 }

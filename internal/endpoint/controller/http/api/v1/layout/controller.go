@@ -20,6 +20,7 @@ type layoutService interface {
 	CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error)
 	DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error
 	GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
+	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
 }
 
 type Controller struct {
@@ -45,6 +46,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/create", h.createLayout)
 		notesAuth.GET("/my", h.getMyLayouts)
 		notesAuth.POST("/delete", h.deleteLayout)
+		notesAuth.POST("/update", h.updateLayout)
 	}
 }
 
@@ -151,6 +153,42 @@ func (h *Controller) deleteLayout(c *gin.Context) {
 	}
 
 	err = h.layoutService.DeleteLayout(ctx, req, userId)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
+}
+
+// @Summary update layout
+// @Description обновить информацию о layout
+// @Tags layouts
+// @Produce json
+// @Param data body request.UpdateLayout true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/layout/update [post]
+func (h *Controller) updateLayout(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req request.UpdateLayout
+	err := c.ShouldBind(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.layoutService.UpdateLayout(ctx, req, userId)
 	if err != nil {
 		_ = c.Error(err)
 		return

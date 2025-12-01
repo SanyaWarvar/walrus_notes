@@ -74,6 +74,15 @@ type NoteId struct {
 // @Schema
 type NewLayoutRequest struct {
 	Title string `json:"title" binding:"required"`
+	Color string `json:"color" binding:"required"`
+}
+
+// UpdateLayout
+// @Schema
+type UpdateLayout struct {
+	LayoutId uuid.UUID `json:"layoutId" binding:"required"`
+	Title    string    `json:"title"`
+	Color    string    `json:"color"`
 }
 
 // LayoutIdRequest
