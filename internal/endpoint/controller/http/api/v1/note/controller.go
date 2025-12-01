@@ -202,7 +202,7 @@ func (h *Controller) updateNote(c *gin.Context) {
 // @Param layoutId query string true "layoutId"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_query, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: note_not_found"
@@ -256,7 +256,7 @@ func (h *Controller) getNotesFromLayout(c *gin.Context) {
 // @Param layoutId query string true "layoutId"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Router /wn/api/v1/notes/layout/graph/unposed [get]
@@ -292,7 +292,7 @@ func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
 // @Param layoutId query string true "layoutId"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Router /wn/api/v1/notes/layout/graph/posed [get]
@@ -440,7 +440,7 @@ func (h *Controller) deleteLinkBetweenNotes(c *gin.Context) {
 // @Param search query string true "search"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Router /wn/api/v1/notes/search [post]

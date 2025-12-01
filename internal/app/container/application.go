@@ -2,6 +2,7 @@ package container
 
 import (
 	"wn/internal/application/auth"
+	"wn/internal/application/file"
 	"wn/internal/application/layout"
 	"wn/internal/application/note"
 	userApp "wn/internal/application/user"
@@ -21,6 +22,7 @@ type applications struct {
 	auth   *auth.Service
 	note   *note.Service
 	layout *layout.Service
+	file   *file.Service
 }
 
 func (s *applications) getUserApplicationService() *userApp.Service {
@@ -74,4 +76,16 @@ func (s *applications) getLayoutApplicationService() *layout.Service {
 		)
 	}
 	return s.layout
+}
+
+func (s *applications) getFileApplciationService() *file.Service {
+	if s.file == nil {
+		s.file = file.NewService(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+
+			s.c.getServices().getFileService(),
+		)
+	}
+	return s.file
 }

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"wn/internal/endpoint/controller/http/api/v1/auth"
+	"wn/internal/endpoint/controller/http/api/v1/file"
 	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
 	"wn/internal/endpoint/controller/http/api/v1/socket"
@@ -18,6 +19,7 @@ type Dispatcher struct {
 	note    *note.Controller
 	layout  *layout.Controller
 	sockets *socket.Controller
+	file    *file.Controller
 }
 
 func NewDispatcher(
@@ -28,6 +30,7 @@ func NewDispatcher(
 	note *note.Controller,
 	layout *layout.Controller,
 	sockets *socket.Controller,
+	file *file.Controller,
 ) *Dispatcher {
 	return &Dispatcher{
 		apiPath: apiPath,
@@ -36,6 +39,7 @@ func NewDispatcher(
 		note:    note,
 		layout:  layout,
 		sockets: sockets,
+		file:    file,
 	}
 }
 
@@ -49,6 +53,7 @@ func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc
 			d.note.Init(api, authorizedGroup)
 			d.layout.Init(api, authorizedGroup)
 			d.sockets.ConnectionController(ws)
+			d.file.Init(api, authorizedGroup)
 		}
 	}
 }

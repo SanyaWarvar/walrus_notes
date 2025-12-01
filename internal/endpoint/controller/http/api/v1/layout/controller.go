@@ -92,7 +92,7 @@ func (h *Controller) createLayout(c *gin.Context) {
 // @Param data body request.NoteId true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{}
+// @Success 200 {object} response.Response{data=[]dto.Layout}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Router /wn/api/v1/layout/my [get]

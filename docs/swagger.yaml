@@ -34,6 +34,54 @@ definitions:
     - Second
     - Minute
     - Hour
+  wn_internal_domain_dto.Layout:
+    properties:
+      id:
+        type: string
+      isMain:
+        type: boolean
+      ownerId:
+        type: string
+      title:
+        type: string
+    type: object
+  wn_internal_domain_dto.Note:
+    properties:
+      draft:
+        type: string
+      haveAccess:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      layoutId:
+        type: string
+      linkedWith:
+        items:
+          type: string
+        type: array
+      ownerId:
+        type: string
+      payload:
+        type: string
+      position:
+        $ref: '#/definitions/wn_internal_domain_dto.Position'
+      title:
+        type: string
+    type: object
+  wn_internal_domain_dto.Position:
+    properties:
+      xPos:
+        type: number
+      yPos:
+        type: number
+    type: object
+  wn_internal_domain_dto.UploadFileResponse:
+    properties:
+      imgUrl:
+        type: string
+    type: object
   wn_internal_domain_dto_request.ChangeProfilePicture:
     properties:
       file:
@@ -142,6 +190,13 @@ definitions:
     required:
     - layoutId
     - noteId
+    type: object
+  wn_internal_domain_dto_request.UploadFileRequest:
+    properties:
+      file:
+        $ref: '#/definitions/multipart.FileHeader'
+    required:
+    - file
     type: object
   wn_internal_domain_dto_response.ChangePictureResponse:
     properties:
@@ -461,6 +516,45 @@ paths:
       summary: register_user
       tags:
       - auth
+  /wn/api/v1/file/upload:
+    post:
+      description: загрузить файл
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.UploadFileRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.UploadFileResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: upload_file
+      tags:
+      - file
   /wn/api/v1/layout/create:
     post:
       description: Создать новый layout
@@ -560,7 +654,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/wn_internal_domain_dto.Layout'
+                  type: array
+              type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
           schema:
@@ -679,7 +780,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/wn_internal_domain_dto.Note'
+                  type: array
+              type: object
         "400":
           description: 'possible codes: bind_query, invalid_X-Request-Id'
           schema:
@@ -750,7 +858,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/wn_internal_domain_dto.Note'
+                  type: array
+              type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
           schema:
@@ -783,7 +898,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/wn_internal_domain_dto.Note'
+                  type: array
+              type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
           schema:
@@ -884,7 +1006,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/wn_internal_domain_dto.Note'
+                  type: array
+              type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
           schema:

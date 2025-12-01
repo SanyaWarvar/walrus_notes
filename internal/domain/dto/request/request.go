@@ -42,12 +42,18 @@ type ChangeProfilePicture struct {
 	UserId uuid.UUID
 }
 
+// UploadFileRequest
+// @Schema
+type UploadFileRequest struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
+}
+
 // NoteRequest
 // @Schema
 type NoteRequest struct {
 	Title    string    `json:"title"`
 	Payload  string    `json:"payload"`
-	LayoutId uuid.UUID `json;"layoutId"`
+	LayoutId uuid.UUID `json:"layoutId"`
 }
 
 // NoteWithIdRequest
