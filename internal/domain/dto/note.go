@@ -74,6 +74,6 @@ type Layout struct {
 }
 
 type Position struct {
-	XPos float64 `json:"xPos,omitempty"`
-	YPos float64 `json:"yPos,omitempty"`
+	XPos float64 `json:"xPos"`
+	YPos float64 `json:"yPos"`
 }
