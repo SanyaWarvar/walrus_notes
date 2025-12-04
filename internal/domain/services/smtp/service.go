@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"net/smtp"
+	"time"
 	"wn/internal/domain/dto/auth"
 	"wn/internal/domain/enum"
 	apperrors "wn/internal/errors"
 	"wn/pkg/applogger"
 	"wn/pkg/util"
-	"time"
+
+	"github.com/resend/resend-go/v3"
 )
 
 type Config struct {
@@ -21,6 +22,7 @@ type Config struct {
 	CodeLenght    int
 	CodeExp       time.Duration
 	MinTTL        time.Duration
+	ApiKey        string
 }
 
 func NewConfig(ownerEmail, ownerPassword, addres string, codeLenght int, codeExp, minTTL time.Duration) *Config {
@@ -40,13 +42,17 @@ type Service struct {
 
 	cacheRepo cacheRepo
 	cfg       *Config
+	resend    *resend.Client
 }
 
 func NewService(lgr applogger.Logger, cfg *Config, cacheRepo cacheRepo) *Service {
+	client := resend.NewClient(cfg.ApiKey)
+
 	return &Service{
 		logger:    lgr,
 		cfg:       cfg,
 		cacheRepo: cacheRepo,
+		resend:    client,
 	}
 }
 
@@ -67,14 +73,23 @@ func (srv *Service) SendMessage(email, messageText, title string) error {
 	toEmail := email
 	fromEmail := srv.cfg.OwnerEmail
 
-	subject_body := fmt.Sprintf("Subject:%s\n\n %s", title, messageText)
-	status := smtp.SendMail(
-		srv.cfg.Address,
-		smtp.PlainAuth("", fromEmail, srv.cfg.OwnerPassword, "smtp.gmail.com"),
-		fromEmail,
-		[]string{toEmail},
-		[]byte(subject_body),
-	)
+	params := &resend.SendEmailRequest{
+		From:    fromEmail,
+		To:      []string{toEmail},
+		Subject: title,
+		Html:    messageText,
+	}
+
+	_, status := srv.resend.Emails.Send(params)
+	/*
+		subject_body := fmt.Sprintf("Subject:%s\n\n %s", title, messageText)
+		status := smtp.SendMail(
+			srv.cfg.Address,
+			smtp.PlainAuth("", fromEmail, srv.cfg.OwnerPassword, "smtp.gmail.com"),
+			fromEmail,
+			[]string{toEmail},
+			[]byte(subject_body),
+		)*/
 
 	return status
 }

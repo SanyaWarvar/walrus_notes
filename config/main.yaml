@@ -37,7 +37,7 @@ response:
   exportError: true
 
 email:
-  ownerEmail: "templeapi88@gmail.com"
+  ownerEmail: "onboarding@resend.dev"
   addres: "smtp.gmail.com:587"
   codeLenght: 6
   codeExp: "5m"

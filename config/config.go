@@ -85,6 +85,7 @@ type (
 		CodeLenght    int           `yaml:"codeLenght"`
 		CodeExp       time.Duration `yaml:"codeExp"`
 		MinTTL        time.Duration `yaml:"minTTL"`
+		ApiKey        string        `env:"SMTP_API_KEY"`
 	}
 )
 
