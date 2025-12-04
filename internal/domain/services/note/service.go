@@ -360,7 +360,7 @@ func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
 	for _, cluster := range clusterInfos {
 		// Если не влезает в текущую строку, переходим на новую
 		if clustersInCurrentRow >= gridCols {
-			currentX = 0
+			currentX = 1
 			currentY += maxHeightInCurrentRow + clusterSpacing
 			maxHeightInCurrentRow = 0
 			clustersInCurrentRow = 0
