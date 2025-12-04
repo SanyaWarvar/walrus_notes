@@ -31,6 +31,7 @@ type noteRepo interface {
 type positionsRepo interface {
 	CreateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
+	DeleteNotesPositionByNoteId(ctx context.Context, noteId uuid.UUID) error
 }
 
 type linksRepo interface {
@@ -77,7 +78,11 @@ func (srv *Service) DeleteLink(ctx context.Context, noteId1, noteId2 uuid.UUID) 
 
 func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
-		err := srv.linksRepo.DeleteLinksWithNote(ctx, noteId)
+		err := srv.positionsRepo.DeleteNotesPositionByNoteId(ctx, noteId)
+		if err != nil {
+			return err
+		}
+		err = srv.linksRepo.DeleteLinksWithNote(ctx, noteId)
 		if err != nil {
 			return err
 		}
@@ -89,7 +94,6 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID
 	})
 }
 
-// todo trx
 func (srv *Service) CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error) {
 	n := entity.Note{
 		Id:         util.NewUUID(),

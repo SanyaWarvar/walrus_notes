@@ -33,3 +33,23 @@ func (repo *Repository) UpdateNotePosition(ctx context.Context, noteId uuid.UUID
 	_, err := repo.conn.Exec(ctx, query, xPos, yPos, noteId)
 	return err
 }
+
+func (repo *Repository) DeleteNotesPositionsByLayoutId(ctx context.Context, layoutId uuid.UUID) error {
+	query := `
+		delete from positions p
+		where p.note_id = any(
+			select id from notes n where n.layout_id = $1
+		)
+	`
+	_, err := repo.conn.Exec(ctx, query, layoutId)
+	return err
+}
+
+func (repo *Repository) DeleteNotesPositionByNoteId(ctx context.Context, noteId uuid.UUID) error {
+	query := `
+		delete from positions p
+		where p.note_id = $1
+	`
+	_, err := repo.conn.Exec(ctx, query, noteId)
+	return err
+}

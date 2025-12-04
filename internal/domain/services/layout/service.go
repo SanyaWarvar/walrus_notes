@@ -31,13 +31,18 @@ type noteRepo interface {
 	DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error
 }
 
+type positionsRepo interface {
+	DeleteNotesPositionsByLayoutId(ctx context.Context, layoutId uuid.UUID) error
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	layoutRepo layoutRepo
-	linksRepo  linksRepo
-	noteRepo   noteRepo
+	layoutRepo    layoutRepo
+	linksRepo     linksRepo
+	noteRepo      noteRepo
+	positionsRepo positionsRepo
 }
 
 func NewService(
@@ -46,13 +51,15 @@ func NewService(
 	layoutRepo layoutRepo,
 	linksRepo linksRepo,
 	noteRepo noteRepo,
+	positionsRepo positionsRepo,
 ) *Service {
 	return &Service{
-		tx:         tx,
-		logger:     logger,
-		layoutRepo: layoutRepo,
-		linksRepo:  linksRepo,
-		noteRepo:   noteRepo,
+		tx:            tx,
+		logger:        logger,
+		layoutRepo:    layoutRepo,
+		linksRepo:     linksRepo,
+		noteRepo:      noteRepo,
+		positionsRepo: positionsRepo,
 	}
 }
 
@@ -71,7 +78,12 @@ func (srv *Service) CreateLayout(ctx context.Context, title, color string, owner
 func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 
-		err := srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId, ownerId)
+		err := srv.positionsRepo.DeleteNotesPositionsByLayoutId(ctx, layoutId)
+		if err != nil {
+			return errors.Wrap(err, "srv.layoutRepo.DeleteLayoutById")
+		}
+
+		err = srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId, ownerId)
 		if err != nil {
 			return errors.Wrap(err, "srv.linksRepo.DeleteLinksFromLayout")
 		}

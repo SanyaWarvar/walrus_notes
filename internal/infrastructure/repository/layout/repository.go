@@ -46,7 +46,7 @@ func (repo *Repository) DeleteLayoutById(ctx context.Context, layoutId, userId u
 		return err
 	}
 	if res.RowsAffected() == 0 {
-		return apperrors.NoteNotFound
+		return apperrors.LayoutNotFound
 	}
 	return nil
 }
