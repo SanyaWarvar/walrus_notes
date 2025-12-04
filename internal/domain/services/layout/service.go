@@ -23,6 +23,7 @@ type layoutRepo interface {
 
 type linksRepo interface {
 	DeleteLinksWithNote(ctx context.Context, noteId uuid.UUID) error
+	DeleteLinksByLayoutId(ctx context.Context, layoutId uuid.UUID) error
 	LinkNotes(ctx context.Context, firstNoteId, secondNoteId uuid.UUID) error
 	GetAllLinks(ctx context.Context, noteIds []uuid.UUID) ([]entity.Link, error)
 }
@@ -80,12 +81,17 @@ func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid
 
 		err := srv.positionsRepo.DeleteNotesPositionsByLayoutId(ctx, layoutId)
 		if err != nil {
-			return errors.Wrap(err, "srv.layoutRepo.DeleteLayoutById")
+			return errors.Wrap(err, "srv.positionsRepo.DeleteNotesPositionsByLayoutId")
+		}
+
+		err = srv.linksRepo.DeleteLinksByLayoutId(ctx, layoutId)
+		if err != nil {
+			return errors.Wrap(err, "srv.linksRepo.DeleteLinksByLayoutId")
 		}
 
 		err = srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId, ownerId)
 		if err != nil {
-			return errors.Wrap(err, "srv.linksRepo.DeleteLinksFromLayout")
+			return errors.Wrap(err, "srv.noteRepo.DeleteNotesByLayoutId")
 		}
 
 		err = srv.layoutRepo.DeleteLayoutById(ctx, layoutId, ownerId)

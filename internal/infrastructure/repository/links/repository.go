@@ -35,6 +35,19 @@ func (repo *Repository) DeleteLinksWithNote(ctx context.Context, noteId uuid.UUI
 	return err
 }
 
+func (repo *Repository) DeleteLinksByLayoutId(ctx context.Context, layoutId uuid.UUID) error {
+	query := `
+		delete from links
+		where first_note_id = any(
+			select id from notes n where n.layout_id = $1
+		) or second_note_id = any(
+			select id from notes n where n.layout_id = $1
+		)
+	`
+	_, err := repo.conn.Exec(ctx, query, layoutId)
+	return err
+}
+
 func (repo *Repository) GetAllLinks(ctx context.Context, noteIds []uuid.UUID) ([]entity.Link, error) {
 	query := `
 		select first_note_id, second_note_id
