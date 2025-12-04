@@ -222,65 +222,242 @@ func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 	}, nil
 }
 
-func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
+func GenerateCluster(notes []dto.Note) []dto.Note {
 	if len(notes) == 0 {
 		return notes
 	}
 
-	// Группируем заметки по layoutId
-	layoutGroups := make(map[uuid.UUID][]dto.Note)
+	// 1. Группируем заметки по layoutId
+	clusters := make(map[uuid.UUID][]dto.Note)
 	for _, note := range notes {
-		layoutGroups[note.LayoutId] = append(layoutGroups[note.LayoutId], note)
+		clusters[note.LayoutId] = append(clusters[note.LayoutId], note)
 	}
 
-	// Параметры кластеризации
-	clusterSpacing := 100.0 // расстояние между кластерами
-	gridSpacing := 20.0     // расстояние между заметками внутри кластера
-	notesPerRow := 5        // максимальное количество заметок в строке кластера
+	// 2. Для каждого кластера вычисляем его границы и смещаем координаты
+	clusterBounds := make(map[uuid.UUID]struct {
+		minX, maxX, minY, maxY float64
+		notes                  []dto.Note
+	})
 
-	// Обрабатываем каждый кластер
-	clusterX := 0.0
-	result := make([]dto.Note, 0, len(notes))
-
-	for _, groupNotes := range layoutGroups {
-		// Сортируем заметки внутри кластера для детерминированного позиционирования
-		sort.Slice(groupNotes, func(i, j int) bool {
-			return groupNotes[i].Id.String() < groupNotes[j].Id.String()
-		})
-
-		// Позиционируем заметки внутри кластера
-		for i, note := range groupNotes {
-			// Если у заметки уже есть позиция, используем её (относительно кластера)
-			if note.Position != nil {
-				note.Position.XPos += clusterX
-				result = append(result, note)
-				continue
-			}
-
-			// Автоматическое позиционирование внутри кластера
-			row := i / notesPerRow
-			col := i % notesPerRow
-
-			xPos := clusterX + float64(col)*gridSpacing
-			yPos := float64(row) * gridSpacing
-
-			// Создаем новую позицию
-			note.Position = &dto.Position{
-				XPos: xPos,
-				YPos: yPos,
-			}
-			result = append(result, note)
+	// Сначала находим границы каждого кластера
+	for layoutId, clusterNotes := range clusters {
+		if len(clusterNotes) == 0 {
+			continue
 		}
 
-		// Сдвигаем следующий кластер вправо
-		maxNotesInCluster := len(groupNotes)
-		clusterWidth := math.Min(float64(notesPerRow), float64(maxNotesInCluster)) * gridSpacing
-		clusterX += clusterWidth + clusterSpacing
+		var minX, maxX, minY, maxY float64
+		firstNoteWithPosition := false
+
+		for i, note := range clusterNotes {
+			if note.Position != nil {
+				if !firstNoteWithPosition {
+					minX = note.Position.XPos
+					maxX = note.Position.XPos
+					minY = note.Position.YPos
+					maxY = note.Position.YPos
+					firstNoteWithPosition = true
+				} else {
+					minX = math.Min(minX, note.Position.XPos)
+					maxX = math.Max(maxX, note.Position.XPos)
+					minY = math.Min(minY, note.Position.YPos)
+					maxY = math.Max(maxY, note.Position.YPos)
+				}
+			}
+			// Создаем копию заметки для модификации
+			clusterNotes[i] = note
+		}
+
+		// Если нет заметок с позициями, устанавливаем дефолтные границы
+		if !firstNoteWithPosition {
+			minX, maxX, minY, maxY = 0, 100, 0, 100
+		}
+
+		clusterBounds[layoutId] = struct {
+			minX, maxX, minY, maxY float64
+			notes                  []dto.Note
+		}{
+			minX:  minX,
+			maxX:  maxX,
+			minY:  minY,
+			maxY:  maxY,
+			notes: clusterNotes,
+		}
 	}
 
-	return result
+	// 3. Определяем размер сетки для кластеров
+	clusterCount := len(clusterBounds)
+	gridCols := int(math.Ceil(math.Sqrt(float64(clusterCount))))
+	_ = int(math.Ceil(float64(clusterCount) / float64(gridCols)))
+
+	// 4. Вычисляем размеры каждого кластера
+	clusterWidths := make([]float64, 0, clusterCount)
+	clusterHeights := make([]float64, 0, clusterCount)
+	clusterLayoutIds := make([]uuid.UUID, 0, clusterCount)
+
+	for layoutId, bounds := range clusterBounds {
+		clusterLayoutIds = append(clusterLayoutIds, layoutId)
+		width := bounds.maxX - bounds.minX
+		height := bounds.maxY - bounds.minY
+
+		// Минимальные размеры для кластера
+		if width < 300 {
+			width = 300
+		}
+		if height < 200 {
+			height = 200
+		}
+
+		clusterWidths = append(clusterWidths, width)
+		clusterHeights = append(clusterHeights, height)
+	}
+
+	// 5. Располагаем кластеры в сетке с отступами
+	clusterSpacing := 500.0
+	resultNotes := make([]dto.Note, 0, len(notes))
+
+	// Сортируем кластеры по размеру (от большего к меньшему) для лучшего заполнения
+	type clusterInfo struct {
+		layoutId uuid.UUID
+		width    float64
+		height   float64
+		bounds   struct {
+			minX, maxX, minY, maxY float64
+			notes                  []dto.Note
+		}
+	}
+
+	clusterInfos := make([]clusterInfo, 0, clusterCount)
+	for layoutId, bounds := range clusterBounds {
+		width := bounds.maxX - bounds.minX
+		height := bounds.maxY - bounds.minY
+		if width < 300 {
+			width = 300
+		}
+		if height < 200 {
+			height = 200
+		}
+
+		clusterInfos = append(clusterInfos, clusterInfo{
+			layoutId: layoutId,
+			width:    width,
+			height:   height,
+			bounds:   bounds,
+		})
+	}
+
+	// Сортируем по площади (ширина * высота)
+	sort.Slice(clusterInfos, func(i, j int) bool {
+		return clusterInfos[i].width*clusterInfos[i].height >
+			clusterInfos[j].width*clusterInfos[j].height
+	})
+
+	// 6. Распределяем кластеры по сетке с динамической высотой строк
+	currentX := 0.0
+	currentY := 0.0
+	maxHeightInCurrentRow := 0.0
+	clustersInCurrentRow := 0
+
+	for _, cluster := range clusterInfos {
+		// Если не влезает в текущую строку, переходим на новую
+		if clustersInCurrentRow >= gridCols {
+			currentX = 0
+			currentY += maxHeightInCurrentRow + clusterSpacing
+			maxHeightInCurrentRow = 0
+			clustersInCurrentRow = 0
+		}
+
+		// Вычисляем смещение для этого кластера
+		clusterOffsetX := currentX - cluster.bounds.minX
+		clusterOffsetY := currentY - cluster.bounds.minY
+
+		// Обновляем максимальную высоту в текущей строке
+		if cluster.height > maxHeightInCurrentRow {
+			maxHeightInCurrentRow = cluster.height
+		}
+
+		// 7. Применяем смещение ко всем заметкам в кластере
+		for _, note := range cluster.bounds.notes {
+			newNote := note
+			if note.Position != nil {
+				newPosition := &dto.Position{
+					XPos: note.Position.XPos + clusterOffsetX,
+					YPos: note.Position.YPos + clusterOffsetY,
+				}
+				newNote.Position = newPosition
+			}
+			// Все заметки переносим на общий лейаут (или оставляем оригинальный, если нужно сохранить)
+			// newNote.LayoutId = commonLayoutId // если хотим один общий лейаут
+			resultNotes = append(resultNotes, newNote)
+		}
+
+		// Переходим к следующей позиции в строке
+		currentX += cluster.width + clusterSpacing
+		clustersInCurrentRow++
+	}
+
+	return resultNotes
 }
 
+/*
+	func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
+		if len(notes) == 0 {
+			return notes
+		}
+
+		// Группируем заметки по layoutId
+		layoutGroups := make(map[uuid.UUID][]dto.Note)
+		for _, note := range notes {
+			layoutGroups[note.LayoutId] = append(layoutGroups[note.LayoutId], note)
+		}
+
+		// Параметры кластеризации
+		clusterSpacing := 100.0 // расстояние между кластерами
+		gridSpacing := 20.0     // расстояние между заметками внутри кластера
+		notesPerRow := 5        // максимальное количество заметок в строке кластера
+
+		// Обрабатываем каждый кластер
+		clusterX := 0.0
+		result := make([]dto.Note, 0, len(notes))
+
+		for _, groupNotes := range layoutGroups {
+			// Сортируем заметки внутри кластера для детерминированного позиционирования
+			sort.Slice(groupNotes, func(i, j int) bool {
+				return groupNotes[i].Id.String() < groupNotes[j].Id.String()
+			})
+
+			// Позиционируем заметки внутри кластера
+			for i, note := range groupNotes {
+				// Если у заметки уже есть позиция, используем её (относительно кластера)
+				if note.Position != nil {
+					note.Position.XPos += clusterX
+					result = append(result, note)
+					continue
+				}
+
+				// Автоматическое позиционирование внутри кластера
+				row := i / notesPerRow
+				col := i % notesPerRow
+
+				xPos := clusterX + float64(col)*gridSpacing
+				yPos := float64(row) * gridSpacing
+
+				// Создаем новую позицию
+				note.Position = &dto.Position{
+					XPos: xPos,
+					YPos: yPos,
+				}
+				result = append(result, note)
+			}
+
+			// Сдвигаем следующий кластер вправо
+			maxNotesInCluster := len(groupNotes)
+			clusterWidth := math.Min(float64(notesPerRow), float64(maxNotesInCluster)) * gridSpacing
+			clusterX += clusterWidth + clusterSpacing
+		}
+
+		return result
+	}
+*/
 func calculateClusterBounds(notes []dto.Note) (minX, minY, maxX, maxY float64) {
 	if len(notes) == 0 {
 		return 0, 0, 0, 0
