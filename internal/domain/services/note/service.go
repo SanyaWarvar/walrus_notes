@@ -269,7 +269,7 @@ func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
 
 		// Если нет заметок с позициями, устанавливаем дефолтные границы
 		if !firstNoteWithPosition {
-			minX, maxX, minY, maxY = 0, 100, 0, 100
+			minX, maxX, minY, maxY = 1, 100, 1, 100
 		}
 
 		clusterBounds[layoutId] = struct {
@@ -352,8 +352,8 @@ func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
 	})
 
 	// 6. Распределяем кластеры по сетке с динамической высотой строк
-	currentX := 0.0
-	currentY := 0.0
+	currentX := 1.0
+	currentY := 1.0
 	maxHeightInCurrentRow := 0.0
 	clustersInCurrentRow := 0
 
