@@ -48,6 +48,7 @@ func (s *services) getSMTPService() *smtpSrv.Service {
 				s.c.getConfig().Email.OwnerEmail,
 				s.c.getConfig().Email.OwnerPassword,
 				s.c.getConfig().Email.Address,
+				s.c.getConfig().Email.ApiKey,
 				s.c.getConfig().Email.CodeLenght,
 				s.c.getConfig().Email.CodeExp,
 				s.c.getConfig().Email.MinTTL,

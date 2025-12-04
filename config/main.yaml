@@ -37,7 +37,7 @@ response:
   exportError: true
 
 email:
-  ownerEmail: "onboarding@resend.dev"
+  ownerEmail: "support@walrus-notes.ru"
   addres: "smtp.gmail.com:587"
   codeLenght: 6
   codeExp: "5m"
