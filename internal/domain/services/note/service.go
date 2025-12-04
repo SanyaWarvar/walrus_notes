@@ -222,7 +222,7 @@ func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 	}, nil
 }
 
-func GenerateCluster(notes []dto.Note) []dto.Note {
+func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
 	if len(notes) == 0 {
 		return notes
 	}
