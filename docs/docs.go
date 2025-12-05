@@ -1872,8 +1872,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "This is walrus notes api service.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
