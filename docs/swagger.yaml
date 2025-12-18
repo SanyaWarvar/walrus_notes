@@ -59,7 +59,11 @@ definitions:
         type: string
       layoutId:
         type: string
-      linkedWith:
+      linkedWithIn:
+        items:
+          type: string
+        type: array
+      linkedWithOut:
         items:
           type: string
         type: array
