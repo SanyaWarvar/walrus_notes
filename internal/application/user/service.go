@@ -62,16 +62,12 @@ func (srv *Service) RegisterUser(ctx context.Context, credentials request.Regist
 		if err != nil {
 			return err
 		}
-		t := true
-		err = srv.userService.UpdateUser(ctx, u.Id, &user.UserUpdateParams{
-			ConfirmedEmail: &t,
-		})
 		if err != nil {
 			return err
 		}
 		_, err = srv.layoutService.CreateLayout(ctx, "All Notes", "#FFFFFF", u.Id, true)
 		return err
-	}); err != nil {
+	}); err != nil {	
 		return nil, err
 	}
 

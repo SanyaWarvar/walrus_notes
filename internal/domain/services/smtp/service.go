@@ -69,7 +69,7 @@ func (srv *Service) SendConfirmEmailMessage(email, code, action string) error {
 <body>
     <div class="email">
         <div class="header">
-            <img src="https://walrus-notes-q231.onrender.com/assets/logo-CkEQqJ7C.png" 
+            <img src="https://walrus-notes-q231.onrender.com/assets/logo.png" 
      alt="Logo" 
      class="logo" 
      style="width: 200px; height:auto; margin-bottom:12px;">
