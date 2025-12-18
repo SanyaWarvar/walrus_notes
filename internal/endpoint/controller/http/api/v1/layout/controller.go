@@ -21,7 +21,7 @@ type layoutService interface {
 	DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error
 	GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
-	ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfoRequest, error)
+	ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error)
 }
 
 type Controller struct {
