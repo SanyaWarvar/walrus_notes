@@ -34,6 +34,33 @@ definitions:
     - Second
     - Minute
     - Hour
+  wn_internal_domain_dto.ExportInfo:
+    properties:
+      createdAt:
+        type: string
+      layouts:
+        items:
+          $ref: '#/definitions/wn_internal_domain_dto.Layout'
+        type: array
+      notes:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/wn_internal_domain_dto.Note'
+          type: array
+        type: object
+      userId:
+        type: string
+    type: object
+  wn_internal_domain_dto.ExportInfoRequest:
+    properties:
+      userId:
+        type: string
+    type: object
+  wn_internal_domain_dto.ImportInfoRequest:
+    properties:
+      info:
+        $ref: '#/definitions/wn_internal_domain_dto.ExportInfo'
+    type: object
   wn_internal_domain_dto.Layout:
     properties:
       color:
@@ -646,6 +673,79 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_layout
+      tags:
+      - layouts
+  /wn/api/v1/layout/export:
+    get:
+      description: Экспортировать лейауты, заметки, позиции и связи
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.ExportInfoRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.ExportInfo'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: export
+      tags:
+      - backup
+  /wn/api/v1/layout/import:
+    post:
+      description: импортировать
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.ImportInfoRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: import
       tags:
       - layouts
   /wn/api/v1/layout/my:

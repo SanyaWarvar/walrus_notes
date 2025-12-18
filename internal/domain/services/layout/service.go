@@ -2,6 +2,7 @@ package layout
 
 import (
 	"context"
+	"fmt"
 	"wn/internal/domain/dto"
 	"wn/internal/domain/dto/request"
 	"wn/internal/entity"
@@ -31,6 +32,11 @@ type linksRepo interface {
 type noteRepo interface {
 	DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
+	GetFullNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
+}
+
+type noteService interface {
+	RessurectNotes(ctx context.Context, item *dto.Note) error
 }
 
 type positionsRepo interface {
@@ -45,6 +51,7 @@ type Service struct {
 	linksRepo     linksRepo
 	noteRepo      noteRepo
 	positionsRepo positionsRepo
+	noteService   noteService
 }
 
 func NewService(
@@ -54,6 +61,7 @@ func NewService(
 	linksRepo linksRepo,
 	noteRepo noteRepo,
 	positionsRepo positionsRepo,
+	noteService noteService,
 ) *Service {
 	return &Service{
 		tx:            tx,
@@ -61,6 +69,7 @@ func NewService(
 		layoutRepo:    layoutRepo,
 		linksRepo:     linksRepo,
 		noteRepo:      noteRepo,
+		noteService:   noteService,
 		positionsRepo: positionsRepo,
 	}
 }
@@ -143,10 +152,12 @@ func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.E
 	var output dto.ExportInfo
 	output.UserId = userId
 	output.CreatedAt = util.GetCurrentUTCTime()
+	output.Notes = map[uuid.UUID][]dto.Note{}
+
 	for _, l := range layouts {
-		notes, err := srv.noteRepo.GetNotesWithPosition(ctx, l.Id, userId)
+		notes, err := srv.noteRepo.GetFullNotesByLayoutId(ctx, l.Id, userId)
 		if err != nil {
-			return nil, errors.Wrap(err, "GetNotesWithPosition")
+			return nil, errors.Wrap(err, "GetFullNotesByLayoutId")
 		}
 		output.Layouts = append(output.Layouts, dto.Layout{
 			Id:      l.Id,
@@ -158,4 +169,57 @@ func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.E
 		output.Notes[l.Id] = notes
 	}
 	return &output, nil
+}
+
+func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *dto.ExportInfo) error {
+	layouts, err := srv.layoutRepo.GetAvailableLayouts(ctx, userId)
+	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
+		for i := range layouts {
+			if layouts[i].IsMain {
+				continue
+			}
+			err = srv.DeleteLayoutById(ctx, layouts[i].Id, userId)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("ImportLayouts: cant delete: %s for user %s", layouts[i].Id.String(), userId.String()))
+
+			}
+		}
+
+		for _, l := range info.Layouts {
+			if l.IsMain {
+				continue
+			}
+			_, err := srv.layoutRepo.CreateLayout(ctx, &entity.Layout{
+				Id:         l.Id,
+				Title:      l.Title,
+				Color:      l.Color,
+				OwnerId:    l.OwnerId,
+				HaveAccess: []uuid.UUID{l.OwnerId},
+				IsMain:     false,
+			})
+			if err != nil {
+				return errors.Wrap(err, "CreateLayout")
+			}
+			for _, note := range info.Notes[l.Id] {
+				err = srv.noteService.RessurectNotes(ctx, &note)
+				if err != nil {
+					return errors.Wrap(err, "RessurectNotes")
+				}
+			}
+		}
+		for _, l := range info.Layouts {
+			if l.IsMain {
+				continue
+			}
+			for _, item := range info.Notes[l.Id] {
+				for _, out := range item.LinkedWithOut {
+					err = srv.linksRepo.LinkNotes(ctx, item.Id, out)
+					if err != nil {
+						return errors.Wrap(err, "LinkNotes")
+					}
+				}
+			}
+		}
+		return nil
+	})
 }

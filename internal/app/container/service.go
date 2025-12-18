@@ -107,6 +107,7 @@ func (s *services) getLayoutService() *layout.Service {
 			s.c.getRepositories().getLinksRepository(),
 			s.c.getRepositories().getNoteRepository(),
 			s.c.getRepositories().getPositionsRepository(),
+			s.c.getServices().getNoteService(),
 		)
 
 	}

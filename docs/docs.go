@@ -558,6 +558,120 @@ const docTemplate = `{
                 }
             }
         },
+        "/wn/api/v1/layout/export": {
+            "get": {
+                "description": "Экспортировать лейауты, заметки, позиции и связи",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "backup"
+                ],
+                "summary": "export",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.ExportInfoRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto.ExportInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/layout/import": {
+            "post": {
+                "description": "импортировать",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "layouts"
+                ],
+                "summary": "import",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.ImportInfoRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/layout/my": {
             "get": {
                 "description": "Получить все layout-ы, к которым имеет доступ пользователь",
@@ -1456,6 +1570,48 @@ const docTemplate = `{
                 "Minute",
                 "Hour"
             ]
+        },
+        "wn_internal_domain_dto.ExportInfo": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "layouts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wn_internal_domain_dto.Layout"
+                    }
+                },
+                "notes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.Note"
+                        }
+                    }
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.ExportInfoRequest": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.ImportInfoRequest": {
+            "type": "object",
+            "properties": {
+                "info": {
+                    "$ref": "#/definitions/wn_internal_domain_dto.ExportInfo"
+                }
+            }
         },
         "wn_internal_domain_dto.Layout": {
             "type": "object",

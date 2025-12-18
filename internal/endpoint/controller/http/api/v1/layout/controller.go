@@ -22,6 +22,7 @@ type layoutService interface {
 	GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
 	ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error)
+	ImportLayouts(ctx context.Context, userId uuid.UUID, req *dto.ImportInfoRequest) error
 }
 
 type Controller struct {
@@ -49,6 +50,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/delete", h.deleteLayout)
 		notesAuth.POST("/update", h.updateLayout)
 		notesAuth.GET("/export", h.exportLayout)
+		notesAuth.POST("/import", h.importLayout)
 	}
 }
 
@@ -89,10 +91,20 @@ func (h *Controller) createLayout(c *gin.Context) {
 	}))
 }
 
+// @Summary export
+// @Description Экспортировать лейауты, заметки, позиции и связи
+// @Tags backup
+// @Produce json
+// @Param data body dto.ExportInfoRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{data=dto.ExportInfo}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/layout/export [get]
 func (h *Controller) exportLayout(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req dto.ExportInfoRequest
-
 	userId, err := util.GetUserId(ctx)
 	if err != nil {
 		_ = c.Error(apperrors.InvalidAuthorizationHeader)
@@ -106,6 +118,40 @@ func (h *Controller) exportLayout(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
+}
+
+// @Summary import
+// @Description импортировать
+// @Tags layouts
+// @Produce json
+// @Param data body dto.ImportInfoRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Router /wn/api/v1/layout/import [post]
+func (h *Controller) importLayout(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req dto.ImportInfoRequest
+	err := c.ShouldBind(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.layoutService.ImportLayouts(ctx, userId, &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
 }
 
 // @Summary get_my_layouts

@@ -502,3 +502,23 @@ func calculateClusterBounds(notes []dto.Note) (minX, minY, maxX, maxY float64) {
 
 	return minX, minY, maxX, maxY
 }
+
+func (srv *Service) RessurectNotes(ctx context.Context, item *dto.Note) error {
+	_, err := srv.noteRepo.CreateNote(ctx, &entity.Note{
+		Id:         item.Id,
+		Title:      item.Title,
+		Payload:    item.Payload,
+		CreatedAt:  util.GetCurrentUTCTime(),
+		OwnerId:    item.OwnerId,
+		HaveAccess: item.HaveAccess,
+		Draft:      item.Draft,
+		LayoutId:   item.LayoutId,
+	})
+	if err != nil {
+		return err
+	}
+	if item.Position != nil {
+		return srv.positionsRepo.CreateNotePosition(ctx, item.Id, &item.Position.XPos, &item.Position.YPos)
+	}
+	return nil
+}

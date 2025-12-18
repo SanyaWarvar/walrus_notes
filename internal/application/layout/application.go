@@ -16,6 +16,7 @@ type layoutService interface {
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 	ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.ExportInfo, error)
 	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
+	ImportLayouts(ctx context.Context, userId uuid.UUID, info *dto.ExportInfo) error
 }
 
 type Service struct {
@@ -55,4 +56,8 @@ func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, 
 
 func (srv *Service) ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error) {
 	return srv.layoutService.ExportLayouts(ctx, req.UserId)
+}
+
+func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, req *dto.ImportInfoRequest) error {
+	return srv.layoutService.ImportLayouts(ctx, userId, &req.Info)
 }

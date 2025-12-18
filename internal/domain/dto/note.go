@@ -85,8 +85,8 @@ type Position struct {
 }
 
 type ExportInfo struct {
-	UserId    uuid.UUID                               `json:"userId"`
-	CreatedAt time.Time                               `json:"createdAt"`
-	Layouts   []Layout                                `json:"layouts"`
-	Notes     map[uuid.UUID][]entity.NoteWithPosition `json:"notes"`
+	UserId    uuid.UUID            `json:"userId"`
+	CreatedAt time.Time            `json:"createdAt"`
+	Layouts   []Layout             `json:"layouts"`
+	Notes     map[uuid.UUID][]Note `json:"notes"`
 }
