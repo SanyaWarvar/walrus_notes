@@ -21,6 +21,7 @@ type layoutService interface {
 	DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error
 	GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
+	ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfoRequest, error)
 }
 
 type Controller struct {
@@ -47,6 +48,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.GET("/my", h.getMyLayouts)
 		notesAuth.POST("/delete", h.deleteLayout)
 		notesAuth.POST("/update", h.updateLayout)
+		notesAuth.GET("/export", h.exportLayout)
 	}
 }
 
@@ -85,6 +87,25 @@ func (h *Controller) createLayout(c *gin.Context) {
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp.NoteId{
 		Id: noteId,
 	}))
+}
+
+func (h *Controller) exportLayout(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req dto.ExportInfoRequest
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+	req.UserId = userId
+	resp, err := h.layoutService.ExportInfo(ctx, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp))
 }
 
 // @Summary get_my_layouts

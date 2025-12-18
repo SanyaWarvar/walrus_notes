@@ -30,6 +30,7 @@ type linksRepo interface {
 
 type noteRepo interface {
 	DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error
+	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 }
 
 type positionsRepo interface {
@@ -132,4 +133,29 @@ func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, 
 		return apperrors.LayoutNotFound
 	}
 	return nil
+}
+
+func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.ExportInfo, error) {
+	layouts, err := srv.layoutRepo.GetAvailableLayouts(ctx, userId)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetAvailableLayouts")
+	}
+	var output dto.ExportInfo
+	output.UserId = userId
+	output.CreatedAt = util.GetCurrentUTCTime()
+	for _, l := range layouts {
+		notes, err := srv.noteRepo.GetNotesWithPosition(ctx, l.Id, userId)
+		if err != nil {
+			return nil, errors.Wrap(err, "GetNotesWithPosition")
+		}
+		output.Layouts = append(output.Layouts, dto.Layout{
+			Id:      l.Id,
+			Title:   l.Title,
+			OwnerId: l.OwnerId,
+			IsMain:  l.IsMain,
+			Color:   l.Color,
+		})
+		output.Notes[l.Id] = notes
+	}
+	return &output, nil
 }

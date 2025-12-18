@@ -14,6 +14,7 @@ type layoutService interface {
 	CreateLayout(ctx context.Context, title, color string, ownerId uuid.UUID, isMain bool) (uuid.UUID, error)
 	DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
+	ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.ExportInfo, error)
 	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
 }
 
@@ -50,4 +51,8 @@ func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdReques
 
 func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
 	return srv.layoutService.UpdateLayout(ctx, req, userId)
+}
+
+func (srv *Service) ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error) {
+	return srv.layoutService.ExportLayouts(ctx, req.UserId)
 }

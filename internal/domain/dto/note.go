@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"time"
 	"wn/internal/entity"
 
 	"github.com/google/uuid"
@@ -81,4 +82,11 @@ type Layout struct {
 type Position struct {
 	XPos float64 `json:"xPos"`
 	YPos float64 `json:"yPos"`
+}
+
+type ExportInfo struct {
+	UserId    uuid.UUID                               `json:"userId"`
+	CreatedAt time.Time                               `json:"createdAt"`
+	Layouts   []Layout                                `json:"layouts"`
+	Notes     map[uuid.UUID][]entity.NoteWithPosition `json:"notes"`
 }
