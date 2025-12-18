@@ -122,7 +122,7 @@ func (h *Controller) exportLayout(c *gin.Context) {
 
 // @Summary import
 // @Description импортировать
-// @Tags layouts
+// @Tags backup
 // @Produce json
 // @Param data body dto.ImportInfoRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"

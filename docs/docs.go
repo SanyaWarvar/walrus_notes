@@ -628,7 +628,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "layouts"
+                    "backup"
                 ],
                 "summary": "import",
                 "parameters": [

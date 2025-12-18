@@ -747,7 +747,7 @@ paths:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: import
       tags:
-      - layouts
+      - backup
   /wn/api/v1/layout/my:
     get:
       description: Получить все layout-ы, к которым имеет доступ пользователь
