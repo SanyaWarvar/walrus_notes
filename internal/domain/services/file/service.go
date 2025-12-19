@@ -42,59 +42,63 @@ func (srv *Service) GenerateStatics(ctx context.Context) error {
 		return errors.Wrap(err, "srv.fileRepo.GetAllFiles")
 	}
 
-	for ind, item := range files {
-		if item.FileAsString == "" {
-			srv.logger.WithCtx(ctx).Debugf("Skipping empty file: %s", item.Filename)
-			continue
-		}
-
-		// Декодируем base64
-		files[ind].File, err = base64.RawStdEncoding.DecodeString(item.FileAsString)
-		if err != nil {
-			srv.logger.WithCtx(ctx).Warnf("Base64 decode failed for %s: %s", item.Filename, err.Error())
-			continue
-		}
-
-		fullPath := filepath.Join(filePath, item.Filename)
-
-		// Проверяем существование файла
-		if _, err := os.Stat(fullPath); err == nil {
-			// Файл уже существует, пропускаем
-			srv.logger.WithCtx(ctx).Debugf("File already exists, skipping: %s", item.Filename)
-			continue
-		} else if !os.IsNotExist(err) {
-			// Другая ошибка при проверке файла
-			srv.logger.WithCtx(ctx).Warnf("File stat error for %s: %s", item.Filename, err.Error())
-			continue
-		}
-
-		// Атомарная запись файла
-		tempPath := fullPath + ".tmp"
-		if err := os.WriteFile(tempPath, files[ind].File, 0644); err != nil {
-			srv.logger.WithCtx(ctx).Errorf("Failed to write file %s: %s", item.Filename, err.Error())
-			continue
-		}
-
-		// Переименовываем временный файл в целевой
-		if err := os.Rename(tempPath, fullPath); err != nil {
-			srv.logger.WithCtx(ctx).Errorf("Failed to rename temp file %s: %s", item.Filename, err.Error())
-			continue
-		}
-
-		srv.logger.WithCtx(ctx).Infof("Successfully generated file: %s", item.Filename)
+	for _, item := range files {
+		createFile(&item)
 	}
 	return nil
 }
 
-func (srv *Service) NewFile(ctx context.Context, file *multipart.FileHeader) (string, error) {
-	ext := strings.TrimPrefix(file.Filename, ".")
+func (srv *Service) NewFile(ctx context.Context, fileObj *multipart.FileHeader) (string, error) {
+	ext := strings.TrimPrefix(fileObj.Filename, ".")
 	filename := util.NewUUID().String() + "." + ext
-	encodedFile, err := encodeFile(file)
+	encodedFile, err := encodeFile(fileObj)
 	if err != nil {
 		return "", err
 	}
 	err = srv.fileRepo.CreateFile(ctx, filename, encodedFile)
-	return filename, err
+	if err != nil {
+		return filename, err
+	}
+	f := &file.StaticFile{
+		Filename:     filename,
+		FileAsString: encodedFile,
+		File:         []byte{},
+	}
+	return filename, createFile(f)
+}
+
+func createFile(item *file.StaticFile) error {
+	var err error
+	if item.FileAsString == "" {
+		return errors.Wrap(err, "item.FileAsString")
+	}
+
+	item.File, err = base64.RawStdEncoding.DecodeString(item.FileAsString)
+	if err != nil {
+		return errors.Wrap(err, "base64.RawStdEncoding.DecodeString")
+	}
+
+	fullPath := filepath.Join(filePath, item.Filename)
+
+	// Проверяем существование файла
+	if _, err := os.Stat(fullPath); err == nil {
+
+	} else if !os.IsNotExist(err) {
+		return errors.Wrap(err, "os.IsNotExist")
+	}
+
+	// Атомарная запись файла
+	tempPath := fullPath + ".tmp"
+	if err := os.WriteFile(tempPath, item.File, 0644); err != nil {
+		return errors.Wrap(err, "os.WriteFile")
+	}
+
+	// Переименовываем временный файл в целевой
+	if err := os.Rename(tempPath, fullPath); err != nil {
+		return errors.Wrap(err, "os.Rename(tempPath, fullPath)")
+	}
+
+	return nil
 }
 
 func encodeFile(fileHeader *multipart.FileHeader) (string, error) {
