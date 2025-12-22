@@ -517,8 +517,9 @@ func (srv *Service) RessurectNotes(ctx context.Context, item *dto.Note) error {
 	if err != nil {
 		return err
 	}
+	var xPos, yPos *float64
 	if item.Position != nil {
-		return srv.positionsRepo.CreateNotePosition(ctx, item.Id, &item.Position.XPos, &item.Position.YPos)
+		xPos, yPos = &item.Position.XPos, &item.Position.YPos
 	}
-	return nil
+	return srv.positionsRepo.CreateNotePosition(ctx, item.Id, xPos, yPos)
 }
