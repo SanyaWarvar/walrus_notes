@@ -262,15 +262,15 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 
 func (repo *Repository) GetFullNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error) {
 	query := `
-	select 
-	n.id, n.title, n.payload, n.owner_id, n.have_access, n.layout_id, n.draft,
-	p.x_position, p.y_position,
-	COALESCE(array((select second_note_id from links l where l.first_note_id = n.id)), '{}'),
-	COALESCE(array((select first_note_id from links l where l.second_note_id = n.id)), '{}')
-	from notes n
-	left join positions p on p.note_id = n.id
-	where n.owner_id = $1 and n.layout_id = $2
-	`
+    select 
+    n.id, n.title, n.payload, n.owner_id, n.have_access, n.layout_id, n.draft,
+    p.x_position, p.y_position,
+    COALESCE(array((select second_note_id from links l where l.first_note_id = n.id)), '{}'),
+    COALESCE(array((select first_note_id from links l where l.second_note_id = n.id)), '{}')
+    from notes n
+    left join positions p on p.note_id = n.id
+    where n.owner_id = $1 and n.layout_id = $2
+    `
 	rows, err := repo.conn.Query(ctx, query, userId, layoutId)
 	if err != nil {
 		return nil, errors.Wrap(err, "repo.conn.Query")
@@ -281,7 +281,10 @@ func (repo *Repository) GetFullNotesByLayoutId(ctx context.Context, layoutId, us
 	for rows.Next() {
 		var item dto.Note
 		var in, out pgtype.Array[uuid.UUID]
-		item.Position = &dto.Position{}
+
+		// Временные переменные для позиции
+		var xPos, yPos *float64
+
 		err := rows.Scan(
 			&item.Id,
 			&item.Title,
@@ -290,14 +293,23 @@ func (repo *Repository) GetFullNotesByLayoutId(ctx context.Context, layoutId, us
 			&item.HaveAccess,
 			&item.LayoutId,
 			&item.Draft,
-			&item.Position.XPos,
-			&item.Position.YPos,
+			&xPos, // Сканируем во временную переменную
+			&yPos, // Сканируем во временную переменную
 			&in,
 			&out,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "rows.Scan")
 		}
+
+		// Создаем Position только если есть координаты
+		if xPos != nil && yPos != nil {
+			item.Position = &dto.Position{
+				XPos: *xPos,
+				YPos: *yPos,
+			}
+		}
+
 		if in.Valid {
 			item.LinkedWithIn = in.Elements
 		} else {
