@@ -3,6 +3,7 @@ package container
 import (
 	"wn/internal/domain/services/file"
 	"wn/internal/domain/services/layout"
+	"wn/internal/domain/services/multyplayer"
 	"wn/internal/domain/services/note"
 	smtpSrv "wn/internal/domain/services/smtp"
 	"wn/internal/domain/services/socket"
@@ -20,13 +21,14 @@ func (c *Container) getServices() *services {
 type services struct {
 	c *Container
 
-	user          *userSrv.Service
-	smtp          *smtpSrv.Service
-	token         *tokenSrv.Service
-	file          *file.Service
-	note          *note.Service
-	layout        *layout.Service
-	socketManager *socket.Service
+	user               *userSrv.Service
+	smtp               *smtpSrv.Service
+	token              *tokenSrv.Service
+	file               *file.Service
+	note               *note.Service
+	layout             *layout.Service
+	socketManager      *socket.Service
+	multyplayerManager *multyplayer.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -119,4 +121,11 @@ func (s *services) getSocketService() *socket.Service {
 		s.socketManager = socket.NewService(s.c.getLogger())
 	}
 	return s.socketManager
+}
+
+func (s *services) getMultyplayerService() *multyplayer.Service {
+	if s.multyplayerManager == nil {
+		s.multyplayerManager = multyplayer.NewService()
+	}
+	return s.multyplayerManager
 }

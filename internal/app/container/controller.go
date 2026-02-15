@@ -44,6 +44,7 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 				c.getLogger(),
 				c.getResponseBuilder(),
 				c.getServices().getSocketService(),
+				c.getServices().getMultyplayerService(),
 			),
 
 			file.NewController(
