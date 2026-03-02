@@ -86,7 +86,6 @@ func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid
 	}
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, apperrors.PermissionsNotEnough
 	}
 
@@ -119,6 +118,7 @@ func (srv *Application) ApplyPermissionsLink(ctx context.Context, userId uuid.UU
 	}
 
 	item, err := srv.permissionsRepository.GetPermission(ctx, &dto.GetPermissionsFilter{
+		ToUserId: &userId,
 		TargetId: &perm.TargetId,
 	})
 	if err != nil && err != apperrors.RecordNotFound {
