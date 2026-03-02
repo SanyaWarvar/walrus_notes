@@ -1,6 +1,9 @@
 package container
 
-import smtpCache "wn/internal/infrastructure/cache/smtp"
+import (
+	"wn/internal/infrastructure/cache/permissions"
+	smtpCache "wn/internal/infrastructure/cache/smtp"
+)
 
 func (c *Container) getCaches() *cache {
 	if c.caches == nil {
@@ -12,7 +15,8 @@ func (c *Container) getCaches() *cache {
 type cache struct {
 	c *Container
 
-	smtp *smtpCache.Cache
+	smtp        *smtpCache.Cache
+	permissions *permissions.Cache
 }
 
 func (s *cache) getSmtpCache() *smtpCache.Cache {
@@ -23,4 +27,14 @@ func (s *cache) getSmtpCache() *smtpCache.Cache {
 		)
 	}
 	return s.smtp
+}
+
+func (s *cache) getPermissionsCache() *permissions.Cache {
+	if s.permissions == nil {
+		s.permissions = permissions.NewCache(
+			s.c.getLogger(),
+			s.c.getCacheClient(),
+		)
+	}
+	return s.permissions
 }

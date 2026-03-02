@@ -10,6 +10,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 )
@@ -374,4 +375,38 @@ func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, searc
 		return nil, errors.Wrap(err, "rows.Err")
 	}
 	return notes, nil
+}
+
+func (repo *Repository) GetByOwnerId(ctx context.Context, ownerId, noteId uuid.UUID) (*entity.Note, error) {
+	sql, args, err := sq.
+		Select("n.*").
+		From("notes n").
+		Where(sq.Eq{"owner_id": ownerId}).
+		Where(sq.Eq{"id": noteId}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "toSql")
+	}
+
+	var item entity.Note
+	err = repo.conn.QueryRow(ctx, sql, args...).Scan(
+		&item.Id,
+		&item.Title,
+		&item.Payload,
+		&item.CreatedAt,
+		&item.OwnerId,
+		&item.HaveAccess,
+		&item.LayoutId,
+		&item.Draft,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.RecordNotFound
+		}
+		return nil, errors.Wrap(err, "scan")
+	}
+
+	return &item, nil
 }

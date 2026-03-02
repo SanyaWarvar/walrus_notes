@@ -5,6 +5,7 @@ import (
 	"wn/internal/infrastructure/repository/layout"
 	"wn/internal/infrastructure/repository/links"
 	"wn/internal/infrastructure/repository/note"
+	"wn/internal/infrastructure/repository/permissions"
 	"wn/internal/infrastructure/repository/positions"
 	tokensRepo "wn/internal/infrastructure/repository/tokens"
 	userRepo "wn/internal/infrastructure/repository/user"
@@ -20,13 +21,14 @@ func (c *Container) getRepositories() *repositories {
 type repositories struct {
 	c *Container
 
-	user      *userRepo.Repository
-	token     *tokensRepo.Repository
-	file      *file.Repository
-	note      *note.Repository
-	layout    *layout.Repository
-	links     *links.Repository
-	positions *positions.Repository
+	user        *userRepo.Repository
+	token       *tokensRepo.Repository
+	file        *file.Repository
+	note        *note.Repository
+	layout      *layout.Repository
+	links       *links.Repository
+	positions   *positions.Repository
+	permissions *permissions.Repository
 }
 
 func (r *repositories) getUserRepository() *userRepo.Repository {
@@ -76,4 +78,11 @@ func (r *repositories) getPositionsRepository() *positions.Repository {
 		r.positions = positions.NewRepository(r.c.getDBPool())
 	}
 	return r.positions
+}
+
+func (r *repositories) getPermissionsRepository() *permissions.Repository {
+	if r.permissions == nil {
+		r.permissions = permissions.NewRepository(r.c.getDBPool())
+	}
+	return r.permissions
 }

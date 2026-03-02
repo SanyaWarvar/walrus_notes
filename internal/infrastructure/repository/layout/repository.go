@@ -8,7 +8,9 @@ import (
 	"wn/pkg/database/postgres"
 
 	"github.com/Masterminds/squirrel"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 )
 
@@ -109,4 +111,36 @@ func (repo *Repository) UpdateLayout(ctx context.Context, userId, layoutId uuid.
 		return 0, errors.Wrap(err, "repo.conn.Exec")
 	}
 	return int(res.RowsAffected()), nil
+}
+
+func (repo *Repository) GetByOwnerId(ctx context.Context, ownerId, layoutId uuid.UUID) (*entity.Layout, error) {
+	sql, args, err := sq.
+		Select("l.*").
+		From("layouts l").
+		Where(sq.Eq{"owner_id": ownerId}).
+		Where(sq.Eq{"id": layoutId}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "toSql")
+	}
+
+	var item entity.Layout
+	err = repo.conn.QueryRow(ctx, sql, args...).Scan(
+		&item.Id,
+		&item.Title,
+		&item.OwnerId,
+		&item.HaveAccess,
+		&item.IsMain,
+		&item.Color,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.RecordNotFound
+		}
+		return nil, errors.Wrap(err, "scan")
+	}
+
+	return &item, nil
 }

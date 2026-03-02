@@ -5,6 +5,7 @@ import (
 	"wn/internal/application/file"
 	"wn/internal/application/layout"
 	"wn/internal/application/note"
+	"wn/internal/application/permissions"
 	userApp "wn/internal/application/user"
 )
 
@@ -18,11 +19,12 @@ func (c *Container) getApplication() *applications {
 type applications struct {
 	c *Container
 
-	user   *userApp.Service
-	auth   *auth.Service
-	note   *note.Service
-	layout *layout.Service
-	file   *file.Service
+	user        *userApp.Service
+	auth        *auth.Service
+	note        *note.Service
+	layout      *layout.Service
+	file        *file.Service
+	permissions *permissions.Application
 }
 
 func (s *applications) getUserApplicationService() *userApp.Service {
@@ -88,4 +90,19 @@ func (s *applications) getFileApplciationService() *file.Service {
 		)
 	}
 	return s.file
+}
+
+func (s *applications) getPermissionsApplicationService() *permissions.Application {
+	if s.permissions == nil {
+		s.permissions = permissions.NewApplication(
+			s.c.getTransactionManager(),
+			s.c.getLogger(),
+
+			s.c.getRepositories().getPermissionsRepository(),
+			s.c.getCaches().getPermissionsCache(),
+			s.c.getRepositories().getLayoutRepository(),
+			s.c.getRepositories().getNoteRepository(),
+		)
+	}
+	return s.permissions
 }

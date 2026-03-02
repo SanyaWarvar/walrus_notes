@@ -781,6 +781,132 @@
                 }
             }
         },
+        "/wn/api/v1/links/apply": {
+            "post": {
+                "description": "Сгенерировать id для выдачи пермишенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "applyLink",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: already_exists",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/links/generate": {
+            "post": {
+                "description": "Сгенерировать id для выдачи пермишенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "generateLink",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: bad_kind, premissions_not_enough",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/notes/create": {
             "post": {
                 "description": "Создать заметку",
@@ -1563,6 +1689,14 @@
                 "Hour"
             ]
         },
+        "wn_internal_domain_dto.ApplyPermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "linkId": {
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto.ExportInfo": {
             "type": "object",
             "properties": {
@@ -1593,6 +1727,37 @@
             "type": "object",
             "properties": {
                 "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.GeneratePermissionLinkRequest": {
+            "type": "object",
+            "properties": {
+                "canEdit": {
+                    "type": "boolean"
+                },
+                "canRead": {
+                    "type": "boolean"
+                },
+                "canWrite": {
+                    "type": "boolean"
+                },
+                "expiredAt": {
+                    "type": "string"
+                },
+                "kind": {
+                    "$ref": "#/definitions/wn_internal_domain_enum.PermissionsKind"
+                },
+                "targetId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.GeneratePermissionsLinkResponse": {
+            "type": "object",
+            "properties": {
+                "linkId": {
                     "type": "string"
                 }
             }
@@ -1954,6 +2119,19 @@
                     "type": "string"
                 }
             }
+        },
+        "wn_internal_domain_enum.PermissionsKind": {
+            "type": "string",
+            "enum": [
+                "PERMISSIONS_KIND_UNSPECIFIED",
+                "PERMISSIONS_KIND_LAYOUT",
+                "PERMISSIONS_KIND_NOTE"
+            ],
+            "x-enum-varnames": [
+                "PermissionsKindUnspecified",
+                "PermissionsKindLayout",
+                "PermissionsKindNote"
+            ]
         },
         "wn_internal_domain_services_token.UserTokens": {
             "type": "object",

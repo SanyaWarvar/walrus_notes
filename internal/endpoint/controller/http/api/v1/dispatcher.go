@@ -5,6 +5,7 @@ import (
 	"wn/internal/endpoint/controller/http/api/v1/file"
 	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
+	"wn/internal/endpoint/controller/http/api/v1/permissions"
 	"wn/internal/endpoint/controller/http/api/v1/socket"
 	"wn/internal/endpoint/controller/http/api/v1/user"
 
@@ -14,12 +15,13 @@ import (
 type Dispatcher struct {
 	apiPath string
 
-	auth    *auth.Controller
-	user    *user.Controller
-	note    *note.Controller
-	layout  *layout.Controller
-	sockets *socket.Controller
-	file    *file.Controller
+	auth        *auth.Controller
+	user        *user.Controller
+	note        *note.Controller
+	layout      *layout.Controller
+	sockets     *socket.Controller
+	file        *file.Controller
+	permissions *permissions.Controller
 }
 
 func NewDispatcher(
@@ -31,15 +33,17 @@ func NewDispatcher(
 	layout *layout.Controller,
 	sockets *socket.Controller,
 	file *file.Controller,
+	permissions *permissions.Controller,
 ) *Dispatcher {
 	return &Dispatcher{
-		apiPath: apiPath,
-		auth:    auth,
-		user:    user,
-		note:    note,
-		layout:  layout,
-		sockets: sockets,
-		file:    file,
+		apiPath:     apiPath,
+		auth:        auth,
+		user:        user,
+		note:        note,
+		layout:      layout,
+		sockets:     sockets,
+		file:        file,
+		permissions: permissions,
 	}
 }
 
@@ -54,6 +58,7 @@ func (d *Dispatcher) Init(router *gin.RouterGroup, authorization gin.HandlerFunc
 			d.layout.Init(api, authorizedGroup)
 			d.sockets.ConnectionController(ws)
 			d.file.Init(api, authorizedGroup)
+			d.permissions.Init(api, authorizedGroup)
 		}
 	}
 }

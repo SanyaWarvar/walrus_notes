@@ -34,6 +34,11 @@ definitions:
     - Second
     - Minute
     - Hour
+  wn_internal_domain_dto.ApplyPermissionsRequest:
+    properties:
+      linkId:
+        type: string
+    type: object
   wn_internal_domain_dto.ExportInfo:
     properties:
       createdAt:
@@ -54,6 +59,26 @@ definitions:
   wn_internal_domain_dto.ExportInfoRequest:
     properties:
       userId:
+        type: string
+    type: object
+  wn_internal_domain_dto.GeneratePermissionLinkRequest:
+    properties:
+      canEdit:
+        type: boolean
+      canRead:
+        type: boolean
+      canWrite:
+        type: boolean
+      expiredAt:
+        type: string
+      kind:
+        $ref: '#/definitions/wn_internal_domain_enum.PermissionsKind'
+      targetId:
+        type: string
+    type: object
+  wn_internal_domain_dto.GeneratePermissionsLinkResponse:
+    properties:
+      linkId:
         type: string
     type: object
   wn_internal_domain_dto.ImportInfoRequest:
@@ -289,6 +314,16 @@ definitions:
       username:
         type: string
     type: object
+  wn_internal_domain_enum.PermissionsKind:
+    enum:
+    - PERMISSIONS_KIND_UNSPECIFIED
+    - PERMISSIONS_KIND_LAYOUT
+    - PERMISSIONS_KIND_NOTE
+    type: string
+    x-enum-varnames:
+    - PermissionsKindUnspecified
+    - PermissionsKindLayout
+    - PermissionsKindNote
   wn_internal_domain_services_token.UserTokens:
     properties:
       accessToken:
@@ -823,6 +858,87 @@ paths:
       summary: update layout
       tags:
       - layouts
+  /wn/api/v1/links/apply:
+    post:
+      description: Сгенерировать id для выдачи пермишенов
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: already_exists'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: applyLink
+      tags:
+      - permissions
+  /wn/api/v1/links/generate:
+    post:
+      description: Сгенерировать id для выдачи пермишенов
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: bad_kind, premissions_not_enough'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: generateLink
+      tags:
+      - permissions
   /wn/api/v1/notes/create:
     post:
       description: Создать заметку

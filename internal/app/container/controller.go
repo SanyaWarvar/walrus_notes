@@ -6,6 +6,7 @@ import (
 	"wn/internal/endpoint/controller/http/api/v1/file"
 	"wn/internal/endpoint/controller/http/api/v1/layout"
 	"wn/internal/endpoint/controller/http/api/v1/note"
+	"wn/internal/endpoint/controller/http/api/v1/permissions"
 	"wn/internal/endpoint/controller/http/api/v1/socket"
 	"wn/internal/endpoint/controller/http/api/v1/user"
 )
@@ -51,6 +52,12 @@ func (c *Container) getHTTPDispatcher() *v1.Dispatcher {
 				c.getLogger(),
 				c.getResponseBuilder(),
 				c.getApplication().getFileApplciationService(),
+			),
+
+			permissions.NewController(
+				c.getLogger(),
+				c.getResponseBuilder(),
+				c.applications.getPermissionsApplicationService(),
 			),
 		)
 	}

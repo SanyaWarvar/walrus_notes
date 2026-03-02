@@ -23,6 +23,12 @@ var (
 
 	NoteNotFound   = apperror.NewInvalidDataError("note not found", "note_not_found")
 	LayoutNotFound = apperror.NewInvalidDataError("layout not found", "layout_not_found")
+
+	RecordNotFound = apperror.NewInvalidDataError("record not found", "record_not_found")
+
+	PermissionsNotEnough = apperror.NewInvalidDataError("permissions not enough", "premissions_not_enough")
+	BadKind              = apperror.NewBadRequestError("bad kind", "bad_kind")
+	AlreadyExist         = apperror.NewInvalidDataError("already exist", "already_exist")
 )
 
 // коды динамических ошибок:
