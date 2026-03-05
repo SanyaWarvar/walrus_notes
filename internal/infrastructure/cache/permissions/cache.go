@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"time"
 	"wn/internal/domain/dto"
-	"wn/internal/infrastructure/cache/common"
 	"wn/pkg/applogger"
 	"wn/pkg/database/dragonfly"
 
@@ -30,11 +29,11 @@ func (ch *Cache) SavePermissionsLink(ctx context.Context, item *dto.PermissionsT
 	if err != nil {
 		return err
 	}
-	return ch.client.Save(ctx, common.PermissionLinks, id.String(), data, ttl)
+	return ch.client.SaveValue(ctx, id.String(), data, *ttl)
 }
 
 func (ch *Cache) GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.PermissionsToken, bool, error) {
-	data, err := ch.client.GetOne(ctx, common.PermissionLinks, id.String())
+	data, err := ch.client.GetValue(ctx, id.String())
 	if err != nil {
 		switch err {
 		case redis.Nil:

@@ -26,15 +26,26 @@ func New(url, username, password string) (*Client, error) {
 	return &Client{redis: r}, nil
 }
 
-func (c *Client) Save(ctx context.Context, mapName, key string, payload []byte, ttl *time.Duration) error {
+func (c *Client) Save(ctx context.Context, mapName, key string, payload []byte) error {
 	err := c.redis.HSet(ctx, mapName, key, payload).Err()
 	if err != nil {
 		return err
 	}
-	if ttl != nil {
-		return c.redis.HExpire(ctx, mapName, *ttl, key).Err()
+	return nil
+}
+
+func (c *Client) SaveValue(ctx context.Context, key string, payload []byte, ttl time.Duration) error {
+	err := c.redis.Set(ctx, key, payload, ttl).Err()
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func (c *Client) GetValue(ctx context.Context, key string) ([]byte, error) {
+	res := c.redis.Get(ctx, key)
+	v, err := res.Bytes()
+	return v, err
 }
 
 func (c *Client) GetOne(ctx context.Context, mapName, key string) ([]byte, error) {

@@ -29,7 +29,7 @@ func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item auth.Co
 	if err != nil {
 		return err
 	}
-	return ch.client.Save(ctx, common.EmailConfirmationCodes, email, data, ttl)
+	return ch.client.SaveValue(ctx, email, data, *ttl)
 }
 
 func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*auth.ConfirmationCode, bool, error) {
