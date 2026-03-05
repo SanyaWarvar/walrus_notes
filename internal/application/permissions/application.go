@@ -27,8 +27,8 @@ type permissionsRepository interface {
 }
 
 type permissionsLinkRepository interface {
-	SavePermissionsLink(ctx context.Context, item *dto.PermissionsToken, id uuid.UUID, ttl *time.Duration) error
-	GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.PermissionsToken, bool, error)
+	SavePermissionsLink(ctx context.Context, item *dto.PermissionToken, id uuid.UUID, ttl *time.Duration) error
+	GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.PermissionToken, bool, error)
 }
 
 type noteRepository interface {
@@ -89,7 +89,7 @@ func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid
 		return nil, apperrors.PermissionsNotEnough
 	}
 
-	if err = srv.permissionsLinkRepository.SavePermissionsLink(ctx, &dto.PermissionsToken{
+	if err = srv.permissionsLinkRepository.SavePermissionsLink(ctx, &dto.PermissionToken{
 		FromUserId: userId,
 		TargetId:   req.TargetId,
 		Kind:       req.Kind,
@@ -117,6 +117,10 @@ func (srv *Application) ApplyPermissionsLink(ctx context.Context, userId uuid.UU
 		return apperrors.RecordNotFound
 	}
 
+	if userId == perm.FromUserId {
+		return apperrors.CantApply
+	}
+
 	item, err := srv.permissionsRepository.GetPermission(ctx, &dto.GetPermissionsFilter{
 		ToUserId: &userId,
 		TargetId: &perm.TargetId,
@@ -140,4 +144,35 @@ func (srv *Application) ApplyPermissionsLink(ctx context.Context, userId uuid.UU
 		CanEdit:    perm.CanEdit,
 		CreatedAt:  util.GetCurrentUTCTime(),
 	})
+}
+
+func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid.UUID) (*dto.PermissionsDashbord, error) {
+	recivied, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		ToUserId: &userId,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "recivied")
+	}
+
+	shared, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		FromUserId: &userId,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "shared")
+	}
+
+	sharedDto := make([]dto.Permission, 0, len(shared))
+	for i := range shared {
+		sharedDto = append(sharedDto, *dto.PermissionFromEntity(&shared[i]))
+	}
+
+	reciviedDto := make([]dto.Permission, 0, len(recivied))
+	for i := range recivied {
+		reciviedDto = append(sharedDto, *dto.PermissionFromEntity(&recivied[i]))
+	}
+
+	return &dto.PermissionsDashbord{
+		Shared:   sharedDto,
+		Recivied: reciviedDto,
+	}, nil
 }

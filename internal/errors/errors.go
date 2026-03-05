@@ -29,6 +29,7 @@ var (
 	PermissionsNotEnough = apperror.NewInvalidDataError("permissions not enough", "premissions_not_enough")
 	BadKind              = apperror.NewBadRequestError("bad kind", "bad_kind")
 	AlreadyExist         = apperror.NewInvalidDataError("already exist", "already_exist")
+	CantApply            = apperror.NewInvalidDataError("cant apply", "cant_apply")
 )
 
 // коды динамических ошибок:

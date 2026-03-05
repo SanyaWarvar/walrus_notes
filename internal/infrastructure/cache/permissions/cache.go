@@ -24,7 +24,7 @@ func NewCache(logger applogger.Logger, client *dragonfly.Client) *Cache {
 	}
 }
 
-func (ch *Cache) SavePermissionsLink(ctx context.Context, item *dto.PermissionsToken, id uuid.UUID, ttl *time.Duration) error {
+func (ch *Cache) SavePermissionsLink(ctx context.Context, item *dto.PermissionToken, id uuid.UUID, ttl *time.Duration) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (ch *Cache) SavePermissionsLink(ctx context.Context, item *dto.PermissionsT
 	return ch.client.SaveValue(ctx, id.String(), data, *ttl)
 }
 
-func (ch *Cache) GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.PermissionsToken, bool, error) {
+func (ch *Cache) GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.PermissionToken, bool, error) {
 	data, err := ch.client.GetValue(ctx, id.String())
 	if err != nil {
 		switch err {
@@ -43,7 +43,7 @@ func (ch *Cache) GetPermissionsLink(ctx context.Context, id uuid.UUID) (*dto.Per
 		return nil, false, err
 	}
 
-	var output dto.PermissionsToken
+	var output dto.PermissionToken
 	err = json.Unmarshal(data, &output)
 	if err != nil {
 		return &output, false, err

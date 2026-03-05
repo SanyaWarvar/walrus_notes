@@ -128,6 +128,32 @@ definitions:
       title:
         type: string
     type: object
+  wn_internal_domain_dto.Permission:
+    properties:
+      canEdit:
+        type: boolean
+      canRead:
+        type: boolean
+      canWrite:
+        type: boolean
+      fromUserId:
+        type: string
+      kind:
+        $ref: '#/definitions/wn_internal_domain_enum.PermissionsKind'
+      targetId:
+        type: string
+    type: object
+  wn_internal_domain_dto.PermissionsDashbord:
+    properties:
+      recivied:
+        items:
+          $ref: '#/definitions/wn_internal_domain_dto.Permission'
+        type: array
+      shared:
+        items:
+          $ref: '#/definitions/wn_internal_domain_dto.Permission'
+        type: array
+    type: object
   wn_internal_domain_dto.Position:
     properties:
       xPos:
@@ -598,6 +624,39 @@ paths:
       summary: register_user
       tags:
       - auth
+  /wn/api/v1/dashboard:
+    get:
+      description: Получить дашборд пермишенов
+      parameters:
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.PermissionsDashbord'
+              type: object
+        "400":
+          description: 'possible codes: invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: getDashboard
+      tags:
+      - permissions
   /wn/api/v1/file/upload:
     post:
       description: загрузить файл
