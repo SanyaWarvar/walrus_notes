@@ -44,8 +44,8 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		permissionsAuth.POST("/links/generate", h.generateLink)
 		permissionsAuth.POST("/links/apply", h.applyLink)
 		permissionsAuth.GET("/dashboard", h.getDashboard)
-		permissionsAuth.GET("/delete", h.deletePermission)
-		permissionsAuth.GET("/update", h.updatePermission)
+		permissionsAuth.POST("/delete", h.deletePermission)
+		permissionsAuth.POST("/update", h.updatePermission)
 	}
 }
 
