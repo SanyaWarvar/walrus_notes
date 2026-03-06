@@ -381,60 +381,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/wn/api/v1/dashboard": {
-            "get": {
-                "description": "Получить дашборд пермишенов",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "permissions"
-                ],
-                "summary": "getDashboard",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Request id identity",
-                        "name": "X-Request-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "auth token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/wn_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto.PermissionsDashbord"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "possible codes: invalid_X-Request-Id",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/wn/api/v1/file/upload": {
             "post": {
                 "description": "загрузить файл",
@@ -836,132 +782,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "possible codes: bind_body, invalid_X-Request-Id",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/wn/api/v1/links/apply": {
-            "post": {
-                "description": "Сгенерировать id для выдачи пермишенов",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "permissions"
-                ],
-                "summary": "applyLink",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request id identity",
-                        "name": "X-Request-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "auth token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "possible codes: already_exists",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/wn/api/v1/links/generate": {
-            "post": {
-                "description": "Сгенерировать id для выдачи пермишенов",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "permissions"
-                ],
-                "summary": "generateLink",
-                "parameters": [
-                    {
-                        "description": "data",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Request id identity",
-                        "name": "X-Request-Id",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "auth token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/wn_pkg_response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
-                        "schema": {
-                            "$ref": "#/definitions/wn_pkg_response.Response"
-                        }
-                    },
-                    "422": {
-                        "description": "possible codes: bad_kind, premissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1574,6 +1394,300 @@ const docTemplate = `{
                 }
             }
         },
+        "/wn/api/v1/permissions/dashboard": {
+            "get": {
+                "description": "Получить дашборд пермишенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "getDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto.PermissionsDashbord"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/permissions/delete": {
+            "post": {
+                "description": "Удалить существующий пермишен",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "deletePermission",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.DeletePermissionsRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: permissions_not_enough, record_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/permissions/links/apply": {
+            "post": {
+                "description": "Сгенерировать id для выдачи пермишенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "applyLink",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: already_exists, cant_apply",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/permissions/links/generate": {
+            "post": {
+                "description": "Сгенерировать id для выдачи пермишенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "generateLink",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/wn_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: bad_kind, premissions_not_enough",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/wn/api/v1/permissions/update": {
+            "post": {
+                "description": "Изменить существующий пермишен",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "permissions"
+                ],
+                "summary": "updatePermission",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto.UpdatePermissionRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: permissions_not_enough, record_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/user/picture": {
             "post": {
                 "description": "сменить аватарку пользователя",
@@ -1759,6 +1873,14 @@ const docTemplate = `{
                 }
             }
         },
+        "wn_internal_domain_dto.DeletePermissionsRequest": {
+            "type": "object",
+            "properties": {
+                "permissionId": {
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto.ExportInfo": {
             "type": "object",
             "properties": {
@@ -1916,6 +2038,9 @@ const docTemplate = `{
                 },
                 "targetId": {
                     "type": "string"
+                },
+                "uuid.UUID": {
+                    "type": "string"
                 }
             }
         },
@@ -1944,6 +2069,23 @@ const docTemplate = `{
                 },
                 "yPos": {
                     "type": "number"
+                }
+            }
+        },
+        "wn_internal_domain_dto.UpdatePermissionRequest": {
+            "type": "object",
+            "properties": {
+                "canEdit": {
+                    "type": "boolean"
+                },
+                "canRead": {
+                    "type": "boolean"
+                },
+                "canWrite": {
+                    "type": "boolean"
+                },
+                "permissionsId": {
+                    "type": "string"
                 }
             }
         },

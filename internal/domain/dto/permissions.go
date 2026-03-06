@@ -19,6 +19,7 @@ type PermissionToken struct {
 }
 
 type Permission struct {
+	Id         uuid.UUID            `json:"uuid.UUID"`
 	FromUserId uuid.UUID            `json:"fromUserId"`
 	TargetId   uuid.UUID            `json:"targetId"`
 	Kind       enum.PermissionsKind `json:"kind"`
@@ -29,6 +30,7 @@ type Permission struct {
 
 func PermissionFromEntity(e *entity.Permission) *Permission {
 	return &Permission{
+		Id:         e.Id,
 		FromUserId: e.FromUserId,
 		TargetId:   e.TargetId,
 		Kind:       e.Kind,
@@ -58,4 +60,15 @@ type ApplyPermissionsRequest struct {
 type PermissionsDashbord struct {
 	Recivied []Permission `json:"recivied"`
 	Shared   []Permission `json:"shared"`
+}
+
+type DeletePermissionsRequest struct {
+	PermissionId uuid.UUID `json:"permissionId"`
+}
+
+type UpdatePermissionRequest struct {
+	PermissionId uuid.UUID `json:"permissionsId"`
+	CanWrite     bool      `json:"canWrite"`
+	CanEdit      bool      `json:"canEdit"`
+	CanRead      bool      `json:"canRead"`
 }

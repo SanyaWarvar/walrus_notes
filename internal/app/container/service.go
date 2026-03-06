@@ -5,6 +5,7 @@ import (
 	"wn/internal/domain/services/layout"
 	"wn/internal/domain/services/multyplayer"
 	"wn/internal/domain/services/note"
+	"wn/internal/domain/services/permission"
 	smtpSrv "wn/internal/domain/services/smtp"
 	"wn/internal/domain/services/socket"
 	tokenSrv "wn/internal/domain/services/token"
@@ -29,6 +30,7 @@ type services struct {
 	layout             *layout.Service
 	socketManager      *socket.Service
 	multyplayerManager *multyplayer.Service
+	permissionsService *permission.Service
 }
 
 func (s *services) getUserService() *userSrv.Service {
@@ -128,4 +130,11 @@ func (s *services) getMultyplayerService() *multyplayer.Service {
 		s.multyplayerManager = multyplayer.NewService()
 	}
 	return s.multyplayerManager
+}
+
+func (s *services) getPermissionsService() *permission.Service {
+	if s.permissionsService == nil {
+		s.permissionsService = permission.NewPermissionsService()
+	}
+	return s.permissionsService
 }

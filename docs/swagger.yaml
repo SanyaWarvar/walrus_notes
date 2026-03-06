@@ -39,6 +39,11 @@ definitions:
       linkId:
         type: string
     type: object
+  wn_internal_domain_dto.DeletePermissionsRequest:
+    properties:
+      permissionId:
+        type: string
+    type: object
   wn_internal_domain_dto.ExportInfo:
     properties:
       createdAt:
@@ -142,6 +147,8 @@ definitions:
         $ref: '#/definitions/wn_internal_domain_enum.PermissionsKind'
       targetId:
         type: string
+      uuid.UUID:
+        type: string
     type: object
   wn_internal_domain_dto.PermissionsDashbord:
     properties:
@@ -160,6 +167,17 @@ definitions:
         type: number
       yPos:
         type: number
+    type: object
+  wn_internal_domain_dto.UpdatePermissionRequest:
+    properties:
+      canEdit:
+        type: boolean
+      canRead:
+        type: boolean
+      canWrite:
+        type: boolean
+      permissionsId:
+        type: string
     type: object
   wn_internal_domain_dto.UploadFileResponse:
     properties:
@@ -624,39 +642,6 @@ paths:
       summary: register_user
       tags:
       - auth
-  /wn/api/v1/dashboard:
-    get:
-      description: Получить дашборд пермишенов
-      parameters:
-      - description: Request id identity
-        in: header
-        name: X-Request-Id
-        required: true
-        type: string
-      - description: auth token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/wn_pkg_response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/wn_internal_domain_dto.PermissionsDashbord'
-              type: object
-        "400":
-          description: 'possible codes: invalid_X-Request-Id'
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-      summary: getDashboard
-      tags:
-      - permissions
   /wn/api/v1/file/upload:
     post:
       description: загрузить файл
@@ -917,87 +902,6 @@ paths:
       summary: update layout
       tags:
       - layouts
-  /wn/api/v1/links/apply:
-    post:
-      description: Сгенерировать id для выдачи пермишенов
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest'
-      - description: Request id identity
-        in: header
-        name: X-Request-Id
-        required: true
-        type: string
-      - description: auth token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-        "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-        "422":
-          description: 'possible codes: already_exists'
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-      summary: applyLink
-      tags:
-      - permissions
-  /wn/api/v1/links/generate:
-    post:
-      description: Сгенерировать id для выдачи пермишенов
-      parameters:
-      - description: data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest'
-      - description: Request id identity
-        in: header
-        name: X-Request-Id
-        required: true
-        type: string
-      - description: auth token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/wn_pkg_response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse'
-              type: object
-        "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-        "422":
-          description: 'possible codes: bad_kind, premissions_not_enough'
-          schema:
-            $ref: '#/definitions/wn_pkg_response.Response'
-      summary: generateLink
-      tags:
-      - permissions
   /wn/api/v1/notes/create:
     post:
       description: Создать заметку
@@ -1388,6 +1292,196 @@ paths:
       summary: update_note
       tags:
       - notes
+  /wn/api/v1/permissions/dashboard:
+    get:
+      description: Получить дашборд пермишенов
+      parameters:
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.PermissionsDashbord'
+              type: object
+        "400":
+          description: 'possible codes: invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: getDashboard
+      tags:
+      - permissions
+  /wn/api/v1/permissions/delete:
+    post:
+      description: Удалить существующий пермишен
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.DeletePermissionsRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: permissions_not_enough, record_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: deletePermission
+      tags:
+      - permissions
+  /wn/api/v1/permissions/links/apply:
+    post:
+      description: Сгенерировать id для выдачи пермишенов
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.ApplyPermissionsRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: already_exists, cant_apply'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: applyLink
+      tags:
+      - permissions
+  /wn/api/v1/permissions/links/generate:
+    post:
+      description: Сгенерировать id для выдачи пермишенов
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionLinkRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/wn_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/wn_internal_domain_dto.GeneratePermissionsLinkResponse'
+              type: object
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: bad_kind, premissions_not_enough'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: generateLink
+      tags:
+      - permissions
+  /wn/api/v1/permissions/update:
+    post:
+      description: Изменить существующий пермишен
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto.UpdatePermissionRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: permissions_not_enough, record_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: updatePermission
+      tags:
+      - permissions
   /wn/api/v1/user/picture:
     post:
       description: сменить аватарку пользователя

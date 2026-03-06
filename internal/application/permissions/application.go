@@ -39,9 +39,15 @@ type layoutRepository interface {
 	GetByOwnerId(ctx context.Context, ownerId, layoutId uuid.UUID) (*entity.Layout, error)
 }
 
+type permissionsService interface {
+	ApplyUpdateRequest(req *dto.UpdatePermissionRequest, e *entity.Permission) *entity.Permission
+}
+
 type Application struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
+
+	permissionsService permissionsService
 
 	permissionsRepository     permissionsRepository
 	permissionsLinkRepository permissionsLinkRepository
@@ -52,6 +58,7 @@ type Application struct {
 func NewApplication(
 	tx trx.TransactionManager,
 	logger applogger.Logger,
+	permissionsService permissionsService,
 	permissionsRepository permissionsRepository,
 	permissionsLinkRepository permissionsLinkRepository,
 	layoutRepository layoutRepository,
@@ -60,6 +67,7 @@ func NewApplication(
 	return &Application{
 		tx:                        tx,
 		logger:                    logger,
+		permissionsService:        permissionsService,
 		permissionsRepository:     permissionsRepository,
 		permissionsLinkRepository: permissionsLinkRepository,
 		layoutRepository:          layoutRepository,
@@ -175,4 +183,33 @@ func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid
 		Shared:   sharedDto,
 		Recivied: reciviedDto,
 	}, nil
+}
+
+func (srv *Application) DeletePermission(ctx context.Context, userId uuid.UUID, req *dto.DeletePermissionsRequest) error {
+	permission, err := srv.permissionsRepository.GetPermission(ctx, &dto.GetPermissionsFilter{
+		Id: &req.PermissionId,
+	})
+	if err != nil {
+		return err
+	}
+	if permission.FromUserId != userId || permission.ToUserId != userId {
+		return apperrors.PermissionsNotEnough
+	}
+	return srv.permissionsRepository.DeletePermissions(ctx, req.PermissionId)
+}
+
+func (srv *Application) UpdatePermission(ctx context.Context, userId uuid.UUID, req *dto.UpdatePermissionRequest) error {
+	permission, err := srv.permissionsRepository.GetPermission(ctx, &dto.GetPermissionsFilter{
+		Id: &req.PermissionId,
+	})
+	if err != nil {
+		return err
+	}
+	if permission.FromUserId != userId {
+		return apperrors.PermissionsNotEnough
+	}
+
+	permission = srv.permissionsService.ApplyUpdateRequest(req, permission)
+
+	return srv.permissionsRepository.UpdatePermissions(ctx, permission)
 }

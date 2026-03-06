@@ -98,6 +98,7 @@ func (s *applications) getPermissionsApplicationService() *permissions.Applicati
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
 
+			s.c.getServices().getPermissionsService(),
 			s.c.getRepositories().getPermissionsRepository(),
 			s.c.getCaches().getPermissionsCache(),
 			s.c.getRepositories().getLayoutRepository(),
