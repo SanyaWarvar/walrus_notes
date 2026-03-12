@@ -2033,13 +2033,16 @@ const docTemplate = `{
                 "fromUserId": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "kind": {
                     "$ref": "#/definitions/wn_internal_domain_enum.PermissionsKind"
                 },
                 "targetId": {
                     "type": "string"
                 },
-                "uuid.UUID": {
+                "toUserId": {
                     "type": "string"
                 }
             }

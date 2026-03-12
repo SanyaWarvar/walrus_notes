@@ -19,8 +19,9 @@ type PermissionToken struct {
 }
 
 type Permission struct {
-	Id         uuid.UUID            `json:"uuid.UUID"`
+	Id         uuid.UUID            `json:"id"`
 	FromUserId uuid.UUID            `json:"fromUserId"`
+	ToUserId   uuid.UUID            `json:"toUserId"`
 	TargetId   uuid.UUID            `json:"targetId"`
 	Kind       enum.PermissionsKind `json:"kind"`
 	CanRead    bool                 `json:"canRead"`
@@ -32,6 +33,7 @@ func PermissionFromEntity(e *entity.Permission) *Permission {
 	return &Permission{
 		Id:         e.Id,
 		FromUserId: e.FromUserId,
+		ToUserId:   e.ToUserId,
 		TargetId:   e.TargetId,
 		Kind:       e.Kind,
 		CanRead:    e.CanRead,
