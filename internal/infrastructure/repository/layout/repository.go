@@ -144,3 +144,34 @@ func (repo *Repository) GetByOwnerId(ctx context.Context, ownerId, layoutId uuid
 
 	return &item, nil
 }
+
+func (repo *Repository) GetById(ctx context.Context, layoutId uuid.UUID) (*entity.Layout, error) {
+	sql, args, err := sq.
+		Select("l.*").
+		From("layouts l").
+		Where(sq.Eq{"id": layoutId}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "toSql")
+	}
+
+	var item entity.Layout
+	err = repo.conn.QueryRow(ctx, sql, args...).Scan(
+		&item.Id,
+		&item.Title,
+		&item.OwnerId,
+		&item.HaveAccess,
+		&item.IsMain,
+		&item.Color,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.RecordNotFound
+		}
+		return nil, errors.Wrap(err, "scan")
+	}
+
+	return &item, nil
+}

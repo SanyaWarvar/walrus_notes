@@ -18,7 +18,7 @@ type permissionsRepository interface {
 }
 
 type layoutRepo interface {
-	GetByOwnerId(ctx context.Context, ownerId, layoutId uuid.UUID) (*entity.Layout, error)
+	GetById(ctx context.Context, layoutId uuid.UUID) (*entity.Layout, error)
 }
 
 type noteRepo interface {
@@ -47,11 +47,11 @@ func (srv *Service) ApplyUpdateRequest(req *dto.UpdatePermissionRequest, e *enti
 }
 
 func (srv *Service) CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error {
-	l, err := srv.layoutRepo.GetByOwnerId(ctx, userId, targetId)
-	if err != nil && err != apperrors.RecordNotFound {
+	l, err := srv.layoutRepo.GetById(ctx, targetId)
+	if err != nil {
 		return err
 	}
-	if l.OwnerId == userId {
+	if l != nil && l.OwnerId == userId {
 		return nil
 	}
 
@@ -78,15 +78,15 @@ func (srv *Service) CheckPermissionByLayoutId(ctx context.Context, targetId, use
 
 func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error {
 	n, err := srv.noteRepo.GetById(ctx, targetId)
-	if err != nil && err != apperrors.RecordNotFound {
+	if err != nil {
 		return err
 	}
 	if n.OwnerId == userId {
 		return nil
 	}
 
-	l, err := srv.layoutRepo.GetByOwnerId(ctx, userId, targetId)
-	if err != nil && err != apperrors.RecordNotFound {
+	l, err := srv.layoutRepo.GetById(ctx, targetId)
+	if err != nil {
 		return err
 	}
 	if l.OwnerId == userId {
