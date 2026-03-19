@@ -144,14 +144,18 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 
 	output := make([]dto.Layout, 0, len(entities))
 	for _, item := range entities {
-		output = append(output, dto.Layout{
-			Id:         item.Id,
-			OwnerId:    item.OwnerId,
-			Title:      item.Title,
-			IsMain:     item.IsMain,
-			Color:      item.Color,
-			Permission: *dto.PermissionFromEntity(perms[item.Id]),
-		})
+		l := dto.Layout{
+			Id:      item.Id,
+			OwnerId: item.OwnerId,
+			Title:   item.Title,
+			IsMain:  item.IsMain,
+			Color:   item.Color,
+		}
+		p, ok := perms[item.Id]
+		if ok {
+			l.Permission = *dto.PermissionFromEntity(p)
+		}
+		output = append(output, l)
 	}
 
 	return output, nil
