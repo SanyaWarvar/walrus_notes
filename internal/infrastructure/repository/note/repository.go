@@ -173,9 +173,9 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 	query := `
 		select n.* from notes n
 		join positions p on p.note_id = n.id
-		where n.layout_id = $1 and $2 = ANY(n.have_access) and x_position is null and y_position is null
+		where n.layout_id = $1 and x_position is null and y_position is null
 	`
-	rows, err := repo.conn.Query(ctx, query, layoutId, userId)
+	rows, err := repo.conn.Query(ctx, query, layoutId)
 	if err != nil {
 		return nil, errors.Wrap(err, "repo.conn.Query")
 	}
@@ -214,7 +214,6 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 		"p.y_position",
 	).From("notes n").
 		Join("positions p ON p.note_id = n.id").
-		Where("? = ANY(n.have_access)", userId).
 		Where(sq.NotEq{"p.x_position": nil}).
 		Where(sq.NotEq{"p.y_position": nil}).
 		PlaceholderFormat(sq.Dollar)
