@@ -135,10 +135,10 @@ func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId
 		select n.* from notes n
 		where n.layout_id = $1
 		order by created_at desc, layout_id 
-		offset $3
-		limit $4
+		offset $2
+		limit $3
 	`
-	rows, err := repo.conn.Query(ctx, query, layoutId, userId, offset, limit)
+	rows, err := repo.conn.Query(ctx, query, layoutId, offset, limit)
 	if err != nil {
 		return nil, errors.Wrap(err, "repo.conn.Query")
 	}
