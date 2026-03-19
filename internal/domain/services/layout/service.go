@@ -131,7 +131,7 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 	}
 
 	permissions, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
-		TargetId: &userId,
+		ToUserId: &userId,
 	})
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 		}
 		p, ok := perms[item.Id]
 		if ok {
-			l.Permission = *dto.PermissionFromEntity(p)
+			l.Permission = dto.PermissionFromEntity(p)
 		}
 		output = append(output, l)
 	}

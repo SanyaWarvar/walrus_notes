@@ -77,7 +77,7 @@ type Layout struct {
 	OwnerId    uuid.UUID  `json:"ownerId"`
 	IsMain     bool       `json:"isMain"`
 	Color      string     `json:"color"`
-	Permission Permission `json:"permission"`
+	Permission *Permission `json:"permission,omitempty"`
 }
 
 type Position struct {
