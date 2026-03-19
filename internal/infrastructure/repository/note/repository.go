@@ -113,7 +113,7 @@ func (repo *Repository) UpdateDraftById(ctx context.Context, userId, noteId uuid
 	query := `
 		update notes 
 		set draft = $1
-		where id = $2 and $3 = any(have_access)
+		where id = $2
 	`
 	_, err := repo.conn.Exec(ctx, query, newDraft, noteId, userId)
 	return err
@@ -123,7 +123,7 @@ func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUI
 	query := `
 		update notes 
 		set payload = draft, draft = ''
-		where id = $1 and $2 = any(have_access)
+		where id = $1
 	`
 	_, err := repo.conn.Exec(ctx, query, noteId, userId)
 	return err

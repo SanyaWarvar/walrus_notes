@@ -2,7 +2,6 @@ package permissions
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"wn/internal/domain/dto"
 	"wn/internal/domain/enum"
@@ -82,7 +81,6 @@ func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid
 		return nil, apperror.NewBadRequestError("bad expired at", constants.BindBodyError)
 	}
 	var err error
-	fmt.Println(ttl)
 
 	switch req.Kind {
 	case enum.PermissionsKindNote:

@@ -7,6 +7,7 @@ import (
 	apperrors "wn/internal/errors"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type permissionsRepository interface {
@@ -49,7 +50,7 @@ func (srv *Service) ApplyUpdateRequest(req *dto.UpdatePermissionRequest, e *enti
 func (srv *Service) CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error {
 	l, err := srv.layoutRepo.GetById(ctx, targetId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "srv.layoutRepo.GetById")
 	}
 	if l != nil && l.OwnerId == userId {
 		return nil
@@ -60,7 +61,7 @@ func (srv *Service) CheckPermissionByLayoutId(ctx context.Context, targetId, use
 		TargetId: &targetId,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "GetPermission")
 	}
 
 	if edit && !perm.CanEdit {
@@ -79,7 +80,7 @@ func (srv *Service) CheckPermissionByLayoutId(ctx context.Context, targetId, use
 func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error {
 	n, err := srv.noteRepo.GetById(ctx, targetId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "noteRepo.GetById")
 	}
 	if n.OwnerId == userId {
 		return nil
@@ -87,7 +88,7 @@ func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userI
 
 	l, err := srv.layoutRepo.GetById(ctx, targetId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "layoutRepo.GetById")
 	}
 	if l.OwnerId == userId {
 		return nil
@@ -98,7 +99,7 @@ func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userI
 		TargetId: &n.LayoutId,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "GetPermission")
 	}
 
 	if edit && !perm.CanEdit {

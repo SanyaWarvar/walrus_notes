@@ -92,7 +92,6 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 func (repo *Repository) UpdateLayout(ctx context.Context, userId, layoutId uuid.UUID, color, title string) (int, error) {
 	builder := squirrel.Update("layouts ").
 		Where(squirrel.Eq{"id": layoutId}).
-		Where("? = ANY(have_access)", userId).
 		PlaceholderFormat(squirrel.Dollar)
 
 	if color != "" {
