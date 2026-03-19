@@ -133,7 +133,7 @@ func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUI
 func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		where n.layout_id = $1 and ($2 = ANY(n.have_access)
+		where n.layout_id = $1
 		order by created_at desc, layout_id 
 		offset $3
 		limit $4
