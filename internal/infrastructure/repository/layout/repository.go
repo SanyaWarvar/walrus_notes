@@ -57,7 +57,7 @@ func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUI
 	query := `
 		select l.* 
 		from layouts l
-		WHERE $1 = l.owner_id or $1 = any(select to_user_id form permissions p where p.target_id = l.id and p.to_user_id = $1)
+		WHERE $1 = l.owner_id or $1 = any(select to_user_id from permissions p where p.target_id = l.id and p.to_user_id = $1)
 	`
 	rows, err := repo.conn.Query(ctx, query, userId)
 	if err != nil {
