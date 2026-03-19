@@ -752,7 +752,8 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id", cant_delete_main_layout'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, cant_delete_main_layout,
+            permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_layout
@@ -900,7 +901,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: update layout
@@ -943,7 +944,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":
-          description: 'possible codes: not_unique'
+          description: 'possible codes: not_unique, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: create_note
@@ -981,7 +982,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":
-          description: 'possible codes: note_not_found'
+          description: 'possible codes: note_not_found, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_note
@@ -1030,7 +1031,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":
-          description: 'possible codes: note_not_found'
+          description: 'possible codes: note_not_found, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: get_notes_from_layout
@@ -1064,7 +1065,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: update_note_position
@@ -1104,7 +1105,7 @@ paths:
                   type: array
               type: object
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: get_posed_notes
@@ -1144,7 +1145,7 @@ paths:
                   type: array
               type: object
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: get_unposed_notes
@@ -1178,7 +1179,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: create_link_between_notes
@@ -1212,7 +1213,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "400":
-          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          description: 'possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_link_between_notes
@@ -1290,7 +1291,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":
-          description: 'possible codes: note_not_found'
+          description: 'possible codes: note_not_found, permissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: update_note

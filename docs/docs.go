@@ -550,7 +550,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id\", cant_delete_main_layout",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, cant_delete_main_layout, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -781,7 +781,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -850,7 +850,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "possible codes: not_unique",
+                        "description": "possible codes: not_unique, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -907,7 +907,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "possible codes: note_not_found",
+                        "description": "possible codes: note_not_found, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -984,7 +984,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "possible codes: note_not_found",
+                        "description": "possible codes: note_not_found, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1035,7 +1035,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1099,7 +1099,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1163,7 +1163,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1214,7 +1214,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1265,7 +1265,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "description": "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1386,7 +1386,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "possible codes: note_not_found",
+                        "description": "possible codes: note_not_found, permissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }

@@ -82,7 +82,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Success 200 {object} response.Response{data=resp.NoteId}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: not_unique"
+// @Failure 422 {object} response.Response{} "possible codes: not_unique, permissions_not_enough"
 // @Router /wn/api/v1/notes/create [post]
 func (h *Controller) createNote(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -126,7 +126,7 @@ func (h *Controller) createNote(c *gin.Context) {
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: note_not_found"
+// @Failure 422 {object} response.Response{} "possible codes: note_not_found, permissions_not_enough"
 // @Router /wn/api/v1/notes/delete [post]
 func (h *Controller) deleteNote(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -168,7 +168,7 @@ func (h *Controller) deleteNote(c *gin.Context) {
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: note_not_found"
+// @Failure 422 {object} response.Response{} "possible codes: note_not_found, permissions_not_enough"
 // @Router /wn/api/v1/notes/update [post]
 func (h *Controller) updateNote(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -205,7 +205,7 @@ func (h *Controller) updateNote(c *gin.Context) {
 // @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_query, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: note_not_found"
+// @Failure 422 {object} response.Response{} "possible codes: note_not_found, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout [get]
 func (h *Controller) getNotesFromLayout(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -258,7 +258,7 @@ func (h *Controller) getNotesFromLayout(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout/graph/unposed [get]
 func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -294,7 +294,7 @@ func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{data=[]dto.Note}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout/graph/posed [get]
 func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -337,7 +337,7 @@ func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout/graph/note [post]
 func (h *Controller) updateNotePosition(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -372,7 +372,7 @@ func (h *Controller) updateNotePosition(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout/links/create [post]
 func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -407,7 +407,7 @@ func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
-// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id, permissions_not_enough"
 // @Router /wn/api/v1/notes/layout/links/delete [post]
 func (h *Controller) deleteLinkBetweenNotes(c *gin.Context) {
 	ctx := c.Request.Context()
