@@ -55,9 +55,10 @@ func (repo *Repository) DeleteLayoutById(ctx context.Context, layoutId, userId u
 
 func (repo *Repository) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]entity.Layout, error) {
 	query := `
-		select * 
+		select l.* 
 		from layouts l
-		WHERE $1 = ANY(l.have_access)
+		join permissions p on p.target_id = l.id and p.user_id = $1
+		WHERE $1 = l.owner_id or p.to_user_id = $1
 	`
 	rows, err := repo.conn.Query(ctx, query, userId)
 	if err != nil {

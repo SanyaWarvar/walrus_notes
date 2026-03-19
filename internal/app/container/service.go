@@ -112,8 +112,8 @@ func (s *services) getLayoutService() *layout.Service {
 			s.c.getRepositories().getNoteRepository(),
 			s.c.getRepositories().getPositionsRepository(),
 			s.c.getServices().getNoteService(),
+			s.c.getRepositories().getPermissionsRepository(),
 		)
-
 	}
 	return s.layout
 }
@@ -134,7 +134,11 @@ func (s *services) getMultyplayerService() *multyplayer.Service {
 
 func (s *services) getPermissionsService() *permission.Service {
 	if s.permissionsService == nil {
-		s.permissionsService = permission.NewPermissionsService()
+		s.permissionsService = permission.NewPermissionsService(
+			s.c.getRepositories().getPermissionsRepository(),
+			s.c.getRepositories().getLayoutRepository(),
+			s.c.getRepositories().getNoteRepository(),
+		)
 	}
 	return s.permissionsService
 }

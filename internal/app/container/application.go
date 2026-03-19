@@ -63,6 +63,7 @@ func (s *applications) getNoteApplicationService() *note.Service {
 			s.c.getLogger(),
 
 			s.c.getServices().getNoteService(),
+			s.c.getServices().getPermissionsService(),
 		)
 	}
 	return s.note
@@ -75,6 +76,7 @@ func (s *applications) getLayoutApplicationService() *layout.Service {
 			s.c.getLogger(),
 
 			s.c.getServices().getLayoutService(),
+			s.c.getServices().getPermissionsService(),
 		)
 	}
 	return s.layout

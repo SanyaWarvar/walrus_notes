@@ -43,15 +43,24 @@ type positionsRepo interface {
 	DeleteNotesPositionsByLayoutId(ctx context.Context, layoutId uuid.UUID) error
 }
 
+type permissionsRepository interface {
+	GetPermission(ctx context.Context, filter *dto.GetPermissionsFilter) (*entity.Permission, error)
+	GetPermissions(ctx context.Context, filter *dto.GetPermissionsFilter) ([]entity.Permission, error)
+	DeletePermissions(ctx context.Context, permissionsIds ...uuid.UUID) error
+	UpdatePermissions(ctx context.Context, item *entity.Permission) error
+	CreatePermissions(ctx context.Context, item *entity.Permission) error
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	layoutRepo    layoutRepo
-	linksRepo     linksRepo
-	noteRepo      noteRepo
-	positionsRepo positionsRepo
-	noteService   noteService
+	layoutRepo            layoutRepo
+	linksRepo             linksRepo
+	noteRepo              noteRepo
+	positionsRepo         positionsRepo
+	noteService           noteService
+	permissionsRepository permissionsRepository
 }
 
 func NewService(
@@ -62,15 +71,17 @@ func NewService(
 	noteRepo noteRepo,
 	positionsRepo positionsRepo,
 	noteService noteService,
+	permissionsRepository permissionsRepository,
 ) *Service {
 	return &Service{
-		tx:            tx,
-		logger:        logger,
-		layoutRepo:    layoutRepo,
-		linksRepo:     linksRepo,
-		noteRepo:      noteRepo,
-		noteService:   noteService,
-		positionsRepo: positionsRepo,
+		tx:                    tx,
+		logger:                logger,
+		layoutRepo:            layoutRepo,
+		linksRepo:             linksRepo,
+		noteRepo:              noteRepo,
+		noteService:           noteService,
+		positionsRepo:         positionsRepo,
+		permissionsRepository: permissionsRepository,
 	}
 }
 
@@ -119,14 +130,27 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 		return nil, err
 	}
 
+	permissions, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		TargetId: &userId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	perms := make(map[uuid.UUID]*entity.Permission, len(permissions))
+	for i := range permissions {
+		perms[permissions[i].TargetId] = &permissions[i]
+	}
+
 	output := make([]dto.Layout, 0, len(entities))
 	for _, item := range entities {
 		output = append(output, dto.Layout{
-			Id:      item.Id,
-			OwnerId: item.OwnerId,
-			Title:   item.Title,
-			IsMain:  item.IsMain,
-			Color:   item.Color,
+			Id:         item.Id,
+			OwnerId:    item.OwnerId,
+			Title:      item.Title,
+			IsMain:     item.IsMain,
+			Color:      item.Color,
+			Permission: *dto.PermissionFromEntity(perms[item.Id]),
 		})
 	}
 

@@ -1969,6 +1969,9 @@ const docTemplate = `{
                 "ownerId": {
                     "type": "string"
                 },
+                "permission": {
+                    "$ref": "#/definitions/wn_internal_domain_dto.Permission"
+                },
                 "title": {
                     "type": "string"
                 }

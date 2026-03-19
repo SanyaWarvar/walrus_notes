@@ -133,7 +133,7 @@ func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUI
 func (repo *Repository) GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		where n.layout_id = $1 and $2 = ANY(n.have_access)
+		where n.layout_id = $1 and ($2 = ANY(n.have_access) or $2 = any(select to_user_id from permissions p where p.target_id = $1))
 		order by created_at desc, layout_id 
 		offset $3
 		limit $4
@@ -343,7 +343,7 @@ func (repo *Repository) DeleteLinkNotes(ctx context.Context, layoutId, firstNote
 func (repo *Repository) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error) {
 	query := `
 		select n.* from notes n
-		where $1 = ANY(n.have_access) 
+		where $1 = ANY(n.have_access) or $1 = any(select to_user_id from permissions p where p.target_id = n.id)
 			AND (n.title ilike '%' || $2 || '%' or n.payload ilike '%' || $2 || '%')
 	`
 	rows, err := repo.conn.Query(ctx, query, userId, search)
@@ -382,6 +382,39 @@ func (repo *Repository) GetByOwnerId(ctx context.Context, ownerId, noteId uuid.U
 		Select("n.*").
 		From("notes n").
 		Where(sq.Eq{"owner_id": ownerId}).
+		Where(sq.Eq{"id": noteId}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "toSql")
+	}
+
+	var item entity.Note
+	err = repo.conn.QueryRow(ctx, sql, args...).Scan(
+		&item.Id,
+		&item.Title,
+		&item.Payload,
+		&item.CreatedAt,
+		&item.OwnerId,
+		&item.HaveAccess,
+		&item.LayoutId,
+		&item.Draft,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.RecordNotFound
+		}
+		return nil, errors.Wrap(err, "scan")
+	}
+
+	return &item, nil
+}
+
+func (repo *Repository) GetById(ctx context.Context, noteId uuid.UUID) (*entity.Note, error) {
+	sql, args, err := sq.
+		Select("n.*").
+		From("notes n").
 		Where(sq.Eq{"id": noteId}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

@@ -19,22 +19,29 @@ type layoutService interface {
 	ImportLayouts(ctx context.Context, userId uuid.UUID, info *dto.ExportInfo) error
 }
 
+type permissionsService interface {
+	CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error
+}
+
 type Service struct {
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
-	layoutService layoutService
+	layoutService      layoutService
+	permissionsService permissionsService
 }
 
 func NewService(
 	tx trx.TransactionManager,
 	logger applogger.Logger,
 	layoutService layoutService,
+	permissionsService permissionsService,
 ) *Service {
 	return &Service{
-		tx:            tx,
-		logger:        logger,
-		layoutService: layoutService,
+		tx:                 tx,
+		logger:             logger,
+		layoutService:      layoutService,
+		permissionsService: permissionsService,
 	}
 }
 
@@ -47,10 +54,19 @@ func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([
 }
 
 func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error {
+	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, true); err != nil {
+		srv.logger.Warnf("DeleteLayout checkPerms: %s", err.Error())
+		return err
+	}
+
 	return srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
 }
 
 func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
+	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, true); err != nil {
+		srv.logger.Warnf("DeleteLayout checkPerms: %s", err.Error())
+		return err
+	}
 	return srv.layoutService.UpdateLayout(ctx, req, userId)
 }
 
