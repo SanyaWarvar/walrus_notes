@@ -87,7 +87,7 @@ func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) er
 		UPDATE notes
 		SET 
 		title = $1,
-		payload = $2
+		payload = $2,
 		layout_id = $3
 		WHERE id = $4 and owner_id = $5
 	`
