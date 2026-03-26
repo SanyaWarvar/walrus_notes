@@ -30,6 +30,7 @@ type srv interface {
 
 	CreateLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
 	DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
+	DragNote(ctx context.Context, userId uuid.UUID, req req.DragNoteRequest) error
 }
 
 type Controller struct {
@@ -56,6 +57,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 		notesAuth.POST("/update", h.updateNote)
 		notesAuth.POST("/delete", h.deleteNote)
 		notesAuth.GET("/search", h.searchNotes)
+		notesAuth.POST("/drag", h.dragNote)
 		layout := notesAuth.Group("/layout")
 		{
 			layout.GET("", h.getNotesFromLayout)
@@ -462,4 +464,41 @@ func (h *Controller) searchNotes(c *gin.Context) {
 	}
 
 	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, notes))
+}
+
+// @Summary drag_note
+// @Description Переместить заметку между лейаутами
+// @Tags notes
+// @Produce json
+// @Param data body request.DragNoteRequest true "data"
+// @Param X-Request-Id header string true "Request id identity"
+// @Param Authorization header string true "auth token"
+// @Success 200 {object} response.Response{}
+// @Failure 401 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
+// @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
+// @Failure 422 {object} response.Response{} "possible codes: permissions_not_enough, record_not_found"
+// @Router /wn/api/v1/notes/drag [post]
+func (h *Controller) dragNote(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req request.DragNoteRequest
+	err := c.BindJSON(&req)
+	if err != nil {
+		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
+		return
+	}
+
+	userId, err := util.GetUserId(ctx)
+	if err != nil {
+		_ = c.Error(apperrors.InvalidAuthorizationHeader)
+		return
+	}
+
+	err = h.noteService.DragNote(ctx, userId, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, nil))
 }

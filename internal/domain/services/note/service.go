@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 	"wn/internal/domain/dto"
+	"wn/internal/domain/services/crypto"
 	"wn/internal/entity"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
@@ -26,6 +27,7 @@ type noteRepo interface {
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
 	CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error
+	GetById(ctx context.Context, noteId uuid.UUID) (*entity.Note, error)
 }
 
 type positionsRepo interface {
@@ -45,8 +47,9 @@ type layoutRepo interface {
 }
 
 type Service struct {
-	tx     trx.TransactionManager
-	logger applogger.Logger
+	tx        trx.TransactionManager
+	logger    applogger.Logger
+	encryptor *crypto.Encryptor
 
 	noteRepo      noteRepo
 	layoutRepo    layoutRepo
@@ -57,6 +60,7 @@ type Service struct {
 func NewService(
 	tx trx.TransactionManager,
 	logger applogger.Logger,
+	encryptor *crypto.Encryptor,
 	noteRepo noteRepo,
 	layoutRepo layoutRepo,
 	linksRepo linksRepo,
@@ -65,6 +69,7 @@ func NewService(
 	return &Service{
 		tx:            tx,
 		logger:        logger,
+		encryptor:     encryptor,
 		noteRepo:      noteRepo,
 		layoutRepo:    layoutRepo,
 		linksRepo:     linksRepo,
@@ -105,6 +110,11 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 		LayoutId:   layoutId,
 	}
 
+	err := n.EncryptNote(srv.encryptor)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
 	return n.Id, srv.tx.Transaction(ctx, func(ctx context.Context) error {
 		_, err := srv.noteRepo.CreateNote(ctx, &n)
 		if err != nil {
@@ -119,13 +129,21 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 }
 
 func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error {
-	n := entity.Note{
-		Id:      noteId,
-		Title:   title,
-		Payload: payload,
-		OwnerId: ownerId,
+	n, err := srv.noteRepo.GetById(ctx, noteId)
+	if err != nil {
+		return err
 	}
-	return srv.noteRepo.UpdateNote(ctx, &n)
+
+	n.Title = title
+	n.Payload = payload
+	n.OwnerId = ownerId
+
+	err = n.EncryptNote(srv.encryptor)
+	if err != nil {
+		return err
+	}
+
+	return srv.noteRepo.UpdateNote(ctx, n)
 }
 
 func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error) {
@@ -140,6 +158,12 @@ func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layout
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "srv.noteRepo.GetNotesByLayoutId")
 	}
+
+	notes, err = srv.decryptSliceNotes(notes)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "decryptSliceNotes")
+	}
+
 	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, count, err
@@ -150,6 +174,12 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userI
 	if err != nil {
 		return nil, err
 	}
+
+	notes, err = srv.decryptSliceNotes(notes)
+	if err != nil {
+		return nil, errors.Wrap(err, "decryptSliceNotes")
+	}
+
 	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntities(notes, links)
 	return notesDto, err
@@ -160,10 +190,17 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, mainLayoutId, layo
 	if mainLayoutId == t {
 		t = uuid.Nil
 	}
+	
 	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, t, userId)
 	if err != nil {
 		return nil, err
 	}
+
+	notes, err = srv.decryptSliceNotesWithPos(notes)
+	if err != nil {
+		return nil, errors.Wrap(err, "decryptSliceNotes")
+	}
+
 	links, err := srv.linksRepo.GetAllLinks(ctx, getIds(notes))
 	notesDto := dto.NotesFromEntitiesWithPosition(notes, links)
 	return notesDto, err
@@ -177,9 +214,23 @@ func (srv *Service) CreateLink(ctx context.Context, noteId1, noteId2 uuid.UUID) 
 	return srv.linksRepo.LinkNotes(ctx, noteId1, noteId2)
 }
 
+func (srv *Service) DragNote(ctx context.Context, noteId, toLayout uuid.UUID) error {
+	note, err := srv.noteRepo.GetById(ctx, noteId)
+	if err != nil {
+		return err
+	}
+	note.LayoutId = toLayout
+	return srv.noteRepo.UpdateNote(ctx, note)
+}
+
 // todo добавлять беклинки?
 func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {
 	notes, err := srv.noteRepo.SearchNotes(ctx, userId, search)
+	if err != nil {
+		return nil, err
+	}
+
+	notes, err = srv.decryptSliceNotes(notes)
 	if err != nil {
 		return nil, err
 	}
@@ -398,66 +449,6 @@ func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
 	return resultNotes
 }
 
-/*
-	func (srv *Service) GenerateCluster(notes []dto.Note) []dto.Note {
-		if len(notes) == 0 {
-			return notes
-		}
-
-		// Группируем заметки по layoutId
-		layoutGroups := make(map[uuid.UUID][]dto.Note)
-		for _, note := range notes {
-			layoutGroups[note.LayoutId] = append(layoutGroups[note.LayoutId], note)
-		}
-
-		// Параметры кластеризации
-		clusterSpacing := 100.0 // расстояние между кластерами
-		gridSpacing := 20.0     // расстояние между заметками внутри кластера
-		notesPerRow := 5        // максимальное количество заметок в строке кластера
-
-		// Обрабатываем каждый кластер
-		clusterX := 0.0
-		result := make([]dto.Note, 0, len(notes))
-
-		for _, groupNotes := range layoutGroups {
-			// Сортируем заметки внутри кластера для детерминированного позиционирования
-			sort.Slice(groupNotes, func(i, j int) bool {
-				return groupNotes[i].Id.String() < groupNotes[j].Id.String()
-			})
-
-			// Позиционируем заметки внутри кластера
-			for i, note := range groupNotes {
-				// Если у заметки уже есть позиция, используем её (относительно кластера)
-				if note.Position != nil {
-					note.Position.XPos += clusterX
-					result = append(result, note)
-					continue
-				}
-
-				// Автоматическое позиционирование внутри кластера
-				row := i / notesPerRow
-				col := i % notesPerRow
-
-				xPos := clusterX + float64(col)*gridSpacing
-				yPos := float64(row) * gridSpacing
-
-				// Создаем новую позицию
-				note.Position = &dto.Position{
-					XPos: xPos,
-					YPos: yPos,
-				}
-				result = append(result, note)
-			}
-
-			// Сдвигаем следующий кластер вправо
-			maxNotesInCluster := len(groupNotes)
-			clusterWidth := math.Min(float64(notesPerRow), float64(maxNotesInCluster)) * gridSpacing
-			clusterX += clusterWidth + clusterSpacing
-		}
-
-		return result
-	}
-*/
 func calculateClusterBounds(notes []dto.Note) (minX, minY, maxX, maxY float64) {
 	if len(notes) == 0 {
 		return 0, 0, 0, 0
@@ -522,4 +513,43 @@ func (srv *Service) RessurectNotes(ctx context.Context, item *dto.Note) error {
 		xPos, yPos = &item.Position.XPos, &item.Position.YPos
 	}
 	return srv.positionsRepo.CreateNotePosition(ctx, item.Id, xPos, yPos)
+}
+
+func (srv *Service) decryptSliceNotes(e []entity.Note) ([]entity.Note, error) {
+	output := make([]entity.Note, 0, len(e))
+	for i := range e {
+		n := e[i]
+		err := n.DecryptNote(srv.encryptor)
+		if err != nil {
+			return nil, err
+		}
+		output = append(output, n)
+	}
+	return output, nil
+}
+
+func (srv *Service) decryptSliceNotesWithPos(e []entity.NoteWithPosition) ([]entity.NoteWithPosition, error) {
+	output := make([]entity.NoteWithPosition, 0, len(e))
+	for i := range e {
+		n := e[i]
+		err := n.DecryptNote(srv.encryptor)
+		if err != nil {
+			return nil, err
+		}
+		output = append(output, n)
+	}
+	return output, nil
+}
+
+func (srv *Service) encryptSliceNotes(e []entity.Note) ([]entity.Note, error) {
+	output := make([]entity.Note, 0, len(e))
+	for i := range e {
+		n := e[i]
+		err := n.EncryptNote(srv.encryptor)
+		if err != nil {
+			return nil, err
+		}
+		output = append(output, n)
+	}
+	return output, nil
 }

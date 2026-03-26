@@ -22,6 +22,7 @@ type noteService interface {
 	DeleteLink(ctx context.Context, noteId1, noteId2 uuid.UUID) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
 	GenerateCluster(notes []dto.Note) []dto.Note
+	DragNote(ctx context.Context, noteId, toLayout uuid.UUID) error
 }
 
 type permissionsService interface {
@@ -128,6 +129,19 @@ func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req req.Li
 		return err
 	}
 	return srv.noteService.DeleteLink(ctx, req.FirstNoteId, req.SecondNoteId)
+}
+
+func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req req.DragNoteRequest) error {
+	if err := srv.permissionsService.CheckPermissionByNoteId(ctx, req.NoteId, userId, true, true, false); err != nil {
+		srv.logger.Warnf("CheckPermissionByNoteId: %s", err.Error())
+		return err
+	}
+	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.ToLayoutId, userId, true, true, false); err != nil {
+		srv.logger.Warnf("CheckPermissionByLayoutId: %s", err.Error())
+		return err
+	}
+
+	return srv.noteService.DragNote(ctx, req.NoteId, req.ToLayoutId)
 }
 
 func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {

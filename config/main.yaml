@@ -27,6 +27,7 @@ internal:
   path: "/wn"
   environment: ".env"
   logInputParamOnErr: true
+  encryptKey: "VerySecureEncryptKey"
 
 cache:
   url: "localhost:6379"

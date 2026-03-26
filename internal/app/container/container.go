@@ -3,6 +3,7 @@ package container
 import (
 	"wn/config"
 	"wn/internal/domain/dto"
+	"wn/internal/domain/services/crypto"
 	"wn/internal/endpoint/controller/http"
 	v1 "wn/internal/endpoint/controller/http/api/v1"
 	"wn/pkg/applogger"
@@ -28,6 +29,7 @@ type Container struct {
 	httpDispatcher     *v1.Dispatcher
 	httpKernel         *http.Kernel
 	restClient         restclient.RestClient
+	encryptor          *crypto.Encryptor
 
 	repositories *repositories
 	applications *applications

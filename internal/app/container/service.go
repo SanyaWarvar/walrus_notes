@@ -92,6 +92,7 @@ func (s *services) getNoteService() *note.Service {
 		s.note = note.NewService(
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
+			s.c.getEncryptor(),
 			s.c.getRepositories().getNoteRepository(),
 			s.c.getRepositories().getLayoutRepository(),
 			s.c.getRepositories().getLinksRepository(),

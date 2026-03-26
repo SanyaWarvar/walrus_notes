@@ -118,3 +118,8 @@ type LinkBetweenNotesRequest struct {
 	FirstNoteId  uuid.UUID `json:"firstNoteId" binding:"required"`
 	SecondNoteId uuid.UUID `json:"secondNoteId" binding:"required"`
 }
+
+type DragNoteRequest struct {
+	NoteId       uuid.UUID `json:"noteId"`
+	ToLayoutId   uuid.UUID `json:"toLayoutId"`
+}

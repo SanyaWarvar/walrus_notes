@@ -2,6 +2,7 @@ package entity
 
 import (
 	"time"
+	"wn/internal/domain/services/crypto"
 
 	"github.com/google/uuid"
 )
@@ -48,4 +49,50 @@ type Layout struct {
 type Link struct {
 	FirstNoteId  uuid.UUID `json:"firstNoteId"`
 	SecondNoteId uuid.UUID `json:"secondNoteId"`
+}
+
+// EncryptNote шифрует поля Payload и Draft
+func (n *Note) EncryptNote(encryptor *crypto.Encryptor) error {
+	// Шифруем Payload
+	if n.Payload != "" {
+		encryptedPayload, err := encryptor.Encrypt(n.Payload)
+		if err != nil {
+			return err
+		}
+		n.Payload = encryptedPayload
+	}
+
+	// Шифруем Draft
+	if n.Draft != "" {
+		encryptedDraft, err := encryptor.Encrypt(n.Draft)
+		if err != nil {
+			return err
+		}
+		n.Draft = encryptedDraft
+	}
+
+	return nil
+}
+
+// DecryptNote расшифровывает поля Payload и Draft
+func (n *Note) DecryptNote(encryptor *crypto.Encryptor) error {
+	// Расшифровываем Payload
+	if n.Payload != "" {
+		decryptedPayload, err := encryptor.Decrypt(n.Payload)
+		if err != nil {
+			return err
+		}
+		n.Payload = decryptedPayload
+	}
+
+	// Расшифровываем Draft
+	if n.Draft != "" {
+		decryptedDraft, err := encryptor.Decrypt(n.Draft)
+		if err != nil {
+			return err
+		}
+		n.Draft = decryptedDraft
+	}
+
+	return nil
 }

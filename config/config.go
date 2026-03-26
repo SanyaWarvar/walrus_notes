@@ -26,6 +26,7 @@ type (
 		Path               string `yaml:"path" env:"API_PATH"`
 		Environment        string `yaml:"environment" env:"ENVIRONMENT"`
 		LogInputParamOnErr bool   `yaml:"logInputParamOnErr" env:"LOG_INPUT_PARAM_ON_ERR"`
+		EncryptKey         string `yaml:"encryptKey" env:"ENCRYPT_KEY"`
 	}
 
 	JwtConfig struct {

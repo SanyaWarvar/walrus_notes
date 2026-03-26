@@ -209,6 +209,13 @@ definitions:
     - code
     - email
     type: object
+  wn_internal_domain_dto_request.DragNoteRequest:
+    properties:
+      noteId:
+        type: string
+      toLayoutId:
+        type: string
+    type: object
   wn_internal_domain_dto_request.LayoutIdRequest:
     properties:
       layoutId:
@@ -986,6 +993,48 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: delete_note
+      tags:
+      - notes
+  /wn/api/v1/notes/drag:
+    post:
+      description: Переместить заметку между лейаутами
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/wn_internal_domain_dto_request.DragNoteRequest'
+      - description: Request id identity
+        in: header
+        name: X-Request-Id
+        required: true
+        type: string
+      - description: auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "400":
+          description: 'possible codes: bind_body, invalid_X-Request-Id'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "401":
+          description: 'possible codes: invalid_token, invalid_authorization_header'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+        "422":
+          description: 'possible codes: permissions_not_enough, record_not_found'
+          schema:
+            $ref: '#/definitions/wn_pkg_response.Response'
+      summary: drag_note
       tags:
       - notes
   /wn/api/v1/notes/layout:

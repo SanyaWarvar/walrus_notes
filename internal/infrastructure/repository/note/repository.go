@@ -88,9 +88,10 @@ func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) er
 		SET 
 		title = $1,
 		payload = $2
-		WHERE id = $3 and owner_id = $4
+		layout_id = $3
+		WHERE id = $4 and owner_id = $5
 	`
-	res, err := repo.conn.Exec(ctx, query, newItem.Title, newItem.Payload, newItem.Id, newItem.OwnerId)
+	res, err := repo.conn.Exec(ctx, query, newItem.Title, newItem.Payload, newItem.LayoutId, newItem.Id, newItem.OwnerId)
 	if err != nil {
 		return err
 	}

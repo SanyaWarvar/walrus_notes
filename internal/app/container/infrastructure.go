@@ -2,6 +2,7 @@ package container
 
 import (
 	"log"
+	"wn/internal/domain/services/crypto"
 	"wn/internal/endpoint/controller/http"
 	"wn/pkg/applogger"
 	"wn/pkg/database/dragonfly"
@@ -46,6 +47,13 @@ func (c *Container) getTransactionManager() trx.TransactionManager {
 		c.pool = c.getDBPool().WithContextManagerManager(c.getContextManager())
 	}
 	return c.trxManager
+}
+
+func (c *Container) getEncryptor() *crypto.Encryptor {
+	if c.encryptor == nil {
+		c.encryptor = crypto.NewEncryptor(c.getConfig().Internal.EncryptKey)
+	}
+	return c.encryptor
 }
 
 func (c *Container) getKernel() *http.Kernel {

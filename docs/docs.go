@@ -915,6 +915,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/wn/api/v1/notes/drag": {
+            "post": {
+                "description": "Переместить заметку между лейаутами",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notes"
+                ],
+                "summary": "drag_note",
+                "parameters": [
+                    {
+                        "description": "data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/wn_internal_domain_dto_request.DragNoteRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request id identity",
+                        "name": "X-Request-Id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "possible codes: bind_body, invalid_X-Request-Id",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "possible codes: invalid_token, invalid_authorization_header",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    },
+                    "422": {
+                        "description": "possible codes: permissions_not_enough, record_not_found",
+                        "schema": {
+                            "$ref": "#/definitions/wn_pkg_response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/wn/api/v1/notes/layout": {
             "get": {
                 "description": "Получить все заметки из layout-а",
@@ -2131,6 +2194,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "newPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto_request.DragNoteRequest": {
+            "type": "object",
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                },
+                "toLayoutId": {
                     "type": "string"
                 }
             }

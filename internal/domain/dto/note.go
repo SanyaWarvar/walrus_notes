@@ -33,6 +33,7 @@ func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {
 			LinkedWithOut: out[item.Id],
 			LinkedWithIn:  in[item.Id],
 			Draft:         item.Draft,
+			LayoutId: item.LayoutId,
 		})
 	}
 	return output
@@ -72,11 +73,11 @@ func TransformLinks(links []entity.Link) (map[uuid.UUID][]uuid.UUID, map[uuid.UU
 }
 
 type Layout struct {
-	Id         uuid.UUID  `json:"id"`
-	Title      string     `json:"title"`
-	OwnerId    uuid.UUID  `json:"ownerId"`
-	IsMain     bool       `json:"isMain"`
-	Color      string     `json:"color"`
+	Id         uuid.UUID   `json:"id"`
+	Title      string      `json:"title"`
+	OwnerId    uuid.UUID   `json:"ownerId"`
+	IsMain     bool        `json:"isMain"`
+	Color      string      `json:"color"`
 	Permission *Permission `json:"permission,omitempty"`
 }
 
