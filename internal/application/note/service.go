@@ -11,9 +11,9 @@ import (
 )
 
 type noteService interface {
-	DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error
+	DeleteNoteById(ctx context.Context, noteId uuid.UUID) error
 	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error)
-	UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error
+	UpdateNote(ctx context.Context, title, payload string, noteId uuid.UUID) error
 	GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error)
 	GetNotesWithPosition(ctx context.Context, mainLayoutId, layoutId, userId uuid.UUID) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
@@ -65,7 +65,8 @@ func (srv *Service) UpdateNote(ctx context.Context, req req.NoteWithIdRequest, u
 		srv.logger.Warnf("UpdateNote checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId, userId)
+
+	return srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId)
 }
 
 func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId, mainLayoutId uuid.UUID) error {
@@ -73,7 +74,8 @@ func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId, main
 		srv.logger.Warnf("DeleteNote checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.noteService.DeleteNoteById(ctx, req.NoteId, userId)
+
+	return srv.noteService.DeleteNoteById(ctx, req.NoteId)
 }
 
 func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {

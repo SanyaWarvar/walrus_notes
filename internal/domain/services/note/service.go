@@ -17,7 +17,7 @@ import (
 )
 
 type noteRepo interface {
-	DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error
+	DeleteNoteById(ctx context.Context, noteId uuid.UUID) error
 	CreateNote(ctx context.Context, item *entity.Note) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, newItem *entity.Note) error
 	GetNoteCountInLayout(ctx context.Context, layoutId uuid.UUID) (int, error)
@@ -25,8 +25,8 @@ type noteRepo interface {
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
-	UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error
-	CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error
+	UpdateDraftById(ctx context.Context, noteId uuid.UUID, newDraft string) error
+	CommitDraft(ctx context.Context, noteId uuid.UUID) error
 	GetById(ctx context.Context, noteId uuid.UUID) (*entity.Note, error)
 }
 
@@ -81,7 +81,7 @@ func (srv *Service) DeleteLink(ctx context.Context, noteId1, noteId2 uuid.UUID) 
 	return srv.linksRepo.DeleteLink(ctx, noteId1, noteId2)
 }
 
-func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
+func (srv *Service) DeleteNoteById(ctx context.Context, noteId uuid.UUID) error {
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 		err := srv.positionsRepo.DeleteNotesPositionByNoteId(ctx, noteId)
 		if err != nil {
@@ -91,7 +91,7 @@ func (srv *Service) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID
 		if err != nil {
 			return err
 		}
-		err = srv.noteRepo.DeleteNoteById(ctx, noteId, userId)
+		err = srv.noteRepo.DeleteNoteById(ctx, noteId)
 		if err != nil {
 			return err
 		}
@@ -128,7 +128,7 @@ func (srv *Service) CreateNote(ctx context.Context, title, payload string, owner
 	})
 }
 
-func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteId, ownerId uuid.UUID) error {
+func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteId uuid.UUID) error {
 	n, err := srv.noteRepo.GetById(ctx, noteId)
 	if err != nil {
 		return err
@@ -136,7 +136,6 @@ func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteI
 
 	n.Title = title
 	n.Payload = payload
-	n.OwnerId = ownerId
 
 	err = n.EncryptNote(srv.encryptor)
 	if err != nil {
@@ -190,7 +189,7 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, mainLayoutId, layo
 	if mainLayoutId == t {
 		t = uuid.Nil
 	}
-	
+
 	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, t, userId)
 	if err != nil {
 		return nil, err
@@ -249,7 +248,32 @@ func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
-	err = srv.noteRepo.UpdateDraftById(ctx, userId, item.NoteId, item.NewDraft)
+
+	n, err := srv.noteRepo.GetById(ctx, item.NoteId)
+	if err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+
+	if err := n.DecryptNote(srv.encryptor); err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+
+	n.Draft = item.NewDraft
+
+	if err := n.EncryptNote(srv.encryptor); err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+
+	err = srv.noteRepo.UpdateNote(ctx, n)
 	return &dto.SocketMessage{
 		Event:   "UPDATE_DRAFT_RESPONSE",
 		Payload: []byte("{\"status\": \"true\"}"),
@@ -266,7 +290,8 @@ func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
-	err = srv.noteRepo.CommitDraft(ctx, userId, item.NoteId)
+
+	err = srv.noteRepo.CommitDraft(ctx, item.NoteId)
 	return &dto.SocketMessage{
 		Event:   "COMMIT_DRAFT_RESPONSE",
 		Payload: []byte("{\"status\": \"true\"}"),

@@ -38,18 +38,16 @@ func (repo *Repository) CreateLayout(ctx context.Context, item *entity.Layout) (
 	return id, err
 }
 
-func (repo *Repository) DeleteLayoutById(ctx context.Context, layoutId, userId uuid.UUID) error {
+func (repo *Repository) DeleteLayoutById(ctx context.Context, layoutId uuid.UUID) error {
 	query := `
 		DELETE FROM layouts 
-		WHERE id = $1 and owner_id = $2
+		WHERE id = $1
 	`
-	res, err := repo.conn.Exec(ctx, query, layoutId, userId)
+	_, err := repo.conn.Exec(ctx, query, layoutId)
 	if err != nil {
 		return err
 	}
-	if res.RowsAffected() == 0 {
-		return apperrors.LayoutNotFound
-	}
+
 	return nil
 }
 

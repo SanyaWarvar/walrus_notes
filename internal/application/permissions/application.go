@@ -2,9 +2,9 @@ package permissions
 
 import (
 	"context"
+	"fmt"
 	"time"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/enum"
 	"wn/internal/entity"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
@@ -31,14 +31,17 @@ type permissionsLinkRepository interface {
 }
 
 type noteRepository interface {
+	GetById(ctx context.Context, noteId uuid.UUID) (*entity.Note, error)
 	GetByOwnerId(ctx context.Context, ownerId, noteId uuid.UUID) (*entity.Note, error)
 }
 
 type layoutRepository interface {
+	GetById(ctx context.Context, layoutId uuid.UUID) (*entity.Layout, error)
 	GetByOwnerId(ctx context.Context, ownerId, layoutId uuid.UUID) (*entity.Layout, error)
 }
 
 type permissionsService interface {
+	CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error
 	ApplyUpdateRequest(req *dto.UpdatePermissionRequest, e *entity.Permission) *entity.Permission
 }
 
@@ -75,27 +78,18 @@ func NewApplication(
 }
 
 func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid.UUID, req *dto.GeneratePermissionLinkRequest) (*dto.GeneratePermissionsLinkResponse, error) {
+	
+	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.TargetId, userId, false, false, true); err != nil{
+		return nil, err
+	}
+	
 	id := uuid.New()
 	ttl := req.ExpiredAt.Sub(util.GetCurrentUTCTime())
 	if ttl < 0 {
 		return nil, apperror.NewBadRequestError("bad expired at", constants.BindBodyError)
 	}
-	var err error
 
-	switch req.Kind {
-	case enum.PermissionsKindNote:
-		_, err = srv.noteRepository.GetByOwnerId(ctx, userId, req.TargetId)
-	case enum.PermissionsKindLayout:
-		_, err = srv.layoutRepository.GetByOwnerId(ctx, userId, req.TargetId)
-	default:
-		return nil, apperrors.BadKind
-	}
-
-	if err != nil {
-		return nil, apperrors.PermissionsNotEnough
-	}
-
-	if err = srv.permissionsLinkRepository.SavePermissionsLink(ctx, &dto.PermissionToken{
+	if err := srv.permissionsLinkRepository.SavePermissionsLink(ctx, &dto.PermissionToken{
 		FromUserId: userId,
 		TargetId:   req.TargetId,
 		Kind:       req.Kind,
@@ -159,7 +153,7 @@ func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid
 	if err != nil {
 		return nil, errors.Wrap(err, "recivied")
 	}
-
+	
 	shared, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
 		FromUserId: &userId,
 	})
@@ -167,6 +161,7 @@ func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid
 		return nil, errors.Wrap(err, "shared")
 	}
 
+	fmt.Println("recivied: ", recivied, "shared: ", shared)
 	sharedDto := make([]dto.Permission, 0, len(shared))
 	for i := range shared {
 		sharedDto = append(sharedDto, *dto.PermissionFromEntity(&shared[i]))
@@ -190,9 +185,11 @@ func (srv *Application) DeletePermission(ctx context.Context, userId uuid.UUID, 
 	if err != nil {
 		return err
 	}
-	if permission.FromUserId != userId || permission.ToUserId != userId {
+
+	if permission.FromUserId == userId || permission.ToUserId == userId {
 		return apperrors.PermissionsNotEnough
 	}
+
 	return srv.permissionsRepository.DeletePermissions(ctx, req.PermissionId)
 }
 

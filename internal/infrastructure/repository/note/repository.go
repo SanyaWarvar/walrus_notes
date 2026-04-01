@@ -54,12 +54,12 @@ func (repo *Repository) CreateNote(ctx context.Context, item *entity.Note) (uuid
 	return item.Id, err
 }
 
-func (repo *Repository) DeleteNoteById(ctx context.Context, noteId, userId uuid.UUID) error {
+func (repo *Repository) DeleteNoteById(ctx context.Context, noteId uuid.UUID) error {
 	query := `
 		DELETE FROM notes 
-		WHERE id = $1 and owner_id = $2
+		WHERE id = $1
 	`
-	res, err := repo.conn.Exec(ctx, query, noteId, userId)
+	res, err := repo.conn.Exec(ctx, query, noteId)
 	if err != nil {
 		return err
 	}
@@ -69,12 +69,12 @@ func (repo *Repository) DeleteNoteById(ctx context.Context, noteId, userId uuid.
 	return nil
 }
 
-func (repo *Repository) DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error {
+func (repo *Repository) DeleteNotesByLayoutId(ctx context.Context, layoutId uuid.UUID) error {
 	query := `
 		DELETE FROM notes 
-		WHERE layout_id = $1 and owner_id = $2
+		WHERE layout_id = $1
 	`
-	_, err := repo.conn.Exec(ctx, query, layoutId, userId)
+	_, err := repo.conn.Exec(ctx, query, layoutId)
 	if err != nil {
 		return err
 	}
@@ -88,10 +88,11 @@ func (repo *Repository) UpdateNote(ctx context.Context, newItem *entity.Note) er
 		SET 
 		title = $1,
 		payload = $2,
-		layout_id = $3
-		WHERE id = $4 and owner_id = $5
+		layout_id = $3,
+		draft = $4
+		WHERE id = $5
 	`
-	res, err := repo.conn.Exec(ctx, query, newItem.Title, newItem.Payload, newItem.LayoutId, newItem.Id, newItem.OwnerId)
+	res, err := repo.conn.Exec(ctx, query, newItem.Title, newItem.Payload, newItem.LayoutId, newItem.Draft, newItem.Id)
 	if err != nil {
 		return err
 	}
@@ -110,23 +111,23 @@ func (repo *Repository) GetNoteCountInLayout(ctx context.Context, layoutId uuid.
 	return n, err
 }
 
-func (repo *Repository) UpdateDraftById(ctx context.Context, userId, noteId uuid.UUID, newDraft string) error {
+func (repo *Repository) UpdateDraftById(ctx context.Context, noteId uuid.UUID, newDraft string) error {
 	query := `
 		update notes 
 		set draft = $1
 		where id = $2
 	`
-	_, err := repo.conn.Exec(ctx, query, newDraft, noteId, userId)
+	_, err := repo.conn.Exec(ctx, query, newDraft, noteId)
 	return err
 }
 
-func (repo *Repository) CommitDraft(ctx context.Context, userId, noteId uuid.UUID) error {
+func (repo *Repository) CommitDraft(ctx context.Context, noteId uuid.UUID) error {
 	query := `
 		update notes 
 		set payload = draft, draft = ''
 		where id = $1
 	`
-	_, err := repo.conn.Exec(ctx, query, noteId, userId)
+	_, err := repo.conn.Exec(ctx, query, noteId)
 	return err
 }
 

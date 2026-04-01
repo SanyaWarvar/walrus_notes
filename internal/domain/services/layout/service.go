@@ -17,7 +17,7 @@ import (
 
 type layoutRepo interface {
 	CreateLayout(ctx context.Context, item *entity.Layout) (uuid.UUID, error)
-	DeleteLayoutById(ctx context.Context, layoutId, userId uuid.UUID) error
+	DeleteLayoutById(ctx context.Context, layoutId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]entity.Layout, error)
 	UpdateLayout(ctx context.Context, userId, layoutId uuid.UUID, color, title string) (int, error)
 }
@@ -30,7 +30,7 @@ type linksRepo interface {
 }
 
 type noteRepo interface {
-	DeleteNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) error
+	DeleteNotesByLayoutId(ctx context.Context, layoutId uuid.UUID) error
 	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetFullNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
 }
@@ -98,9 +98,26 @@ func (srv *Service) CreateLayout(ctx context.Context, title, color string, owner
 }
 
 func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error {
+	perm, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		TargetId: &layoutId,
+	})
+	if err != nil {
+		return err
+	}
+
+	permIds := make([]uuid.UUID, 0, len(perm))
+	for _, p := range perm {
+		permIds = append(permIds, p.Id)
+	}
+
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 
-		err := srv.positionsRepo.DeleteNotesPositionsByLayoutId(ctx, layoutId)
+		err := srv.permissionsRepository.DeletePermissions(ctx, permIds...)
+		if err != nil {
+			return errors.Wrap(err, "srv.permissionsRepository.DeletePermissions")
+		}
+
+		err = srv.positionsRepo.DeleteNotesPositionsByLayoutId(ctx, layoutId)
 		if err != nil {
 			return errors.Wrap(err, "srv.positionsRepo.DeleteNotesPositionsByLayoutId")
 		}
@@ -110,12 +127,12 @@ func (srv *Service) DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid
 			return errors.Wrap(err, "srv.linksRepo.DeleteLinksByLayoutId")
 		}
 
-		err = srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId, ownerId)
+		err = srv.noteRepo.DeleteNotesByLayoutId(ctx, layoutId)
 		if err != nil {
 			return errors.Wrap(err, "srv.noteRepo.DeleteNotesByLayoutId")
 		}
 
-		err = srv.layoutRepo.DeleteLayoutById(ctx, layoutId, ownerId)
+		err = srv.layoutRepo.DeleteLayoutById(ctx, layoutId)
 		if err != nil {
 			return errors.Wrap(err, "srv.layoutRepo.DeleteLayoutById")
 		}
@@ -183,6 +200,10 @@ func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.E
 	output.Notes = map[uuid.UUID][]dto.Note{}
 
 	for _, l := range layouts {
+		if l.OwnerId != userId {
+			continue
+		}
+
 		notes, err := srv.noteRepo.GetFullNotesByLayoutId(ctx, l.Id, userId)
 		if err != nil {
 			return nil, errors.Wrap(err, "GetFullNotesByLayoutId")
