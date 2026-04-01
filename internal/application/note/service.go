@@ -4,6 +4,7 @@ import (
 	"context"
 	"wn/internal/domain/dto"
 	req "wn/internal/domain/dto/request"
+	"wn/internal/entity"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
@@ -15,7 +16,7 @@ type noteService interface {
 	CreateNote(ctx context.Context, title, payload string, ownerId, layoutId, mainLayoutId uuid.UUID) (uuid.UUID, error)
 	UpdateNote(ctx context.Context, title, payload string, noteId uuid.UUID) error
 	GetNotesWithPagination(ctx context.Context, page int, layoutId, userId uuid.UUID) ([]dto.Note, int, error)
-	GetNotesWithPosition(ctx context.Context, mainLayoutId, layoutId, userId uuid.UUID) ([]dto.Note, error)
+	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, layoutIds []uuid.UUID) ([]dto.Note, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
 	UpdateNotePosition(ctx context.Context, noteId uuid.UUID, xPos, yPos *float64) error
 	CreateLink(ctx context.Context, noteId1, noteId2 uuid.UUID) error
@@ -23,6 +24,10 @@ type noteService interface {
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
 	GenerateCluster(notes []dto.Note) []dto.Note
 	DragNote(ctx context.Context, noteId, toLayout uuid.UUID) error
+}
+
+type layoutRepository interface {
+	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]entity.Layout, error)
 }
 
 type permissionsService interface {
@@ -36,6 +41,7 @@ type Service struct {
 
 	noteService        noteService
 	permissionsService permissionsService
+	layoutRepository   layoutRepository
 }
 
 func NewService(
@@ -43,12 +49,14 @@ func NewService(
 	logger applogger.Logger,
 	noteService noteService,
 	permissionsService permissionsService,
+	layoutRepository layoutRepository,
 ) *Service {
 	return &Service{
 		tx:                 tx,
 		logger:             logger,
 		noteService:        noteService,
 		permissionsService: permissionsService,
+		layoutRepository:   layoutRepository,
 	}
 }
 
@@ -91,10 +99,24 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayout
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return nil, err
 	}
-	notes, err := srv.noteService.GetNotesWithPosition(ctx, mainLayoutId, req.LayoutId, userId)
+
+	var notes []dto.Note
+	var err error
+
+	if req.LayoutId == mainLayoutId {
+		layoutIds, err := srv.getLayoutIds(ctx, userId)
+		if err != nil {
+			return nil, err
+		}
+		notes, err = srv.noteService.GetNotesWithPosition(ctx, mainLayoutId, layoutIds)
+	} else {
+		notes, err = srv.noteService.GetNotesWithPosition(ctx, userId, []uuid.UUID{req.LayoutId})
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if mainLayoutId == req.LayoutId {
 		return srv.noteService.GenerateCluster(notes), nil
 	}
@@ -148,4 +170,19 @@ func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req req.Drag
 
 func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {
 	return srv.noteService.SearchNotes(ctx, userId, search)
+}
+
+func (srv *Service) getLayoutIds(ctx context.Context, userId uuid.UUID) ([]uuid.UUID, error) {
+	layouts, err := srv.layoutRepository.GetAvailableLayouts(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	layoutIds := make([]uuid.UUID, 0, len(layouts)-1)
+	for _, l := range layouts {
+		if l.IsMain {
+			continue
+		}
+		layoutIds = append(layoutIds, l.Id)
+	}
+	return layoutIds, nil
 }

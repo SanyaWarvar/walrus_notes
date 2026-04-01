@@ -208,7 +208,7 @@ func (repo *Repository) GetNotesWithoutPosition(ctx context.Context, layoutId, u
 	return notes, nil
 }
 
-func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error) {
+func (repo *Repository) GetNotesWithPosition(ctx context.Context, userId uuid.UUID, layoutIds []uuid.UUID) ([]entity.NoteWithPosition, error) {
 	builder := sq.Select(
 		"n.*",
 		"p.note_id",
@@ -218,11 +218,8 @@ func (repo *Repository) GetNotesWithPosition(ctx context.Context, layoutId, user
 		Join("positions p ON p.note_id = n.id").
 		Where(sq.NotEq{"p.x_position": nil}).
 		Where(sq.NotEq{"p.y_position": nil}).
+		Where(sq.Eq{"n.layout_id": layoutIds}).
 		PlaceholderFormat(sq.Dollar)
-
-	if layoutId != uuid.Nil {
-		builder = builder.Where(sq.Eq{"n.layout_id": layoutId})
-	}
 
 	query, args, err := builder.ToSql()
 	if err != nil {

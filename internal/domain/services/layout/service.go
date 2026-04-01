@@ -31,7 +31,6 @@ type linksRepo interface {
 
 type noteRepo interface {
 	DeleteNotesByLayoutId(ctx context.Context, layoutId uuid.UUID) error
-	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetFullNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID) ([]dto.Note, error)
 }
 

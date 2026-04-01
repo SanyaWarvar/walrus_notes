@@ -22,7 +22,7 @@ type noteRepo interface {
 	UpdateNote(ctx context.Context, newItem *entity.Note) error
 	GetNoteCountInLayout(ctx context.Context, layoutId uuid.UUID) (int, error)
 	GetNotesByLayoutId(ctx context.Context, layoutId, userId uuid.UUID, offset, limit int) ([]entity.Note, error)
-	GetNotesWithPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.NoteWithPosition, error)
+	GetNotesWithPosition(ctx context.Context, userId uuid.UUID, layoutIds []uuid.UUID) ([]entity.NoteWithPosition, error)
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, noteId uuid.UUID, newDraft string) error
@@ -184,13 +184,9 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, layoutId, userI
 	return notesDto, err
 }
 
-func (srv *Service) GetNotesWithPosition(ctx context.Context, mainLayoutId, layoutId, userId uuid.UUID) ([]dto.Note, error) {
-	t := layoutId
-	if mainLayoutId == t {
-		t = uuid.Nil
-	}
+func (srv *Service) GetNotesWithPosition(ctx context.Context, userId uuid.UUID, layoutIds []uuid.UUID) ([]dto.Note, error) {
 
-	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, t, userId)
+	notes, err := srv.noteRepo.GetNotesWithPosition(ctx, userId, layoutIds)
 	if err != nil {
 		return nil, err
 	}
