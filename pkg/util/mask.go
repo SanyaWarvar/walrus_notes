@@ -9,16 +9,14 @@ import (
 var headerToMask = []string{constants.AuthorizationHeader, constants.RefreshHeader}
 
 func MaskHeaders(header http.Header) http.Header {
-	// Копируем исходные заголовки
 	maskedHeaders := make(http.Header)
 	for k, v := range header {
 		maskedHeaders[k] = v
 	}
 
-	// Маскирование заголовков из слайса headerToMask
 	for _, headerName := range headerToMask {
 		if value := header.Get(headerName); value != "" {
-			maskedHeaders.Set(headerName, maskBySize(value)) // Замените на то, что нужно для маскировки
+			maskedHeaders.Set(headerName, maskBySize(value))
 		}
 	}
 

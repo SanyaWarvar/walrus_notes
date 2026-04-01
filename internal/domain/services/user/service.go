@@ -55,13 +55,14 @@ func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintia
 		CreatedAt: util.GetCurrentUTCTime(),
 	}
 	userEntity := userRepository.User{
-		Id:        user.Id,
-		Username:  user.Username,
-		Email:     user.Email,
-		Password:  generatePasswordHash(credintials.Password),
-		ImgUrl:    "base.png",
-		CreatedAt: user.CreatedAt,
-		Role:      constants.ClientRole,
+		Id:             user.Id,
+		Username:       user.Username,
+		Email:          user.Email,
+		ConfirmedEmail: false,
+		Password:       generatePasswordHash(credintials.Password),
+		ImgUrl:         "base.png",
+		CreatedAt:      user.CreatedAt,
+		Role:           constants.ClientRole,
 	}
 	err := srv.userRepo.CreateUser(ctx, &userEntity)
 	return &user, err
