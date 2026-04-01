@@ -59,8 +59,8 @@ type ApplyPermissionsRequest struct {
 	LinkId uuid.UUID `json:"linkId"`
 }
 
-type PermissionsDashbord struct {
-	Recivied []Permission `json:"recivied"`
+type PermissionsDashboard struct {
+	Received []Permission `json:"received"`
 	Shared   []Permission `json:"shared"`
 }
 

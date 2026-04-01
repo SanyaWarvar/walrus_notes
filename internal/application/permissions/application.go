@@ -2,7 +2,6 @@ package permissions
 
 import (
 	"context"
-	"fmt"
 	"time"
 	"wn/internal/domain/dto"
 	"wn/internal/entity"
@@ -78,11 +77,11 @@ func NewApplication(
 }
 
 func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid.UUID, req *dto.GeneratePermissionLinkRequest) (*dto.GeneratePermissionsLinkResponse, error) {
-	
-	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.TargetId, userId, false, false, true); err != nil{
+
+	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.TargetId, userId, false, false, true); err != nil {
 		return nil, err
 	}
-	
+
 	id := uuid.New()
 	ttl := req.ExpiredAt.Sub(util.GetCurrentUTCTime())
 	if ttl < 0 {
@@ -146,14 +145,14 @@ func (srv *Application) ApplyPermissionsLink(ctx context.Context, userId uuid.UU
 	})
 }
 
-func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid.UUID) (*dto.PermissionsDashbord, error) {
-	recivied, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid.UUID) (*dto.PermissionsDashboard, error) {
+	received, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
 		ToUserId: &userId,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "recivied")
+		return nil, errors.Wrap(err, "received")
 	}
-	
+
 	shared, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
 		FromUserId: &userId,
 	})
@@ -161,20 +160,19 @@ func (srv *Application) GetPermissionsDashboard(ctx context.Context, userId uuid
 		return nil, errors.Wrap(err, "shared")
 	}
 
-	fmt.Println("recivied: ", recivied, "shared: ", shared)
 	sharedDto := make([]dto.Permission, 0, len(shared))
 	for i := range shared {
 		sharedDto = append(sharedDto, *dto.PermissionFromEntity(&shared[i]))
 	}
 
-	reciviedDto := make([]dto.Permission, 0, len(recivied))
-	for i := range recivied {
-		reciviedDto = append(sharedDto, *dto.PermissionFromEntity(&recivied[i]))
+	receivedDto := make([]dto.Permission, 0, len(received))
+	for i := range received {
+		receivedDto = append(receivedDto, *dto.PermissionFromEntity(&received[i]))
 	}
 
-	return &dto.PermissionsDashbord{
+	return &dto.PermissionsDashboard{
 		Shared:   sharedDto,
-		Recivied: reciviedDto,
+		Received: receivedDto,
 	}, nil
 }
 
@@ -186,7 +184,7 @@ func (srv *Application) DeletePermission(ctx context.Context, userId uuid.UUID, 
 		return err
 	}
 
-	if permission.FromUserId == userId || permission.ToUserId == userId {
+	if !(permission.FromUserId == userId || permission.ToUserId == userId) {
 		return apperrors.PermissionsNotEnough
 	}
 

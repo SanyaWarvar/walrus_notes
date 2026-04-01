@@ -17,7 +17,7 @@ import (
 type permissionsService interface {
 	GeneratePermissionsLink(ctx context.Context, userId uuid.UUID, req *dto.GeneratePermissionLinkRequest) (*dto.GeneratePermissionsLinkResponse, error)
 	ApplyPermissionsLink(ctx context.Context, userId uuid.UUID, req *dto.ApplyPermissionsRequest) error
-	GetPermissionsDashboard(ctx context.Context, userId uuid.UUID) (*dto.PermissionsDashbord, error)
+	GetPermissionsDashboard(ctx context.Context, userId uuid.UUID) (*dto.PermissionsDashboard, error)
 	UpdatePermission(ctx context.Context, userId uuid.UUID, req *dto.UpdatePermissionRequest) error
 	DeletePermission(ctx context.Context, userId uuid.UUID, req *dto.DeletePermissionsRequest) error
 }
@@ -125,7 +125,7 @@ func (h *Controller) applyLink(c *gin.Context) {
 // @Produce json
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{data=dto.PermissionsDashbord}
+// @Success 200 {object} response.Response{data=dto.PermissionsDashboard}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: invalid_X-Request-Id"
 // @Router /wn/api/v1/permissions/dashboard [get]

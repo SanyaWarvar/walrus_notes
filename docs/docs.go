@@ -1495,7 +1495,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto.PermissionsDashbord"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.PermissionsDashboard"
                                         }
                                     }
                                 }
@@ -2113,10 +2113,10 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto.PermissionsDashbord": {
+        "wn_internal_domain_dto.PermissionsDashboard": {
             "type": "object",
             "properties": {
-                "recivied": {
+                "received": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/wn_internal_domain_dto.Permission"

@@ -154,9 +154,9 @@ definitions:
       toUserId:
         type: string
     type: object
-  wn_internal_domain_dto.PermissionsDashbord:
+  wn_internal_domain_dto.PermissionsDashboard:
     properties:
-      recivied:
+      received:
         items:
           $ref: '#/definitions/wn_internal_domain_dto.Permission'
         type: array
@@ -1370,7 +1370,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto.PermissionsDashbord'
+                  $ref: '#/definitions/wn_internal_domain_dto.PermissionsDashboard'
               type: object
         "400":
           description: 'possible codes: invalid_X-Request-Id'

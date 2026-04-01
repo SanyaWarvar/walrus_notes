@@ -86,7 +86,7 @@ func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userI
 		return nil
 	}
 
-	l, err := srv.layoutRepo.GetById(ctx, targetId)
+	l, err := srv.layoutRepo.GetById(ctx, n.LayoutId)
 	if err != nil {
 		return errors.Wrap(err, "layoutRepo.GetById")
 	}
