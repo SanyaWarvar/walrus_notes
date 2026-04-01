@@ -268,15 +268,15 @@ func (repo *Repository) GetFullNotesByLayoutId(ctx context.Context, layoutId, us
     COALESCE(array((select first_note_id from links l where l.second_note_id = n.id)), '{}')
     from notes n
     left join positions p on p.note_id = n.id
-    where n.owner_id = $1 and n.layout_id = $2
+    where n.layout_id = $1
     `
-	rows, err := repo.conn.Query(ctx, query, userId, layoutId)
+	rows, err := repo.conn.Query(ctx, query, layoutId)
 	if err != nil {
 		return nil, errors.Wrap(err, "repo.conn.Query")
 	}
 	defer rows.Close()
 
-	var notes []dto.Note
+	notes := []dto.Note{}
 	for rows.Next() {
 		var item dto.Note
 		var in, out pgtype.Array[uuid.UUID]

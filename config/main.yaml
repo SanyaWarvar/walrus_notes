@@ -5,13 +5,13 @@ http:
   writeTimeout: 10s
 
 postgres:
-  username: "postgres"
-  host: "localhost"
+  username: "tusk"
+  host: "dpg-d6t9h9cr85hc739amrt0-a.frankfurt-postgres.render.com"
   port: "5432"
-  dbname: "postgres"
-  sslmode: "disable"
-  password: "postgres"
-  schema: "walrus"
+  dbname: "walrus_u0i2"
+  sslmode: "require"
+  password: "i4OcP4ui3CTUQ8lSejE0lQfFO8bR0uba"
+  schema: "public"
   poolMax: 50
   poolMin: 20
   healthCheckPeriod: 10s

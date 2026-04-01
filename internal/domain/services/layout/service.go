@@ -223,7 +223,7 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 	layouts, err := srv.layoutRepo.GetAvailableLayouts(ctx, userId)
 	return srv.tx.Transaction(ctx, func(ctx context.Context) error {
 		for i := range layouts {
-			if layouts[i].IsMain {
+			if layouts[i].IsMain || layouts[i].OwnerId != userId {
 				continue
 			}
 			err = srv.DeleteLayoutById(ctx, layouts[i].Id, userId)
@@ -234,7 +234,7 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 		}
 
 		for _, l := range info.Layouts {
-			if l.IsMain {
+			if l.IsMain || l.OwnerId != userId {
 				continue
 			}
 			_, err := srv.layoutRepo.CreateLayout(ctx, &entity.Layout{
@@ -256,7 +256,7 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 			}
 		}
 		for _, l := range info.Layouts {
-			if l.IsMain {
+			if l.IsMain || l.OwnerId != userId {
 				continue
 			}
 			for _, item := range info.Notes[l.Id] {
