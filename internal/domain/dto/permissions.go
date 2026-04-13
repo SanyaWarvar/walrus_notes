@@ -19,14 +19,13 @@ type PermissionToken struct {
 }
 
 type Permission struct {
-	Id         uuid.UUID            `json:"id"`
-	FromUserId uuid.UUID            `json:"fromUserId"`
-	ToUserId   uuid.UUID            `json:"toUserId"`
-	TargetId   uuid.UUID            `json:"targetId"`
-	Kind       enum.PermissionsKind `json:"kind"`
-	CanRead    bool                 `json:"canRead"`
-	CanWrite   bool                 `json:"canWrite"`
-	CanEdit    bool                 `json:"canEdit"`
+	Id         uuid.UUID `json:"id"`
+	FromUserId uuid.UUID `json:"fromUserId"`
+	ToUserId   uuid.UUID `json:"toUserId"`
+	TargetId   uuid.UUID `json:"targetId"`
+	CanRead    bool      `json:"canRead"`
+	CanWrite   bool      `json:"canWrite"`
+	CanEdit    bool      `json:"canEdit"`
 }
 
 func PermissionFromEntity(e *entity.Permission) *Permission {
@@ -35,7 +34,6 @@ func PermissionFromEntity(e *entity.Permission) *Permission {
 		FromUserId: e.FromUserId,
 		ToUserId:   e.ToUserId,
 		TargetId:   e.TargetId,
-		Kind:       e.Kind,
 		CanRead:    e.CanRead,
 		CanWrite:   e.CanWrite,
 		CanEdit:    e.CanEdit,

@@ -33,7 +33,7 @@ func NotesFromEntities(entities []entity.Note, links []entity.Link) []Note {
 			LinkedWithOut: out[item.Id],
 			LinkedWithIn:  in[item.Id],
 			Draft:         item.Draft,
-			LayoutId: item.LayoutId,
+			LayoutId:      item.LayoutId,
 		})
 	}
 	return output
@@ -87,8 +87,9 @@ type Position struct {
 }
 
 type ExportInfo struct {
-	UserId    uuid.UUID            `json:"userId"`
-	CreatedAt time.Time            `json:"createdAt"`
-	Layouts   []Layout             `json:"layouts"`
-	Notes     map[uuid.UUID][]Note `json:"notes"`
+	UserId      uuid.UUID            `json:"userId"`
+	CreatedAt   time.Time            `json:"createdAt"`
+	Layouts     []Layout             `json:"layouts"`
+	Notes       map[uuid.UUID][]Note `json:"notes"`
+	Permissions []Permission         `json:"permissions"`
 }

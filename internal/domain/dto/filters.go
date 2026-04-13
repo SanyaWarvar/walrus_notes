@@ -12,6 +12,7 @@ type GetPermissionsFilter struct {
 	FromUserId *uuid.UUID
 	ToUserId   *uuid.UUID
 	TargetId   *uuid.UUID
+	TargetIdIn []uuid.UUID
 
 	Limit uint64
 }

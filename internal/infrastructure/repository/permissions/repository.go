@@ -64,6 +64,7 @@ func (repo *Repository) UpdatePermissions(ctx context.Context, item *entity.Perm
 		Set("can_read", item.CanRead).
 		Set("can_write", item.CanWrite).
 		Set("can_edit", item.CanEdit).
+		Where(sq.Eq{"id": item.Id}).
 		PlaceholderFormat(sq.Dollar)
 
 	sql, args, err := query.ToSql()

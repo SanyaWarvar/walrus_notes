@@ -198,6 +198,7 @@ func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.E
 	output.CreatedAt = util.GetCurrentUTCTime()
 	output.Notes = map[uuid.UUID][]dto.Note{}
 
+	layoutIds := make([]uuid.UUID, 0, len(layouts))
 	for _, l := range layouts {
 		if l.OwnerId != userId {
 			continue
@@ -215,7 +216,20 @@ func (srv *Service) ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.E
 			Color:   l.Color,
 		})
 		output.Notes[l.Id] = notes
+		layoutIds = append(layoutIds, l.Id)
 	}
+	perm, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		TargetIdIn: layoutIds,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "GetPermissions")
+	}
+
+	output.Permissions = make([]dto.Permission, 0, len(perm))
+	for i := range perm {
+		output.Permissions = append(output.Permissions, *dto.PermissionFromEntity(&perm[i]))
+	}
+
 	return &output, nil
 }
 
@@ -255,6 +269,7 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 				}
 			}
 		}
+
 		for _, l := range info.Layouts {
 			if l.IsMain || l.OwnerId != userId {
 				continue
@@ -266,6 +281,22 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 						return errors.Wrap(err, "LinkNotes")
 					}
 				}
+			}
+		}
+
+		for _, p := range info.Permissions {
+			err = srv.permissionsRepository.CreatePermissions(ctx, &entity.Permission{
+				Id:         p.Id,
+				FromUserId: p.FromUserId,
+				ToUserId:   p.ToUserId,
+				TargetId:   p.TargetId,
+				CanRead:    p.CanRead,
+				CanWrite:   p.CanWrite,
+				CanEdit:    p.CanEdit,
+				CreatedAt:  util.GetCurrentUTCTime(),
+			})
+			if err != nil {
+				return errors.Wrap(err, "CreatePermissions")
 			}
 		}
 		return nil
