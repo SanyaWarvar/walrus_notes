@@ -3,6 +3,7 @@ package note
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math"
 	"sort"
 	"wn/internal/domain/dto"
@@ -153,6 +154,7 @@ func (srv *Service) GetNotesWithPagination(ctx context.Context, page int, layout
 	}
 	offset := util.CalculateOffset(page)
 	limit := util.CalculateLimit()
+
 	notes, err := srv.noteRepo.GetNotesByLayoutId(ctx, layoutId, userId, offset, limit)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "srv.noteRepo.GetNotesByLayoutId")
@@ -543,7 +545,9 @@ func (srv *Service) decryptSliceNotes(e []entity.Note) ([]entity.Note, error) {
 	output := make([]entity.Note, 0, len(e))
 	for i := range e {
 		n := e[i]
+		fmt.Printf("before decrypt %d: %v\n", i, n)
 		err := n.DecryptNote(srv.encryptor)
+		fmt.Printf("after decrypt %d: %v\n", i, n)
 		if err != nil {
 			return nil, err
 		}
