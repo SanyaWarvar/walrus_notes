@@ -3,7 +3,6 @@ package note
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"math"
 	"sort"
 	"wn/internal/domain/dto"
@@ -135,6 +134,11 @@ func (srv *Service) UpdateNote(ctx context.Context, title, payload string, noteI
 		return err
 	}
 
+	err = n.DecryptNote(srv.encryptor)
+	if err != nil {
+		return err
+	}
+
 	n.Title = title
 	n.Payload = payload
 
@@ -242,7 +246,7 @@ func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 	err := json.Unmarshal(msg.Payload, &item)
 	if err != nil {
 		return &dto.SocketMessage{
-			Event:   "COMMIT_DRAFT_RESPONSE",
+			Event:   "UPDATE_DRAFT_RESPONSE",
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
@@ -250,14 +254,14 @@ func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 	n, err := srv.noteRepo.GetById(ctx, item.NoteId)
 	if err != nil {
 		return &dto.SocketMessage{
-			Event:   "COMMIT_DRAFT_RESPONSE",
+			Event:   "UPDATE_DRAFT_RESPONSE",
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
 
 	if err := n.DecryptNote(srv.encryptor); err != nil {
 		return &dto.SocketMessage{
-			Event:   "COMMIT_DRAFT_RESPONSE",
+			Event:   "UPDATE_DRAFT_RESPONSE",
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
@@ -266,7 +270,7 @@ func (srv *Service) HandleCreateDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 
 	if err := n.EncryptNote(srv.encryptor); err != nil {
 		return &dto.SocketMessage{
-			Event:   "COMMIT_DRAFT_RESPONSE",
+			Event:   "UPDATE_DRAFT_RESPONSE",
 			Payload: []byte("{\"status\": \"false\"}"),
 		}, err
 	}
@@ -545,9 +549,7 @@ func (srv *Service) decryptSliceNotes(e []entity.Note) ([]entity.Note, error) {
 	output := make([]entity.Note, 0, len(e))
 	for i := range e {
 		n := e[i]
-		fmt.Printf("before decrypt %d: %v\n", i, n)
 		err := n.DecryptNote(srv.encryptor)
-		fmt.Printf("after decrypt %d: %v\n", i, n)
 		if err != nil {
 			return nil, err
 		}

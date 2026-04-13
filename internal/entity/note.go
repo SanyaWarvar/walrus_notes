@@ -53,7 +53,6 @@ type Link struct {
 
 // EncryptNote шифрует поля Payload и Draft
 func (n *Note) EncryptNote(encryptor *crypto.Encryptor) error {
-	// Шифруем Payload
 	if n.Payload != "" {
 		encryptedPayload, err := encryptor.Encrypt(n.Payload)
 		if err != nil {
@@ -62,7 +61,6 @@ func (n *Note) EncryptNote(encryptor *crypto.Encryptor) error {
 		n.Payload = encryptedPayload
 	}
 
-	// Шифруем Draft
 	if n.Draft != "" {
 		encryptedDraft, err := encryptor.Encrypt(n.Draft)
 		if err != nil {
@@ -76,7 +74,6 @@ func (n *Note) EncryptNote(encryptor *crypto.Encryptor) error {
 
 // DecryptNote расшифровывает поля Payload и Draft
 func (n *Note) DecryptNote(encryptor *crypto.Encryptor) error {
-	// Расшифровываем Payload
 	if n.Payload != "" {
 		decryptedPayload, err := encryptor.Decrypt(n.Payload)
 		if err != nil {
@@ -85,7 +82,6 @@ func (n *Note) DecryptNote(encryptor *crypto.Encryptor) error {
 		n.Payload = decryptedPayload
 	}
 
-	// Расшифровываем Draft
 	if n.Draft != "" {
 		decryptedDraft, err := encryptor.Decrypt(n.Draft)
 		if err != nil {
