@@ -91,7 +91,6 @@ func (srv *Application) GeneratePermissionsLink(ctx context.Context, userId uuid
 	if err := srv.permissionsLinkRepository.SavePermissionsLink(ctx, &dto.PermissionToken{
 		FromUserId: userId,
 		TargetId:   req.TargetId,
-		Kind:       req.Kind,
 		CanRead:    req.CanRead,
 		CanWrite:   req.CanWrite,
 		CanEdit:    req.CanEdit,
@@ -137,7 +136,6 @@ func (srv *Application) ApplyPermissionsLink(ctx context.Context, userId uuid.UU
 		ToUserId:   userId,
 		FromUserId: perm.FromUserId,
 		TargetId:   perm.TargetId,
-		Kind:       perm.Kind,
 		CanRead:    perm.CanRead,
 		CanWrite:   perm.CanWrite,
 		CanEdit:    perm.CanEdit,

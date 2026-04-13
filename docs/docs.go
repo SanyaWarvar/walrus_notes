@@ -1686,7 +1686,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "possible codes: bad_kind, premissions_not_enough",
+                        "description": "possible codes: premissions_not_enough",
                         "schema": {
                             "$ref": "#/definitions/wn_pkg_response.Response"
                         }
@@ -1892,7 +1892,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/textproto.MIMEHeader"
                 },
                 "size": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int64"
                 }
             }
         },
@@ -1907,6 +1908,7 @@ const docTemplate = `{
         },
         "time.Duration": {
             "type": "integer",
+            "format": "int64",
             "enum": [
                 -9223372036854775808,
                 9223372036854775807,
@@ -1965,6 +1967,12 @@ const docTemplate = `{
                         }
                     }
                 },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/wn_internal_domain_dto.Permission"
+                    }
+                },
                 "userId": {
                     "type": "string"
                 }
@@ -1992,9 +2000,6 @@ const docTemplate = `{
                 },
                 "expiredAt": {
                     "type": "string"
-                },
-                "kind": {
-                    "$ref": "#/definitions/wn_internal_domain_enum.PermissionsKind"
                 },
                 "targetId": {
                     "type": "string"
@@ -2101,9 +2106,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
-                },
-                "kind": {
-                    "$ref": "#/definitions/wn_internal_domain_enum.PermissionsKind"
                 },
                 "targetId": {
                     "type": "string"
@@ -2443,19 +2445,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "wn_internal_domain_enum.PermissionsKind": {
-            "type": "string",
-            "enum": [
-                "PERMISSIONS_KIND_UNSPECIFIED",
-                "PERMISSIONS_KIND_LAYOUT",
-                "PERMISSIONS_KIND_NOTE"
-            ],
-            "x-enum-varnames": [
-                "PermissionsKindUnspecified",
-                "PermissionsKindLayout",
-                "PermissionsKindNote"
-            ]
         },
         "wn_internal_domain_services_token.UserTokens": {
             "type": "object",

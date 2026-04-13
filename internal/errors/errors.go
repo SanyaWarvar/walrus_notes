@@ -27,7 +27,6 @@ var (
 	RecordNotFound = apperror.NewInvalidDataError("record not found", "record_not_found")
 
 	PermissionsNotEnough = apperror.NewInvalidDataError("permissions not enough", "premissions_not_enough")
-	BadKind              = apperror.NewBadRequestError("bad kind", "bad_kind")
 	AlreadyExist         = apperror.NewInvalidDataError("already exist", "already_exist")
 	CantApply            = apperror.NewInvalidDataError("cant apply", "cant_apply")
 )

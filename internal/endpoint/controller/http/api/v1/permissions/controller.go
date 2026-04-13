@@ -59,7 +59,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Success 200 {object} response.Response{data=dto.GeneratePermissionsLinkResponse}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
-// @Failure 422 {object} response.Response{} "possible codes: bad_kind, premissions_not_enough"
+// @Failure 422 {object} response.Response{} "possible codes: premissions_not_enough"
 // @Router /wn/api/v1/permissions/links/generate [post]
 func (h *Controller) generateLink(c *gin.Context) {
 	ctx := c.Request.Context()

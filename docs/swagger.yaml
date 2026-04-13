@@ -6,6 +6,7 @@ definitions:
       header:
         $ref: '#/definitions/textproto.MIMEHeader'
       size:
+        format: int64
         type: integer
     type: object
   textproto.MIMEHeader:
@@ -24,6 +25,7 @@ definitions:
     - 1000000000
     - 60000000000
     - 3600000000000
+    format: int64
     type: integer
     x-enum-varnames:
     - minDuration
@@ -58,6 +60,10 @@ definitions:
             $ref: '#/definitions/wn_internal_domain_dto.Note'
           type: array
         type: object
+      permissions:
+        items:
+          $ref: '#/definitions/wn_internal_domain_dto.Permission'
+        type: array
       userId:
         type: string
     type: object
@@ -76,8 +82,6 @@ definitions:
         type: boolean
       expiredAt:
         type: string
-      kind:
-        $ref: '#/definitions/wn_internal_domain_enum.PermissionsKind'
       targetId:
         type: string
     type: object
@@ -147,8 +151,6 @@ definitions:
         type: string
       id:
         type: string
-      kind:
-        $ref: '#/definitions/wn_internal_domain_enum.PermissionsKind'
       targetId:
         type: string
       toUserId:
@@ -369,16 +371,6 @@ definitions:
       username:
         type: string
     type: object
-  wn_internal_domain_enum.PermissionsKind:
-    enum:
-    - PERMISSIONS_KIND_UNSPECIFIED
-    - PERMISSIONS_KIND_LAYOUT
-    - PERMISSIONS_KIND_NOTE
-    type: string
-    x-enum-varnames:
-    - PermissionsKindUnspecified
-    - PermissionsKindLayout
-    - PermissionsKindNote
   wn_internal_domain_services_token.UserTokens:
     properties:
       accessToken:
@@ -1492,7 +1484,7 @@ paths:
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
         "422":
-          description: 'possible codes: bad_kind, premissions_not_enough'
+          description: 'possible codes: premissions_not_enough'
           schema:
             $ref: '#/definitions/wn_pkg_response.Response'
       summary: generateLink

@@ -28,7 +28,6 @@ func (repo *Repository) CreatePermissions(ctx context.Context, item *entity.Perm
 			"to_user_id",
 			"from_user_id",
 			"target_id",
-			"kind",
 			"can_read",
 			"can_write",
 			"can_edit",
@@ -38,7 +37,6 @@ func (repo *Repository) CreatePermissions(ctx context.Context, item *entity.Perm
 		item.ToUserId,
 		item.FromUserId,
 		item.TargetId,
-		item.Kind,
 		item.CanRead,
 		item.CanWrite,
 		item.CanEdit,
@@ -104,7 +102,6 @@ func (repo *Repository) GetPermissions(ctx context.Context, filter *dto.GetPermi
 			"to_user_id",
 			"from_user_id",
 			"target_id",
-			"kind",
 			"can_read",
 			"can_write",
 			"can_edit",
@@ -115,10 +112,6 @@ func (repo *Repository) GetPermissions(ctx context.Context, filter *dto.GetPermi
 
 	if filter.Id != nil {
 		query = query.Where(sq.Eq{"p.id": filter.Id})
-	}
-
-	if filter.Kind != nil {
-		query = query.Where(sq.Eq{"p.kind": filter.Kind})
 	}
 
 	if filter.FromUserId != nil {
@@ -156,7 +149,6 @@ func (repo *Repository) GetPermissions(ctx context.Context, filter *dto.GetPermi
 			&item.ToUserId,
 			&item.FromUserId,
 			&item.TargetId,
-			&item.Kind,
 			&item.CanRead,
 			&item.CanWrite,
 			&item.CanEdit,

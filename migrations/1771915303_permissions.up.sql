@@ -3,7 +3,6 @@ create table if not exists permissions (
     to_user_id uuid,
     from_user_id uuid,
     target_id uuid,
-    kind varchar,
     can_read boolean,
     can_write boolean,
     can_edit boolean,
