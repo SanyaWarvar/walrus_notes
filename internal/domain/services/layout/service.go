@@ -262,6 +262,7 @@ func (srv *Service) ImportLayouts(ctx context.Context, userId uuid.UUID, info *d
 			if err != nil {
 				return errors.Wrap(err, "CreateLayout")
 			}
+
 			for _, note := range info.Notes[l.Id] {
 				err = srv.noteService.RessurectNotes(ctx, &note)
 				if err != nil {

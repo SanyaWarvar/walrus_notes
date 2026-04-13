@@ -532,7 +532,6 @@ func (srv *Service) RessurectNotes(ctx context.Context, item *dto.Note) error {
 		Draft:      item.Draft,
 		LayoutId:   item.LayoutId,
 	}
-	e.EncryptNote(srv.encryptor)
 
 	_, err := srv.noteRepo.CreateNote(ctx, &e)
 	if err != nil {
