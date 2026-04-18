@@ -25,7 +25,7 @@ func NewRepository(conn postgres.Connection) *Repository {
 
 func (repo *Repository) CreateUser(ctx context.Context, item *entity.User) error {
 	query := `
-		INSERT INTO entity.Users VALUES
+		INSERT INTO users VALUES
 		($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 	_, err := repo.conn.Exec(ctx, query, item.Id, item.Username, item.Email, item.Password, item.Role, item.ImgUrl, item.ConfirmedEmail, item.CreatedAt)
@@ -39,7 +39,7 @@ func (repo *Repository) CreateUser(ctx context.Context, item *entity.User) error
 
 func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *dto.UserUpdateParams) error {
 
-	builder := squirrel.Update("entity.Users").
+	builder := squirrel.Update("users").
 		Where(squirrel.Eq{"id": userId}).
 		PlaceholderFormat(squirrel.Dollar)
 
@@ -77,7 +77,7 @@ func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, update
 
 func (repo *Repository) GetUser(ctx context.Context, filter dto.UserFilter) (*entity.User, bool, error) {
 	var output entity.User
-	builder := squirrel.Select("u.*").From("entity.Users u")
+	builder := squirrel.Select("u.*").From("users u")
 
 	if filter.Id != nil {
 		builder = builder.Where(squirrel.Eq{"id": filter.Id})
