@@ -1,4 +1,4 @@
-package file
+package entity
 
 type StaticFile struct {
 	Filename     string `db:"file_path"`

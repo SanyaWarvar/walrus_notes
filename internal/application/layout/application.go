@@ -3,7 +3,6 @@ package layout
 import (
 	"context"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
@@ -15,7 +14,7 @@ type layoutService interface {
 	DeleteLayoutById(ctx context.Context, layoutId, ownerId uuid.UUID) error
 	GetAvailableLayouts(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
 	ExportLayouts(ctx context.Context, userId uuid.UUID) (*dto.ExportInfo, error)
-	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
+	UpdateLayout(ctx context.Context, req dto.UpdateLayout, userId uuid.UUID) error
 	ImportLayouts(ctx context.Context, userId uuid.UUID, info *dto.ExportInfo) error
 }
 
@@ -45,7 +44,7 @@ func NewService(
 	}
 }
 
-func (srv *Service) CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error) {
+func (srv *Service) CreateLayout(ctx context.Context, req dto.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error) {
 	return srv.layoutService.CreateLayout(ctx, req.Title, req.Color, userId, false)
 }
 
@@ -53,7 +52,7 @@ func (srv *Service) GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([
 	return srv.layoutService.GetAvailableLayouts(ctx, userId)
 }
 
-func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error {
+func (srv *Service) DeleteLayout(ctx context.Context, req dto.LayoutIdRequest, userId uuid.UUID) error {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, true); err != nil {
 		srv.logger.Warnf("DeleteLayout checkPerms: %s", err.Error())
 		return err
@@ -62,7 +61,7 @@ func (srv *Service) DeleteLayout(ctx context.Context, req request.LayoutIdReques
 	return srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
 }
 
-func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
+func (srv *Service) UpdateLayout(ctx context.Context, req dto.UpdateLayout, userId uuid.UUID) error {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, true); err != nil {
 		srv.logger.Warnf("DeleteLayout checkPerms: %s", err.Error())
 		return err

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"time"
-	"wn/internal/domain/dto/auth"
+	"wn/internal/domain/dto"
 	"wn/pkg/applogger"
 	"wn/pkg/database/dragonfly"
 
@@ -23,7 +23,7 @@ func NewCache(logger applogger.Logger, client *dragonfly.Client) *Cache {
 	}
 }
 
-func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item auth.ConfirmationCode, ttl *time.Duration) error {
+func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item dto.ConfirmationCode, ttl *time.Duration) error {
 	data, err := json.Marshal(item)
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func (ch *Cache) SaveConfirmCode(ctx context.Context, email string, item auth.Co
 	return ch.client.SaveValue(ctx, email, data, *ttl)
 }
 
-func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*auth.ConfirmationCode, bool, error) {
+func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*dto.ConfirmationCode, bool, error) {
 	data, err := ch.client.GetValue(ctx, email)
 	if err != nil {
 		switch err {
@@ -42,7 +42,7 @@ func (ch *Cache) GetConfirmCode(ctx context.Context, email string) (*auth.Confir
 		return nil, false, err
 	}
 
-	var output auth.ConfirmationCode
+	var output dto.ConfirmationCode
 	err = json.Unmarshal(data, &output)
 	if err != nil {
 		return &output, false, err

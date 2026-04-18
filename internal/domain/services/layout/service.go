@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
@@ -177,7 +176,7 @@ func (srv *Service) GetAvailableLayouts(ctx context.Context, userId uuid.UUID) (
 	return output, nil
 }
 
-func (srv *Service) UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error {
+func (srv *Service) UpdateLayout(ctx context.Context, req dto.UpdateLayout, userId uuid.UUID) error {
 	updatedRows, err := srv.layoutRepo.UpdateLayout(ctx, userId, req.LayoutId, req.Color, req.Title)
 	if err != nil {
 		return errors.Wrap(err, "srv.layoutRepo.UpdateLayout")

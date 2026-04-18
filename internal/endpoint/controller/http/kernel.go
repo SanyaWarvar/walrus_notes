@@ -13,6 +13,7 @@ import (
 
 type Kernel struct {
 	logInputParamOnErr bool
+	servicePrefix      string
 
 	logger  applogger.Logger
 	builder *response.Builder
@@ -22,6 +23,7 @@ type Kernel struct {
 
 func NewKernel(
 	logInputParamOnErr bool,
+	servicePrefix string,
 
 	logger applogger.Logger,
 	builder *response.Builder,
@@ -29,6 +31,7 @@ func NewKernel(
 ) *Kernel {
 	return &Kernel{
 		logInputParamOnErr: logInputParamOnErr,
+		servicePrefix:      servicePrefix,
 
 		logger:  logger,
 		builder: builder,
@@ -61,7 +64,7 @@ func (k *Kernel) Init() *gin.Engine {
 		ErrorHandler(k.builder),
 	)
 
-	k.initApi(router.Group("/wn", RequestIdValidationHandler), router.Group("/wn"))
+	k.initApi(router.Group(k.servicePrefix, RequestIdValidationHandler), router.Group(k.servicePrefix))
 	return router
 }
 

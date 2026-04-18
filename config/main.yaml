@@ -28,6 +28,7 @@ internal:
   environment: ".env"
   logInputParamOnErr: true
   encryptKey: "VerySecureEncryptKey"
+  passwordSalt: "VerySecurePasswordSalt"
 
 cache:
   url: "localhost:6379"

@@ -60,6 +60,7 @@ func (c *Container) getKernel() *http.Kernel {
 	if c.httpKernel == nil {
 		c.httpKernel = http.NewKernel(
 			c.getConfig().Internal.LogInputParamOnErr,
+			c.getConfig().Internal.Path,
 
 			c.getLogger(),
 			c.getResponseBuilder(),

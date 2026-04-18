@@ -4,14 +4,9 @@ import (
 	"context"
 	"time"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/auth"
-	"wn/internal/domain/dto/request"
-	resp "wn/internal/domain/dto/response"
-	"wn/internal/domain/dto/user"
 	"wn/internal/domain/enum"
 	"wn/internal/domain/services/token"
 	apperrors "wn/internal/errors"
-	userRepository "wn/internal/infrastructure/repository/user"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
@@ -21,8 +16,8 @@ import (
 var codeDelay time.Duration = time.Duration(time.Minute * 1)
 
 type userService interface {
-	GetUserByEmail(ctx context.Context, email string, password string) (*user.User, error)
-	UpdateUser(ctx context.Context, userId uuid.UUID, filter *userRepository.UserUpdateParams) error
+	GetUserByEmail(ctx context.Context, email string, password string) (*dto.User, error)
+	UpdateUser(ctx context.Context, userId uuid.UUID, filter *dto.UserUpdateParams) error
 }
 
 type tokenService interface {
@@ -33,7 +28,7 @@ type tokenService interface {
 
 type smtpService interface {
 	SendConfirmEmailCode(ctx context.Context, email string, action enum.EmailCodeAction) error
-	ConfirmCode(ctx context.Context, email string, code string) (*auth.ConfirmationCode, error)
+	ConfirmCode(ctx context.Context, email string, code string) (*dto.ConfirmationCode, error)
 }
 
 type layoutService interface {
@@ -70,16 +65,16 @@ func NewService(
 
 // todo add check is confirmed email
 
-func (srv *Service) SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*resp.SendCodeResponse, error) {
+func (srv *Service) SendConfirmationCode(ctx context.Context, req dto.LoginRequest, action enum.EmailCodeAction) (*dto.SendCodeResponse, error) {
 	_, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
-	return &resp.SendCodeResponse{NextCodeDelay: codeDelay},
+	return &dto.SendCodeResponse{NextCodeDelay: codeDelay},
 		srv.smtpService.SendConfirmEmailCode(ctx, req.Email, action)
 }
 
-func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCodeRequest) error {
+func (srv *Service) ConfirmCode(ctx context.Context, req dto.ConfirmationCodeRequest) error {
 	u, err := srv.userService.GetUserByEmail(ctx, req.Email, "")
 	if err != nil {
 		return err
@@ -91,14 +86,14 @@ func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCode
 	t := true
 	switch code.Action {
 	case enum.ConfirmCode:
-		return srv.userService.UpdateUser(ctx, u.Id, &userRepository.UserUpdateParams{
+		return srv.userService.UpdateUser(ctx, u.Id, &dto.UserUpdateParams{
 			ConfirmedEmail: &t,
 		})
 	case enum.ForgotPassword:
 		if req.NewPassword == "" {
 			return apperrors.NoNewPassword
 		}
-		return srv.userService.UpdateUser(ctx, u.Id, &userRepository.UserUpdateParams{
+		return srv.userService.UpdateUser(ctx, u.Id, &dto.UserUpdateParams{
 			Password: &req.NewPassword,
 		})
 	default:
@@ -106,7 +101,7 @@ func (srv *Service) ConfirmCode(ctx context.Context, req request.ConfimationCode
 	}
 }
 
-func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*resp.LoginResponse, error) {
+func (srv *Service) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 	u, err := srv.userService.GetUserByEmail(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
@@ -114,7 +109,7 @@ func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*resp.
 
 	layouts, err := srv.layoutService.GetAvailableLayouts(ctx, u.Id)
 	var layoutId uuid.UUID
-	for _, layout := range layouts{
+	for _, layout := range layouts {
 		if layout.OwnerId == u.Id && layout.IsMain {
 			layoutId = layout.Id
 			break
@@ -125,7 +120,7 @@ func (srv *Service) Login(ctx context.Context, req request.LoginRequest) (*resp.
 	if err != nil {
 		return nil, err
 	}
-	return &resp.LoginResponse{
+	return &dto.LoginResponse{
 		UserId:  u.Id,
 		Access:  tokens.Access,
 		Refresh: tokens.Refresh,

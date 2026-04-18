@@ -2,7 +2,7 @@ package links
 
 import (
 	"context"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	"wn/pkg/database/postgres"
 
 	"github.com/google/uuid"

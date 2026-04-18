@@ -3,8 +3,6 @@ package layout
 import (
 	"context"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
-	resp "wn/internal/domain/dto/response"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"
@@ -17,10 +15,10 @@ import (
 )
 
 type layoutService interface {
-	CreateLayout(ctx context.Context, req request.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error)
-	DeleteLayout(ctx context.Context, req request.LayoutIdRequest, userId uuid.UUID) error
+	CreateLayout(ctx context.Context, req dto.NewLayoutRequest, userId uuid.UUID) (uuid.UUID, error)
+	DeleteLayout(ctx context.Context, req dto.LayoutIdRequest, userId uuid.UUID) error
 	GetLayoutsByUserId(ctx context.Context, userId uuid.UUID) ([]dto.Layout, error)
-	UpdateLayout(ctx context.Context, req request.UpdateLayout, userId uuid.UUID) error
+	UpdateLayout(ctx context.Context, req dto.UpdateLayout, userId uuid.UUID) error
 	ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error)
 	ImportLayouts(ctx context.Context, userId uuid.UUID, req *dto.ImportInfoRequest) error
 }
@@ -58,16 +56,16 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Description Создать новый layout
 // @Tags layouts
 // @Produce json
-// @Param data body request.NewLayoutRequest true "data"
+// @Param data body dto.NewLayoutRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{data=resp.NoteId}
+// @Success 200 {object} response.Response{data=dto.NoteId}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Router /wn/api/v1/layout/create [post]
 func (h *Controller) createLayout(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.NewLayoutRequest
+	var req dto.NewLayoutRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -86,8 +84,8 @@ func (h *Controller) createLayout(c *gin.Context) {
 		return
 	}
 
-	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp.NoteId{
-		Id: noteId,
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, dto.NoteId{
+		NoteId: noteId,
 	}))
 }
 
@@ -158,7 +156,7 @@ func (h *Controller) importLayout(c *gin.Context) {
 // @Description Получить все layout-ы, к которым имеет доступ пользователь
 // @Tags layouts
 // @Produce json
-// @Param data body request.NoteId true "data"
+// @Param data body dto.NoteId true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{data=[]dto.Layout}
@@ -187,7 +185,7 @@ func (h *Controller) getMyLayouts(c *gin.Context) {
 // @Description удалить layout
 // @Tags layouts
 // @Produce json
-// @Param data body request.LayoutIdRequest true "data"
+// @Param data body dto.LayoutIdRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -197,7 +195,7 @@ func (h *Controller) getMyLayouts(c *gin.Context) {
 func (h *Controller) deleteLayout(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req request.LayoutIdRequest
+	var req dto.LayoutIdRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -232,7 +230,7 @@ func (h *Controller) deleteLayout(c *gin.Context) {
 // @Description обновить информацию о layout
 // @Tags layouts
 // @Produce json
-// @Param data body request.UpdateLayout true "data"
+// @Param data body dto.UpdateLayout true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -242,7 +240,7 @@ func (h *Controller) deleteLayout(c *gin.Context) {
 func (h *Controller) updateLayout(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req request.UpdateLayout
+	var req dto.UpdateLayout
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))

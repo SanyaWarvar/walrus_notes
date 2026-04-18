@@ -21,7 +21,7 @@ type pagination struct {
 
 type Response struct {
 	Meta       meta       `json:"meta"`
-	Pagination pagination `json:"pagination"`
+	Pagination pagination `json:"pagination,omitempty"`
 	Data       any        `json:"data"`
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"mime/multipart"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
@@ -34,7 +33,7 @@ func NewService(
 	}
 }
 
-func (srv *Service) UploadFile(ctx context.Context, userId uuid.UUID, req request.UploadFileRequest, host string) (*dto.UploadFileResponse, error) {
+func (srv *Service) UploadFile(ctx context.Context, userId uuid.UUID, req dto.UploadFileRequest, host string) (*dto.UploadFileResponse, error) {
 	filename, err := srv.fileService.NewFile(ctx, req.File)
 	if err != nil {
 		return nil, err

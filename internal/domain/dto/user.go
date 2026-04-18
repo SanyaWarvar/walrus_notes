@@ -1,8 +1,8 @@
-package user
+package dto
 
 import (
-	"wn/internal/infrastructure/repository/user"
 	"time"
+	"wn/internal/domain/entity"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +16,7 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func UserDtoFromEntity(entity *user.User) *User {
+func UserDtoFromEntity(entity *entity.User) *User {
 	return &User{
 		Id:        entity.Id,
 		Username:  entity.Username,

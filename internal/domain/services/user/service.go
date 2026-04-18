@@ -4,10 +4,9 @@ import (
 	"context"
 	"crypto/sha512"
 	"fmt"
-	"wn/internal/domain/dto/request"
-	"wn/internal/domain/dto/user"
+	"wn/internal/domain/dto"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
-	userRepository "wn/internal/infrastructure/repository/user"
 
 	"wn/pkg/applogger"
 	"wn/pkg/constants"
@@ -18,16 +17,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-// todo вынести в конфиг
-var salt string = "pashatechnik"
-
 type userRepo interface {
-	CreateUser(ctx context.Context, item *userRepository.User) error
-	GetUser(ctx context.Context, filter userRepository.UserFilter) (*userRepository.User, bool, error)
-	UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *userRepository.UserUpdateParams) error
+	CreateUser(ctx context.Context, item *entity.User) error
+	GetUser(ctx context.Context, filter dto.UserFilter) (*entity.User, bool, error)
+	UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *dto.UserUpdateParams) error
 }
 
 type Service struct {
+	passwordSalt string
+
 	tx     trx.TransactionManager
 	logger applogger.Logger
 
@@ -35,31 +33,33 @@ type Service struct {
 }
 
 func NewService(
+	passwordSalt string,
 	tx trx.TransactionManager,
 	logger applogger.Logger,
 	userRepo userRepo,
 ) *Service {
 	return &Service{
-		tx:       tx,
-		logger:   logger,
-		userRepo: userRepo,
+		passwordSalt: passwordSalt,
+		tx:           tx,
+		logger:       logger,
+		userRepo:     userRepo,
 	}
 }
 
-func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintials request.RegisterCredentials) (*user.User, error) {
-	user := user.User{
+func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintials dto.RegisterCredentials) (*dto.User, error) {
+	user := dto.User{
 		Id:        util.NewUUID(),
 		Username:  credintials.Username,
 		Email:     credintials.Email,
 		ImgUrl:    "base.png",
 		CreatedAt: util.GetCurrentUTCTime(),
 	}
-	userEntity := userRepository.User{
+	userEntity := entity.User{
 		Id:             user.Id,
 		Username:       user.Username,
 		Email:          user.Email,
 		ConfirmedEmail: false,
-		Password:       generatePasswordHash(credintials.Password),
+		Password:       srv.generatePasswordHash(credintials.Password),
 		ImgUrl:         "base.png",
 		CreatedAt:      user.CreatedAt,
 		Role:           constants.ClientRole,
@@ -68,8 +68,8 @@ func (srv *Service) CreateUserFromAuthCredentials(ctx context.Context, credintia
 	return &user, err
 }
 
-func (srv *Service) UpdateUser(ctx context.Context, userId uuid.UUID, filter *userRepository.UserUpdateParams) error {
-	_, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+func (srv *Service) UpdateUser(ctx context.Context, userId uuid.UUID, filter *dto.UserUpdateParams) error {
+	_, ex, err := srv.userRepo.GetUser(ctx, dto.UserFilter{
 		Id: &userId,
 	})
 	if err != nil {
@@ -81,15 +81,15 @@ func (srv *Service) UpdateUser(ctx context.Context, userId uuid.UUID, filter *us
 	}
 
 	if filter.Password != nil {
-		newPassword := generatePasswordHash(*filter.Password)
+		newPassword := srv.generatePasswordHash(*filter.Password)
 		filter.Password = &newPassword
 	}
 
 	return srv.userRepo.UpdateUser(ctx, userId, filter)
 }
 
-func (srv *Service) GetUserById(ctx context.Context, userId uuid.UUID, password string) (*user.User, error) {
-	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+func (srv *Service) GetUserById(ctx context.Context, userId uuid.UUID, password string) (*dto.User, error) {
+	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, dto.UserFilter{
 		Id: &userId,
 	})
 	if err != nil {
@@ -105,11 +105,11 @@ func (srv *Service) GetUserById(ctx context.Context, userId uuid.UUID, password 
 			return nil, apperrors.IncorrectPassword
 		}
 	}
-	return user.UserDtoFromEntity(targetEntityUser), nil
+	return dto.UserDtoFromEntity(targetEntityUser), nil
 }
 
-func (srv *Service) GetUserByEmail(ctx context.Context, email string, password string) (*user.User, error) {
-	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, userRepository.UserFilter{
+func (srv *Service) GetUserByEmail(ctx context.Context, email string, password string) (*dto.User, error) {
+	targetEntityUser, ex, err := srv.userRepo.GetUser(ctx, dto.UserFilter{
 		Email: &email,
 	})
 	if err != nil {
@@ -125,16 +125,16 @@ func (srv *Service) GetUserByEmail(ctx context.Context, email string, password s
 			return nil, apperrors.IncorrectPassword
 		}
 	}
-	return user.UserDtoFromEntity(targetEntityUser), nil
+	return dto.UserDtoFromEntity(targetEntityUser), nil
 }
 
 func (srv *Service) comparePassword(origin, existed string) bool {
-	return generatePasswordHash(origin) == existed
+	return srv.generatePasswordHash(origin) == existed
 }
 
-func generatePasswordHash(password string) string {
+func (srv *Service) generatePasswordHash(password string) string {
 	hash := sha512.New()
 	hash.Write([]byte(password))
 
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+	return fmt.Sprintf("%x", hash.Sum([]byte(srv.passwordSalt)))
 }

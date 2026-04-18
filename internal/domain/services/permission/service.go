@@ -3,7 +3,7 @@ package permission
 import (
 	"context"
 	"wn/internal/domain/dto"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
 
 	"github.com/google/uuid"

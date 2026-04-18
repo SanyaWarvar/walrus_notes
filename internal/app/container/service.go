@@ -36,6 +36,7 @@ type services struct {
 func (s *services) getUserService() *userSrv.Service {
 	if s.user == nil {
 		s.user = userSrv.NewService(
+			s.c.cfg.Internal.PasswordSalt,
 			s.c.getTransactionManager(),
 			s.c.getLogger(),
 			s.c.getRepositories().getUserRepository(),

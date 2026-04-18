@@ -2,7 +2,7 @@ package layout
 
 import (
 	"context"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
 	"wn/internal/infrastructure/repository/common"
 	"wn/pkg/database/postgres"

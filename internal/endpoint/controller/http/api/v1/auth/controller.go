@@ -2,8 +2,7 @@ package auth
 
 import (
 	"context"
-	"wn/internal/domain/dto/request"
-	resp "wn/internal/domain/dto/response"
+	"wn/internal/domain/dto"
 	"wn/internal/domain/enum"
 	"wn/internal/domain/services/token"
 	"wn/pkg/apperror"
@@ -15,13 +14,13 @@ import (
 )
 
 type userService interface {
-	RegisterUser(ctx context.Context, credentials request.RegisterCredentials) (*resp.RegisterResponse, error)
+	RegisterUser(ctx context.Context, credentials dto.RegisterCredentials) (*dto.RegisterResponse, error)
 }
 
 type authService interface {
-	SendConfirmationCode(ctx context.Context, req request.LoginRequest, action enum.EmailCodeAction) (*resp.SendCodeResponse, error)
-	ConfirmCode(ctx context.Context, req request.ConfimationCodeRequest) error
-	Login(ctx context.Context, req request.LoginRequest) (*resp.LoginResponse, error)
+	SendConfirmationCode(ctx context.Context, req dto.LoginRequest, action enum.EmailCodeAction) (*dto.SendCodeResponse, error)
+	ConfirmCode(ctx context.Context, req dto.ConfirmationCodeRequest) error
+	Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error)
 	RefreshTokens(ctx context.Context, req token.UserTokens) (*token.UserTokens, error)
 }
 
@@ -59,15 +58,15 @@ func (h *Controller) Init(api *gin.RouterGroup) {
 // @Description register new user
 // @Tags auth
 // @Produce json
-// @Param data body request.RegisterCredentials true "data"
+// @Param data body dto.RegisterCredentials true "data"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.RegisterResponse}
+// @Success 200 {object} response.Response{data=dto.RegisterResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: not_unique"
 // @Router /wn/api/v1/auth/register [post]
 func (h *Controller) register(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.RegisterCredentials
+	var req dto.RegisterCredentials
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -86,16 +85,16 @@ func (h *Controller) register(c *gin.Context) {
 // @Description register new user
 // @Tags auth
 // @Produce json
-// @Param data body request.LoginRequest true "data"
+// @Param data body dto.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.SendCodeResponse}
+// @Success 200 {object} response.Response{data=dto.SendCodeResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 400 {object} response.Response{} "possible codes: incorrect_password"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found, confirm_code_already_send"
 // @Router /wn/api/v1/auth/code [post]
 func (h *Controller) sendCode(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.LoginRequest
+	var req dto.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -118,7 +117,7 @@ func (h *Controller) sendCode(c *gin.Context) {
 // @Description Подтверждение кода для подтверждения почты, либо сброса пароля. Если сброс пароля, то newPassword обязательное поле.
 // @Tags auth
 // @Produce json
-// @Param data body request.ConfimationCodeRequest true "data"
+// @Param data body dto.ConfirmationCodeRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Success 200 {object} response.Response{}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
@@ -126,7 +125,7 @@ func (h *Controller) sendCode(c *gin.Context) {
 // @Router /wn/api/v1/auth/confirm [post]
 func (h *Controller) confirmCode(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.ConfimationCodeRequest
+	var req dto.ConfirmationCodeRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -145,16 +144,16 @@ func (h *Controller) confirmCode(c *gin.Context) {
 // @Description Получение access,refresh токенов по почте и паролю
 // @Tags auth
 // @Produce json
-// @Param data body request.LoginRequest true "data"
+// @Param data body dto.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.LoginResponse}
+// @Success 200 {object} response.Response{data=dto.LoginResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 401 {object} response.Response{} "possible codes: incorrect_password"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found "
 // @Router /wn/api/v1/auth/login [post]
 func (h *Controller) login(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.LoginRequest
+	var req dto.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -200,15 +199,15 @@ func (h *Controller) refreshTokens(c *gin.Context) {
 // @Description Сброс пароля
 // @Tags auth
 // @Produce json
-// @Param data body request.LoginRequest true "data"
+// @Param data body dto.LoginRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
-// @Success 200 {object} response.Response{data=resp.SendCodeResponse}
+// @Success 200 {object} response.Response{data=dto.SendCodeResponse}
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found, confirm_code_already_send"
 // @Router /wn/api/v1/auth/forgot [post]
 func (h *Controller) forgotPassword(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.LoginRequest
+	var req dto.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))

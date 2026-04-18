@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"wn/internal/infrastructure/repository/file"
+	"wn/internal/domain/entity"
 	"wn/pkg/applogger"
 	"wn/pkg/util"
 
@@ -19,7 +19,7 @@ import (
 const filePath = "./statics/images/"
 
 type fileRepo interface {
-	GetAllFiles(ctx context.Context) ([]file.StaticFile, error)
+	GetAllFiles(ctx context.Context) ([]entity.StaticFile, error)
 	CreateFile(ctx context.Context, filename string, encodedFile string) error
 }
 
@@ -59,7 +59,7 @@ func (srv *Service) NewFile(ctx context.Context, fileObj *multipart.FileHeader) 
 	if err != nil {
 		return filename, err
 	}
-	f := &file.StaticFile{
+	f := &entity.StaticFile{
 		Filename:     filename,
 		FileAsString: encodedFile,
 		File:         []byte{},
@@ -67,7 +67,7 @@ func (srv *Service) NewFile(ctx context.Context, fileObj *multipart.FileHeader) 
 	return filename, createFile(f)
 }
 
-func createFile(item *file.StaticFile) error {
+func createFile(item *entity.StaticFile) error {
 	var err error
 	if item.FileAsString == "" {
 		return errors.Wrap(err, "item.FileAsString")

@@ -36,14 +36,80 @@ definitions:
     - Second
     - Minute
     - Hour
+  user.User:
+    properties:
+      gid:
+        description: |-
+          Gid is the primary group ID.
+          On POSIX systems, this is a decimal number representing the gid.
+          On Windows, this is a SID in a string format.
+          On Plan 9, this is the contents of /dev/user.
+        type: string
+      homeDir:
+        description: HomeDir is the path to the user's home directory (if they have
+          one).
+        type: string
+      name:
+        description: |-
+          Name is the user's real or display name.
+          It might be blank.
+          On POSIX systems, this is the first (or only) entry in the GECOS field
+          list.
+          On Windows, this is the user's display name.
+          On Plan 9, this is the contents of /dev/user.
+        type: string
+      uid:
+        description: |-
+          Uid is the user ID.
+          On POSIX systems, this is a decimal number representing the uid.
+          On Windows, this is a security identifier (SID) in a string format.
+          On Plan 9, this is the contents of /dev/user.
+        type: string
+      username:
+        description: Username is the login name.
+        type: string
+    type: object
   wn_internal_domain_dto.ApplyPermissionsRequest:
     properties:
       linkId:
         type: string
     type: object
+  wn_internal_domain_dto.ChangePictureResponse:
+    properties:
+      newImgUrl:
+        type: string
+    type: object
+  wn_internal_domain_dto.ChangeProfilePicture:
+    properties:
+      file:
+        $ref: '#/definitions/multipart.FileHeader'
+      userId:
+        type: string
+    required:
+    - file
+    type: object
+  wn_internal_domain_dto.ConfirmationCodeRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      newPassword:
+        type: string
+    required:
+    - code
+    - email
+    type: object
   wn_internal_domain_dto.DeletePermissionsRequest:
     properties:
       permissionId:
+        type: string
+    type: object
+  wn_internal_domain_dto.DragNoteRequest:
+    properties:
+      noteId:
+        type: string
+      toLayoutId:
         type: string
     type: object
   wn_internal_domain_dto.ExportInfo:
@@ -110,6 +176,52 @@ definitions:
       title:
         type: string
     type: object
+  wn_internal_domain_dto.LayoutIdRequest:
+    properties:
+      layoutId:
+        type: string
+    type: object
+  wn_internal_domain_dto.LinkBetweenNotesRequest:
+    properties:
+      firstNoteId:
+        type: string
+      layoutId:
+        type: string
+      secondNoteId:
+        type: string
+    required:
+    - firstNoteId
+    - layoutId
+    - secondNoteId
+    type: object
+  wn_internal_domain_dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    type: object
+  wn_internal_domain_dto.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+      userId:
+        type: string
+    type: object
+  wn_internal_domain_dto.NewLayoutRequest:
+    properties:
+      color:
+        type: string
+      title:
+        type: string
+    required:
+    - color
+    - title
+    type: object
   wn_internal_domain_dto.Note:
     properties:
       draft:
@@ -138,6 +250,33 @@ definitions:
         $ref: '#/definitions/wn_internal_domain_dto.Position'
       title:
         type: string
+    type: object
+  wn_internal_domain_dto.NoteId:
+    properties:
+      noteId:
+        type: string
+    required:
+    - noteId
+    type: object
+  wn_internal_domain_dto.NoteRequest:
+    properties:
+      layoutId:
+        type: string
+      payload:
+        type: string
+      title:
+        type: string
+    type: object
+  wn_internal_domain_dto.NoteWithIdRequest:
+    properties:
+      noteId:
+        type: string
+      payload:
+        type: string
+      title:
+        type: string
+    required:
+    - noteId
     type: object
   wn_internal_domain_dto.Permission:
     properties:
@@ -174,115 +313,7 @@ definitions:
       yPos:
         type: number
     type: object
-  wn_internal_domain_dto.UpdatePermissionRequest:
-    properties:
-      canEdit:
-        type: boolean
-      canRead:
-        type: boolean
-      canWrite:
-        type: boolean
-      permissionsId:
-        type: string
-    type: object
-  wn_internal_domain_dto.UploadFileResponse:
-    properties:
-      imgUrl:
-        type: string
-    type: object
-  wn_internal_domain_dto_request.ChangeProfilePicture:
-    properties:
-      file:
-        $ref: '#/definitions/multipart.FileHeader'
-      userId:
-        type: string
-    required:
-    - file
-    type: object
-  wn_internal_domain_dto_request.ConfimationCodeRequest:
-    properties:
-      code:
-        type: string
-      email:
-        type: string
-      newPassword:
-        type: string
-    required:
-    - code
-    - email
-    type: object
-  wn_internal_domain_dto_request.DragNoteRequest:
-    properties:
-      noteId:
-        type: string
-      toLayoutId:
-        type: string
-    type: object
-  wn_internal_domain_dto_request.LayoutIdRequest:
-    properties:
-      layoutId:
-        type: string
-    type: object
-  wn_internal_domain_dto_request.LinkBetweenNotesRequest:
-    properties:
-      firstNoteId:
-        type: string
-      layoutId:
-        type: string
-      secondNoteId:
-        type: string
-    required:
-    - firstNoteId
-    - layoutId
-    - secondNoteId
-    type: object
-  wn_internal_domain_dto_request.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    type: object
-  wn_internal_domain_dto_request.NewLayoutRequest:
-    properties:
-      color:
-        type: string
-      title:
-        type: string
-    required:
-    - color
-    - title
-    type: object
-  wn_internal_domain_dto_request.NoteId:
-    properties:
-      noteId:
-        type: string
-    required:
-    - noteId
-    type: object
-  wn_internal_domain_dto_request.NoteRequest:
-    properties:
-      layoutId:
-        type: string
-      payload:
-        type: string
-      title:
-        type: string
-    type: object
-  wn_internal_domain_dto_request.NoteWithIdRequest:
-    properties:
-      noteId:
-        type: string
-      payload:
-        type: string
-      title:
-        type: string
-    required:
-    - noteId
-    type: object
-  wn_internal_domain_dto_request.RegisterCredentials:
+  wn_internal_domain_dto.RegisterCredentials:
     properties:
       email:
         type: string
@@ -295,7 +326,17 @@ definitions:
     - password
     - username
     type: object
-  wn_internal_domain_dto_request.UpdateLayout:
+  wn_internal_domain_dto.RegisterResponse:
+    properties:
+      userId:
+        type: string
+    type: object
+  wn_internal_domain_dto.SendCodeResponse:
+    properties:
+      nextCodeDelay:
+        $ref: '#/definitions/time.Duration'
+    type: object
+  wn_internal_domain_dto.UpdateLayout:
     properties:
       color:
         type: string
@@ -306,7 +347,7 @@ definitions:
     required:
     - layoutId
     type: object
-  wn_internal_domain_dto_request.UpdateNotePositionRequest:
+  wn_internal_domain_dto.UpdateNotePositionRequest:
     properties:
       layoutId:
         type: string
@@ -320,55 +361,27 @@ definitions:
     - layoutId
     - noteId
     type: object
-  wn_internal_domain_dto_request.UploadFileRequest:
+  wn_internal_domain_dto.UpdatePermissionRequest:
+    properties:
+      canEdit:
+        type: boolean
+      canRead:
+        type: boolean
+      canWrite:
+        type: boolean
+      permissionsId:
+        type: string
+    type: object
+  wn_internal_domain_dto.UploadFileRequest:
     properties:
       file:
         $ref: '#/definitions/multipart.FileHeader'
     required:
     - file
     type: object
-  wn_internal_domain_dto_response.ChangePictureResponse:
+  wn_internal_domain_dto.UploadFileResponse:
     properties:
-      newImgUrl:
-        type: string
-    type: object
-  wn_internal_domain_dto_response.LoginResponse:
-    properties:
-      accessToken:
-        type: string
-      refreshToken:
-        type: string
-      userId:
-        type: string
-    type: object
-  wn_internal_domain_dto_response.NoteId:
-    properties:
-      id:
-        type: string
-    type: object
-  wn_internal_domain_dto_response.RegisterResponse:
-    properties:
-      userId:
-        type: string
-    type: object
-  wn_internal_domain_dto_response.SendCodeResponse:
-    properties:
-      nextCodeDelay:
-        $ref: '#/definitions/time.Duration'
-    type: object
-  wn_internal_domain_dto_user.User:
-    properties:
-      createdAt:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
       imgUrl:
-        type: string
-      role:
-        type: string
-      username:
         type: string
     type: object
   wn_internal_domain_services_token.UserTokens:
@@ -424,7 +437,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LoginRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LoginRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -440,7 +453,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.SendCodeResponse'
+                  $ref: '#/definitions/wn_internal_domain_dto.SendCodeResponse'
               type: object
         "400":
           description: 'possible codes: incorrect_password'
@@ -463,7 +476,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.ConfimationCodeRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.ConfirmationCodeRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -497,7 +510,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LoginRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LoginRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -513,7 +526,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.SendCodeResponse'
+                  $ref: '#/definitions/wn_internal_domain_dto.SendCodeResponse'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -535,7 +548,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LoginRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LoginRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -551,7 +564,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.LoginResponse'
+                  $ref: '#/definitions/wn_internal_domain_dto.LoginResponse'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -616,7 +629,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.RegisterCredentials'
+          $ref: '#/definitions/wn_internal_domain_dto.RegisterCredentials'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -632,7 +645,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.RegisterResponse'
+                  $ref: '#/definitions/wn_internal_domain_dto.RegisterResponse'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -654,7 +667,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.UploadFileRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.UploadFileRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -693,7 +706,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.NewLayoutRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.NewLayoutRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -714,7 +727,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.NoteId'
+                  $ref: '#/definitions/wn_internal_domain_dto.NoteId'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -732,7 +745,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LayoutIdRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LayoutIdRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -840,7 +853,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.NoteId'
+          $ref: '#/definitions/wn_internal_domain_dto.NoteId'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -881,7 +894,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.UpdateLayout'
+          $ref: '#/definitions/wn_internal_domain_dto.UpdateLayout'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -915,7 +928,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.NoteRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.NoteRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -936,7 +949,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.NoteId'
+                  $ref: '#/definitions/wn_internal_domain_dto.NoteId'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -958,7 +971,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.NoteId'
+          $ref: '#/definitions/wn_internal_domain_dto.NoteId'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -996,7 +1009,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.DragNoteRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.DragNoteRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1087,7 +1100,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.UpdateNotePositionRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.UpdateNotePositionRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1201,7 +1214,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LinkBetweenNotesRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1235,7 +1248,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.LinkBetweenNotesRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1309,7 +1322,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.NoteWithIdRequest'
+          $ref: '#/definitions/wn_internal_domain_dto.NoteWithIdRequest'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1537,7 +1550,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/wn_internal_domain_dto_request.ChangeProfilePicture'
+          $ref: '#/definitions/wn_internal_domain_dto.ChangeProfilePicture'
       - description: Request id identity
         in: header
         name: X-Request-Id
@@ -1558,7 +1571,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_response.ChangePictureResponse'
+                  $ref: '#/definitions/wn_internal_domain_dto.ChangePictureResponse'
               type: object
         "400":
           description: 'possible codes: bind_body, invalid_X-Request-Id'
@@ -1595,7 +1608,7 @@ paths:
             - $ref: '#/definitions/wn_pkg_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/wn_internal_domain_dto_user.User'
+                  $ref: '#/definitions/user.User'
               type: object
         "400":
           description: 'possible codes: bind_path, invalid_X-Request-Id'

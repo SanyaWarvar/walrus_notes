@@ -1,8 +1,8 @@
-package auth
+package dto
 
 import (
-	"wn/internal/domain/enum"
 	"time"
+	"wn/internal/domain/enum"
 )
 
 type ConfirmationCode struct {

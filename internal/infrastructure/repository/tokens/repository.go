@@ -3,8 +3,9 @@ package tokens
 import (
 	"context"
 	"database/sql"
-	"wn/pkg/database/postgres"
 	"time"
+	"wn/internal/domain/entity"
+	"wn/pkg/database/postgres"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -20,7 +21,7 @@ func NewRepository(conn postgres.Connection) *Repository {
 }
 
 // Create создает новый refresh token
-func (repo *Repository) Create(ctx context.Context, token *RefreshToken) error {
+func (repo *Repository) Create(ctx context.Context, token *entity.RefreshToken) error {
 	query, args, err := squirrel.Insert("refresh_tokens").
 		Columns("id", "user_id", "access_id", "exp_at").
 		Values(token.Id, token.UserId, token.AccessId, token.ExpAt).
@@ -39,7 +40,7 @@ func (repo *Repository) Create(ctx context.Context, token *RefreshToken) error {
 }
 
 // GetByID возвращает refresh token по ID
-func (repo *Repository) GetByID(ctx context.Context, id uuid.UUID) (*RefreshToken, bool, error) {
+func (repo *Repository) GetByID(ctx context.Context, id uuid.UUID) (*entity.RefreshToken, bool, error) {
 	query, args, err := squirrel.Select("id", "user_id", "access_id", "exp_at").
 		From("refresh_tokens").
 		Where(squirrel.Eq{"id": id}).
@@ -49,7 +50,7 @@ func (repo *Repository) GetByID(ctx context.Context, id uuid.UUID) (*RefreshToke
 		return nil, false, errors.Wrap(err, "squirrel.ToSql")
 	}
 
-	var token RefreshToken
+	var token entity.RefreshToken
 	err = repo.conn.QueryRow(ctx, query, args...).Scan(&token.Id, &token.UserId, &token.AccessId, &token.ExpAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -79,7 +80,7 @@ func (repo *Repository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// todo add
+// todo add worker
 func (repo *Repository) DeleteExpired(ctx context.Context, cutoffTime time.Time) error {
 	query, args, err := squirrel.Delete("refresh_tokens").
 		Where(squirrel.Lt{"exp_at": cutoffTime}).

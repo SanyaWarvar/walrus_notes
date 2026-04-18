@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 	"wn/internal/domain/dto"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"

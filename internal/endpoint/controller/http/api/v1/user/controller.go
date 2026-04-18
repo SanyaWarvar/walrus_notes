@@ -2,9 +2,7 @@ package user
 
 import (
 	"context"
-	"wn/internal/domain/dto/request"
-	resp "wn/internal/domain/dto/response"
-	"wn/internal/domain/dto/user"
+	"wn/internal/domain/dto"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"
@@ -17,8 +15,8 @@ import (
 )
 
 type userService interface {
-	ChangeProfilePicture(ctx context.Context, req request.ChangeProfilePicture, host string) (*resp.ChangePictureResponse, error)
-	GetUserById(ctx context.Context, userId uuid.UUID, host string) (*user.User, error)
+	ChangeProfilePicture(ctx context.Context, req dto.ChangeProfilePicture, host string) (*dto.ChangePictureResponse, error)
+	GetUserById(ctx context.Context, userId uuid.UUID, host string) (*dto.User, error)
 }
 
 type Controller struct {
@@ -50,17 +48,17 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Description сменить аватарку пользователя
 // @Tags user
 // @Produce json
-// @Param data body request.ChangeProfilePicture true "data"
+// @Param data body dto.ChangeProfilePicture true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{data=resp.ChangePictureResponse}
+// @Success 200 {object} response.Response{data=dto.ChangePictureResponse}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: user_not_found"
 // @Router /wn/api/v1/user/picture [post]
 func (h *Controller) changeProfilePicture(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.ChangeProfilePicture
+	var req dto.ChangeProfilePicture
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))

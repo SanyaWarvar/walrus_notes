@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 	"database/sql"
+	"wn/internal/domain/dto"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
 	"wn/internal/infrastructure/repository/common"
 	"wn/pkg/database/postgres"
@@ -21,9 +23,9 @@ func NewRepository(conn postgres.Connection) *Repository {
 	return &Repository{conn: conn}
 }
 
-func (repo *Repository) CreateUser(ctx context.Context, item *User) error {
+func (repo *Repository) CreateUser(ctx context.Context, item *entity.User) error {
 	query := `
-		INSERT INTO users VALUES
+		INSERT INTO entity.Users VALUES
 		($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 	_, err := repo.conn.Exec(ctx, query, item.Id, item.Username, item.Email, item.Password, item.Role, item.ImgUrl, item.ConfirmedEmail, item.CreatedAt)
@@ -35,14 +37,14 @@ func (repo *Repository) CreateUser(ctx context.Context, item *User) error {
 	return err
 }
 
-func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *UserUpdateParams) error {
+func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, updateParams *dto.UserUpdateParams) error {
 
-	builder := squirrel.Update("users").
+	builder := squirrel.Update("entity.Users").
 		Where(squirrel.Eq{"id": userId}).
 		PlaceholderFormat(squirrel.Dollar)
 
 	if updateParams.Username != nil {
-		builder = builder.Set("username", *updateParams.Username)
+		builder = builder.Set("entity.Username", *updateParams.Username)
 	}
 	if updateParams.Email != nil {
 		builder = builder.Set("email", *updateParams.Email)
@@ -73,9 +75,9 @@ func (repo *Repository) UpdateUser(ctx context.Context, userId uuid.UUID, update
 	return nil
 }
 
-func (repo *Repository) GetUser(ctx context.Context, filter UserFilter) (*User, bool, error) {
-	var output User
-	builder := squirrel.Select("u.*").From("users u")
+func (repo *Repository) GetUser(ctx context.Context, filter dto.UserFilter) (*entity.User, bool, error) {
+	var output entity.User
+	builder := squirrel.Select("u.*").From("entity.Users u")
 
 	if filter.Id != nil {
 		builder = builder.Where(squirrel.Eq{"id": filter.Id})

@@ -3,8 +3,8 @@ package token
 import (
 	"context"
 	"time"
+	"wn/internal/domain/entity"
 	apperrors "wn/internal/errors"
-	"wn/internal/infrastructure/repository/tokens"
 	"wn/pkg/util"
 
 	"github.com/google/uuid"
@@ -12,8 +12,8 @@ import (
 )
 
 type tokenRepo interface {
-	Create(ctx context.Context, token *tokens.RefreshToken) error
-	GetByID(ctx context.Context, id uuid.UUID) (*tokens.RefreshToken, bool, error)
+	Create(ctx context.Context, token *entity.RefreshToken) error
+	GetByID(ctx context.Context, id uuid.UUID) (*entity.RefreshToken, bool, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	DeleteExpired(ctx context.Context, cutoffTime time.Time) error
 }
@@ -64,7 +64,7 @@ func (s *Service) GenerateUserTokens(ctx context.Context, userId, mainLayoutId u
 		return nil, errors.Wrap(err, ".GenerateUserTokens")
 	}
 
-	return t, s.tokenRepo.Create(ctx, &tokens.RefreshToken{
+	return t, s.tokenRepo.Create(ctx, &entity.RefreshToken{
 		Id:       refreshId,
 		UserId:   userId,
 		AccessId: accessId,

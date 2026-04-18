@@ -27,12 +27,13 @@ type (
 		Environment        string `yaml:"environment" env:"ENVIRONMENT"`
 		LogInputParamOnErr bool   `yaml:"logInputParamOnErr" env:"LOG_INPUT_PARAM_ON_ERR"`
 		EncryptKey         string `yaml:"encryptKey" env:"ENCRYPT_KEY"`
+		PasswordSalt       string `yaml:"passwordSalt" env:"PASSWORD_SALT"`
 	}
 
 	JwtConfig struct {
 		JwtSecret  string        `env:"JWT_SECRET"`
 		AccessTTL  time.Duration `yaml:"accessTtl" env:"ENV_ACCESS_TTL"`
-		RefreshTTL time.Duration `yaml:"refreshTtl"`
+		RefreshTTL time.Duration `yaml:"refreshTtl" env:"ENV_REFRESH_TTL"`
 	}
 
 	CacheConfig struct {

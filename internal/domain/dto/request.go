@@ -1,4 +1,4 @@
-package request
+package dto
 
 import (
 	"mime/multipart"
@@ -21,9 +21,9 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-// ConfimationCodeRequest
+// ConfirmationCodeRequest
 // @Schema
-type ConfimationCodeRequest struct {
+type ConfirmationCodeRequest struct {
 	Code        string `json:"code"  binding:"required"`
 	Email       string `json:"email" binding:"required"`
 	NewPassword string `json:"newPassword"`
@@ -120,6 +120,6 @@ type LinkBetweenNotesRequest struct {
 }
 
 type DragNoteRequest struct {
-	NoteId       uuid.UUID `json:"noteId"`
-	ToLayoutId   uuid.UUID `json:"toLayoutId"`
+	NoteId     uuid.UUID `json:"noteId"`
+	ToLayoutId uuid.UUID `json:"toLayoutId"`
 }

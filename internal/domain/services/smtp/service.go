@@ -6,7 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"wn/internal/domain/dto/auth"
+	"wn/internal/domain/dto"
 	"wn/internal/domain/enum"
 	apperrors "wn/internal/errors"
 	"wn/pkg/applogger"
@@ -38,8 +38,8 @@ func NewConfig(ownerEmail, ownerPassword, addres, apikey string, codeLenght int,
 }
 
 type cacheRepo interface {
-	GetConfirmCode(ctx context.Context, email string) (*auth.ConfirmationCode, bool, error)
-	SaveConfirmCode(ctx context.Context, email string, item auth.ConfirmationCode, ttl *time.Duration) error
+	GetConfirmCode(ctx context.Context, email string) (*dto.ConfirmationCode, bool, error)
+	SaveConfirmCode(ctx context.Context, email string, item dto.ConfirmationCode, ttl *time.Duration) error
 }
 
 type Service struct {
@@ -147,8 +147,8 @@ func (srv *Service) SendMessage(email, messageText, title string) error {
 	return status
 }
 
-func (srv *Service) GenerateConfirmCode(action enum.EmailCodeAction) *auth.ConfirmationCode {
-	return &auth.ConfirmationCode{
+func (srv *Service) GenerateConfirmCode(action enum.EmailCodeAction) *dto.ConfirmationCode {
+	return &dto.ConfirmationCode{
 		Code:      fmt.Sprintf("%0*d", srv.cfg.CodeLenght, rand.Intn(int(math.Pow10(srv.cfg.CodeLenght)))),
 		Action:    action,
 		CreatedAt: util.GetCurrentUTCTime(),
@@ -173,7 +173,7 @@ func (srv *Service) SendConfirmEmailCode(ctx context.Context, email string, acti
 	return err
 }
 
-func (srv *Service) ConfirmCode(ctx context.Context, email string, code string) (*auth.ConfirmationCode, error) {
+func (srv *Service) ConfirmCode(ctx context.Context, email string, code string) (*dto.ConfirmationCode, error) {
 	targetCode, ex, err := srv.cacheRepo.GetConfirmCode(ctx, email)
 	if err != nil {
 		return nil, err

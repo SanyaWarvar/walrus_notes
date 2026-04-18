@@ -2,7 +2,7 @@ package dto
 
 import (
 	"time"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 
 	"github.com/google/uuid"
 )

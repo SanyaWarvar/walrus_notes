@@ -3,7 +3,6 @@ package file
 import (
 	"context"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"
@@ -16,7 +15,7 @@ import (
 )
 
 type fileService interface {
-	UploadFile(ctx context.Context, userId uuid.UUID, req request.UploadFileRequest, host string) (*dto.UploadFileResponse, error)
+	UploadFile(ctx context.Context, userId uuid.UUID, req dto.UploadFileRequest, host string) (*dto.UploadFileResponse, error)
 }
 
 type Controller struct {
@@ -49,7 +48,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Description загрузить файл
 // @Tags file
 // @Produce json
-// @Param data body request.UploadFileRequest true "data"
+// @Param data body dto.UploadFileRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{data=dto.UploadFileResponse}
@@ -58,7 +57,7 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Router /wn/api/v1/file/upload [post]
 func (h *Controller) uploadFile(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.UploadFileRequest
+	var req dto.UploadFileRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))

@@ -32,7 +32,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LoginRequest"
                         }
                     },
                     {
@@ -55,7 +55,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.SendCodeResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -94,7 +94,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.ConfimationCodeRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.ConfirmationCodeRequest"
                         }
                     },
                     {
@@ -144,7 +144,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LoginRequest"
                         }
                     },
                     {
@@ -167,7 +167,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.SendCodeResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.SendCodeResponse"
                                         }
                                     }
                                 }
@@ -206,7 +206,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LoginRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LoginRequest"
                         }
                     },
                     {
@@ -229,7 +229,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.LoginResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.LoginResponse"
                                         }
                                     }
                                 }
@@ -336,7 +336,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.RegisterCredentials"
+                            "$ref": "#/definitions/wn_internal_domain_dto.RegisterCredentials"
                         }
                     },
                     {
@@ -359,7 +359,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.RegisterResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.RegisterResponse"
                                         }
                                     }
                                 }
@@ -398,7 +398,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.UploadFileRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.UploadFileRequest"
                         }
                     },
                     {
@@ -461,7 +461,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.NewLayoutRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.NewLayoutRequest"
                         }
                     },
                     {
@@ -491,7 +491,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.NoteId"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.NoteId"
                                         }
                                     }
                                 }
@@ -524,7 +524,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LayoutIdRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LayoutIdRequest"
                         }
                     },
                     {
@@ -689,7 +689,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteId"
+                            "$ref": "#/definitions/wn_internal_domain_dto.NoteId"
                         }
                     },
                     {
@@ -755,7 +755,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.UpdateLayout"
+                            "$ref": "#/definitions/wn_internal_domain_dto.UpdateLayout"
                         }
                     },
                     {
@@ -806,7 +806,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.NoteRequest"
                         }
                     },
                     {
@@ -836,7 +836,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.NoteId"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.NoteId"
                                         }
                                     }
                                 }
@@ -875,7 +875,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteId"
+                            "$ref": "#/definitions/wn_internal_domain_dto.NoteId"
                         }
                     },
                     {
@@ -932,7 +932,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.DragNoteRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.DragNoteRequest"
                         }
                     },
                     {
@@ -1072,7 +1072,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.UpdateNotePositionRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.UpdateNotePositionRequest"
                         }
                     },
                     {
@@ -1251,7 +1251,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LinkBetweenNotesRequest"
                         }
                     },
                     {
@@ -1302,7 +1302,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.LinkBetweenNotesRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.LinkBetweenNotesRequest"
                         }
                     },
                     {
@@ -1417,7 +1417,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.NoteWithIdRequest"
+                            "$ref": "#/definitions/wn_internal_domain_dto.NoteWithIdRequest"
                         }
                     },
                     {
@@ -1768,7 +1768,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/wn_internal_domain_dto_request.ChangeProfilePicture"
+                            "$ref": "#/definitions/wn_internal_domain_dto.ChangeProfilePicture"
                         }
                     },
                     {
@@ -1798,7 +1798,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_response.ChangePictureResponse"
+                                            "$ref": "#/definitions/wn_internal_domain_dto.ChangePictureResponse"
                                         }
                                     }
                                 }
@@ -1858,7 +1858,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/wn_internal_domain_dto_user.User"
+                                            "$ref": "#/definitions/user.User"
                                         }
                                     }
                                 }
@@ -1930,6 +1930,31 @@ const docTemplate = `{
                 "Hour"
             ]
         },
+        "user.User": {
+            "type": "object",
+            "properties": {
+                "gid": {
+                    "description": "Gid is the primary group ID.\nOn POSIX systems, this is a decimal number representing the gid.\nOn Windows, this is a SID in a string format.\nOn Plan 9, this is the contents of /dev/user.",
+                    "type": "string"
+                },
+                "homeDir": {
+                    "description": "HomeDir is the path to the user's home directory (if they have one).",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name is the user's real or display name.\nIt might be blank.\nOn POSIX systems, this is the first (or only) entry in the GECOS field\nlist.\nOn Windows, this is the user's display name.\nOn Plan 9, this is the contents of /dev/user.",
+                    "type": "string"
+                },
+                "uid": {
+                    "description": "Uid is the user ID.\nOn POSIX systems, this is a decimal number representing the uid.\nOn Windows, this is a security identifier (SID) in a string format.\nOn Plan 9, this is the contents of /dev/user.",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Username is the login name.",
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto.ApplyPermissionsRequest": {
             "type": "object",
             "properties": {
@@ -1938,10 +1963,61 @@ const docTemplate = `{
                 }
             }
         },
+        "wn_internal_domain_dto.ChangePictureResponse": {
+            "type": "object",
+            "properties": {
+                "newImgUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.ChangeProfilePicture": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.ConfirmationCodeRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "email"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto.DeletePermissionsRequest": {
             "type": "object",
             "properties": {
                 "permissionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.DragNoteRequest": {
+            "type": "object",
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                },
+                "toLayoutId": {
                     "type": "string"
                 }
             }
@@ -2045,6 +2121,76 @@ const docTemplate = `{
                 }
             }
         },
+        "wn_internal_domain_dto.LayoutIdRequest": {
+            "type": "object",
+            "properties": {
+                "layoutId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.LinkBetweenNotesRequest": {
+            "type": "object",
+            "required": [
+                "firstNoteId",
+                "layoutId",
+                "secondNoteId"
+            ],
+            "properties": {
+                "firstNoteId": {
+                    "type": "string"
+                },
+                "layoutId": {
+                    "type": "string"
+                },
+                "secondNoteId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.NewLayoutRequest": {
+            "type": "object",
+            "required": [
+                "color",
+                "title"
+            ],
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "wn_internal_domain_dto.Note": {
             "type": "object",
             "properties": {
@@ -2083,6 +2229,48 @@ const docTemplate = `{
                 },
                 "position": {
                     "$ref": "#/definitions/wn_internal_domain_dto.Position"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.NoteId": {
+            "type": "object",
+            "required": [
+                "noteId"
+            ],
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.NoteRequest": {
+            "type": "object",
+            "properties": {
+                "layoutId": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.NoteWithIdRequest": {
+            "type": "object",
+            "required": [
+                "noteId"
+            ],
+            "properties": {
+                "noteId": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -2143,173 +2331,7 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto.UpdatePermissionRequest": {
-            "type": "object",
-            "properties": {
-                "canEdit": {
-                    "type": "boolean"
-                },
-                "canRead": {
-                    "type": "boolean"
-                },
-                "canWrite": {
-                    "type": "boolean"
-                },
-                "permissionsId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto.UploadFileResponse": {
-            "type": "object",
-            "properties": {
-                "imgUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.ChangeProfilePicture": {
-            "type": "object",
-            "required": [
-                "file"
-            ],
-            "properties": {
-                "file": {
-                    "$ref": "#/definitions/multipart.FileHeader"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.ConfimationCodeRequest": {
-            "type": "object",
-            "required": [
-                "code",
-                "email"
-            ],
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "newPassword": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.DragNoteRequest": {
-            "type": "object",
-            "properties": {
-                "noteId": {
-                    "type": "string"
-                },
-                "toLayoutId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.LayoutIdRequest": {
-            "type": "object",
-            "properties": {
-                "layoutId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.LinkBetweenNotesRequest": {
-            "type": "object",
-            "required": [
-                "firstNoteId",
-                "layoutId",
-                "secondNoteId"
-            ],
-            "properties": {
-                "firstNoteId": {
-                    "type": "string"
-                },
-                "layoutId": {
-                    "type": "string"
-                },
-                "secondNoteId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.NewLayoutRequest": {
-            "type": "object",
-            "required": [
-                "color",
-                "title"
-            ],
-            "properties": {
-                "color": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.NoteId": {
-            "type": "object",
-            "required": [
-                "noteId"
-            ],
-            "properties": {
-                "noteId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.NoteRequest": {
-            "type": "object",
-            "properties": {
-                "layoutId": {
-                    "type": "string"
-                },
-                "payload": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.NoteWithIdRequest": {
-            "type": "object",
-            "required": [
-                "noteId"
-            ],
-            "properties": {
-                "noteId": {
-                    "type": "string"
-                },
-                "payload": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_request.RegisterCredentials": {
+        "wn_internal_domain_dto.RegisterCredentials": {
             "type": "object",
             "required": [
                 "email",
@@ -2328,7 +2350,23 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto_request.UpdateLayout": {
+        "wn_internal_domain_dto.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.SendCodeResponse": {
+            "type": "object",
+            "properties": {
+                "nextCodeDelay": {
+                    "$ref": "#/definitions/time.Duration"
+                }
+            }
+        },
+        "wn_internal_domain_dto.UpdateLayout": {
             "type": "object",
             "required": [
                 "layoutId"
@@ -2345,7 +2383,7 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto_request.UpdateNotePositionRequest": {
+        "wn_internal_domain_dto.UpdateNotePositionRequest": {
             "type": "object",
             "required": [
                 "layoutId",
@@ -2366,7 +2404,24 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto_request.UploadFileRequest": {
+        "wn_internal_domain_dto.UpdatePermissionRequest": {
+            "type": "object",
+            "properties": {
+                "canEdit": {
+                    "type": "boolean"
+                },
+                "canRead": {
+                    "type": "boolean"
+                },
+                "canWrite": {
+                    "type": "boolean"
+                },
+                "permissionsId": {
+                    "type": "string"
+                }
+            }
+        },
+        "wn_internal_domain_dto.UploadFileRequest": {
             "type": "object",
             "required": [
                 "file"
@@ -2377,71 +2432,10 @@ const docTemplate = `{
                 }
             }
         },
-        "wn_internal_domain_dto_response.ChangePictureResponse": {
+        "wn_internal_domain_dto.UploadFileResponse": {
             "type": "object",
             "properties": {
-                "newImgUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_response.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "type": "string"
-                },
-                "refreshToken": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_response.NoteId": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_response.RegisterResponse": {
-            "type": "object",
-            "properties": {
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "wn_internal_domain_dto_response.SendCodeResponse": {
-            "type": "object",
-            "properties": {
-                "nextCodeDelay": {
-                    "$ref": "#/definitions/time.Duration"
-                }
-            }
-        },
-        "wn_internal_domain_dto_user.User": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
                 "imgUrl": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }

@@ -3,8 +3,7 @@ package note
 import (
 	"context"
 	"wn/internal/domain/dto"
-	req "wn/internal/domain/dto/request"
-	"wn/internal/entity"
+	"wn/internal/domain/entity"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
@@ -60,7 +59,7 @@ func NewService(
 	}
 }
 
-func (srv *Service) CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error) {
+func (srv *Service) CreateNote(ctx context.Context, req dto.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error) {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("CreateNote checkPerms: %s", err.Error())
 		return uuid.Nil, err
@@ -68,7 +67,7 @@ func (srv *Service) CreateNote(ctx context.Context, req req.NoteRequest, userId 
 	return srv.noteService.CreateNote(ctx, req.Title, req.Payload, userId, req.LayoutId, mainLayoutId)
 }
 
-func (srv *Service) UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error {
+func (srv *Service) UpdateNote(ctx context.Context, req dto.NoteWithIdRequest, userId uuid.UUID) error {
 	if err := srv.permissionsService.CheckPermissionByNoteId(ctx, req.NoteId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("UpdateNote checkPerms: %s", err.Error())
 		return err
@@ -77,7 +76,7 @@ func (srv *Service) UpdateNote(ctx context.Context, req req.NoteWithIdRequest, u
 	return srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId)
 }
 
-func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId, mainLayoutId uuid.UUID) error {
+func (srv *Service) DeleteNote(ctx context.Context, req dto.NoteId, userId, mainLayoutId uuid.UUID) error {
 	if err := srv.permissionsService.CheckPermissionByNoteId(ctx, req.NoteId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("DeleteNote checkPerms: %s", err.Error())
 		return err
@@ -86,7 +85,7 @@ func (srv *Service) DeleteNote(ctx context.Context, req req.NoteId, userId, main
 	return srv.noteService.DeleteNoteById(ctx, req.NoteId)
 }
 
-func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {
+func (srv *Service) GetNotesFromLayout(ctx context.Context, req dto.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return nil, 0, err
@@ -94,7 +93,7 @@ func (srv *Service) GetNotesFromLayout(ctx context.Context, req req.GetNotesFrom
 	return srv.noteService.GetNotesWithPagination(ctx, req.Page, req.LayoutId, userId)
 }
 
-func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
+func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req dto.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return nil, err
@@ -123,7 +122,7 @@ func (srv *Service) GetNotesWithPosition(ctx context.Context, userId, mainLayout
 	return notes, err
 }
 
-func (srv *Service) GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
+func (srv *Service) GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req dto.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error) {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, false, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return nil, err
@@ -131,7 +130,7 @@ func (srv *Service) GetNotesWithoutPosition(ctx context.Context, userId uuid.UUI
 	return srv.noteService.GetNotesWithoutPosition(ctx, req.LayoutId, userId)
 }
 
-func (srv *Service) UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error {
+func (srv *Service) UpdateNotePosition(ctx context.Context, userId uuid.UUID, req dto.UpdateNotePositionRequest) error {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
@@ -139,7 +138,7 @@ func (srv *Service) UpdateNotePosition(ctx context.Context, userId uuid.UUID, re
 	return srv.noteService.UpdateNotePosition(ctx, req.NoteId, req.XPos, req.YPos)
 }
 
-func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error {
+func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
@@ -147,7 +146,7 @@ func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req req.Li
 	return srv.noteService.CreateLink(ctx, req.FirstNoteId, req.SecondNoteId)
 }
 
-func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error {
+func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error {
 	if err := srv.permissionsService.CheckPermissionByLayoutId(ctx, req.LayoutId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
@@ -155,7 +154,7 @@ func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req req.Li
 	return srv.noteService.DeleteLink(ctx, req.FirstNoteId, req.SecondNoteId)
 }
 
-func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req req.DragNoteRequest) error {
+func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req dto.DragNoteRequest) error {
 	if err := srv.permissionsService.CheckPermissionByNoteId(ctx, req.NoteId, userId, true, true, false); err != nil {
 		srv.logger.Warnf("CheckPermissionByNoteId: %s", err.Error())
 		return err

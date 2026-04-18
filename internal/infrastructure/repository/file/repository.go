@@ -3,6 +3,7 @@ package file
 import (
 	"context"
 	"fmt"
+	"wn/internal/domain/entity"
 	"wn/pkg/database/postgres"
 
 	"github.com/Masterminds/squirrel"
@@ -27,7 +28,7 @@ func (repo *Repository) CreateFile(ctx context.Context, filename string, encoded
 	return err
 }
 
-func (repo *Repository) GetAllFiles(ctx context.Context) ([]StaticFile, error) {
+func (repo *Repository) GetAllFiles(ctx context.Context) ([]entity.StaticFile, error) {
 
 	query, args, err := squirrel.Select("file_name, file_data").From("files").PlaceholderFormat(squirrel.Dollar).ToSql()
 	if err != nil {
@@ -39,9 +40,9 @@ func (repo *Repository) GetAllFiles(ctx context.Context) ([]StaticFile, error) {
 		return nil, errors.Wrap(err, "repo.conn.Query")
 	}
 	defer rows.Close()
-	var files []StaticFile
+	var files []entity.StaticFile
 	for rows.Next() {
-		var f StaticFile
+		var f entity.StaticFile
 		if err := rows.Scan(&f.Filename, &f.FileAsString); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}

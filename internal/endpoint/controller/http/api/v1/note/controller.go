@@ -4,9 +4,6 @@ import (
 	"context"
 	"strconv"
 	"wn/internal/domain/dto"
-	"wn/internal/domain/dto/request"
-	req "wn/internal/domain/dto/request"
-	resp "wn/internal/domain/dto/response"
 	apperrors "wn/internal/errors"
 	"wn/pkg/apperror"
 	"wn/pkg/applogger"
@@ -19,18 +16,18 @@ import (
 )
 
 type srv interface {
-	CreateNote(ctx context.Context, req req.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error)
-	UpdateNote(ctx context.Context, req req.NoteWithIdRequest, userId uuid.UUID) error
-	DeleteNote(ctx context.Context, req req.NoteId, userId uuid.UUID, mainLayoutId uuid.UUID) error
-	GetNotesFromLayout(ctx context.Context, req req.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
-	GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
-	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req req.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
-	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req req.UpdateNotePositionRequest) error
+	CreateNote(ctx context.Context, req dto.NoteRequest, userId uuid.UUID, mainLayoutId uuid.UUID) (uuid.UUID, error)
+	UpdateNote(ctx context.Context, req dto.NoteWithIdRequest, userId uuid.UUID) error
+	DeleteNote(ctx context.Context, req dto.NoteId, userId uuid.UUID, mainLayoutId uuid.UUID) error
+	GetNotesFromLayout(ctx context.Context, req dto.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error)
+	GetNotesWithPosition(ctx context.Context, userId, mainLayoutId uuid.UUID, req dto.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
+	GetNotesWithoutPosition(ctx context.Context, userId uuid.UUID, req dto.GetNotesFromLayoutWithoutPagRequest) ([]dto.Note, error)
+	UpdateNotePosition(ctx context.Context, userId uuid.UUID, req dto.UpdateNotePositionRequest) error
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error)
 
-	CreateLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
-	DeleteLink(ctx context.Context, userId uuid.UUID, req req.LinkBetweenNotesRequest) error
-	DragNote(ctx context.Context, userId uuid.UUID, req req.DragNoteRequest) error
+	CreateLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error
+	DeleteLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error
+	DragNote(ctx context.Context, userId uuid.UUID, req dto.DragNoteRequest) error
 }
 
 type Controller struct {
@@ -78,17 +75,17 @@ func (h *Controller) Init(api, authApi *gin.RouterGroup) {
 // @Description Создать заметку
 // @Tags notes
 // @Produce json
-// @Param data body request.NoteRequest true "data"
+// @Param data body dto.NoteRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
-// @Success 200 {object} response.Response{data=resp.NoteId}
+// @Success 200 {object} response.Response{data=dto.NoteId}
 // @Failure 400 {object} response.Response{} "possible codes: invalid_token, invalid_authorization_header"
 // @Failure 400 {object} response.Response{} "possible codes: bind_body, invalid_X-Request-Id"
 // @Failure 422 {object} response.Response{} "possible codes: not_unique, permissions_not_enough"
 // @Router /wn/api/v1/notes/create [post]
 func (h *Controller) createNote(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.NoteRequest
+	var req dto.NoteRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -113,8 +110,8 @@ func (h *Controller) createNote(c *gin.Context) {
 		return
 	}
 
-	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, resp.NoteId{
-		Id: noteId,
+	c.AbortWithStatusJSON(h.builder.BuildSuccessResponseBody(ctx, dto.NoteId{
+		NoteId: noteId,
 	}))
 }
 
@@ -122,7 +119,7 @@ func (h *Controller) createNote(c *gin.Context) {
 // @Description Удалить заметку
 // @Tags notes
 // @Produce json
-// @Param data body request.NoteId true "data"
+// @Param data body dto.NoteId true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -132,7 +129,7 @@ func (h *Controller) createNote(c *gin.Context) {
 // @Router /wn/api/v1/notes/delete [post]
 func (h *Controller) deleteNote(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.NoteId
+	var req dto.NoteId
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -164,7 +161,7 @@ func (h *Controller) deleteNote(c *gin.Context) {
 // @Description Обновить заметку
 // @Tags notes
 // @Produce json
-// @Param data body request.NoteWithIdRequest true "data"
+// @Param data body dto.NoteWithIdRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -174,7 +171,7 @@ func (h *Controller) deleteNote(c *gin.Context) {
 // @Router /wn/api/v1/notes/update [post]
 func (h *Controller) updateNote(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.NoteWithIdRequest
+	var req dto.NoteWithIdRequest
 	err := c.ShouldBind(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -223,7 +220,7 @@ func (h *Controller) getNotesFromLayout(c *gin.Context) {
 		return
 	}
 
-	req := request.GetNotesFromLayoutRequest{
+	req := dto.GetNotesFromLayoutRequest{
 		Page:     page,
 		LayoutId: layoutId,
 	}
@@ -269,7 +266,7 @@ func (h *Controller) getNotesFromLayoutWithoutPosition(c *gin.Context) {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
 		return
 	}
-	var req request.GetNotesFromLayoutWithoutPagRequest
+	var req dto.GetNotesFromLayoutWithoutPagRequest
 	req.LayoutId = layoutId
 
 	userId, err := util.GetUserId(ctx)
@@ -312,7 +309,7 @@ func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindQueryError))
 		return
 	}
-	var req request.GetNotesFromLayoutWithoutPagRequest
+	var req dto.GetNotesFromLayoutWithoutPagRequest
 	req.LayoutId = layoutId
 
 	userId, err := util.GetUserId(ctx)
@@ -334,7 +331,7 @@ func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 // @Description Обновить позицию заметки в графе
 // @Tags graph
 // @Produce json
-// @Param data body request.UpdateNotePositionRequest true "data"
+// @Param data body dto.UpdateNotePositionRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -343,7 +340,7 @@ func (h *Controller) getNotesFromLayoutWithPosition(c *gin.Context) {
 // @Router /wn/api/v1/notes/layout/graph/note [post]
 func (h *Controller) updateNotePosition(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.UpdateNotePositionRequest
+	var req dto.UpdateNotePositionRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -369,7 +366,7 @@ func (h *Controller) updateNotePosition(c *gin.Context) {
 // @Description Связать заметки
 // @Tags links
 // @Produce json
-// @Param data body request.LinkBetweenNotesRequest true "data"
+// @Param data body dto.LinkBetweenNotesRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -378,7 +375,7 @@ func (h *Controller) updateNotePosition(c *gin.Context) {
 // @Router /wn/api/v1/notes/layout/links/create [post]
 func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.LinkBetweenNotesRequest
+	var req dto.LinkBetweenNotesRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -404,7 +401,7 @@ func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
 // @Description Обновить позицию заметки в графе
 // @Tags links
 // @Produce json
-// @Param data body request.LinkBetweenNotesRequest true "data"
+// @Param data body dto.LinkBetweenNotesRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -413,7 +410,7 @@ func (h *Controller) createLinkBetweenNotes(c *gin.Context) {
 // @Router /wn/api/v1/notes/layout/links/delete [post]
 func (h *Controller) deleteLinkBetweenNotes(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req request.LinkBetweenNotesRequest
+	var req dto.LinkBetweenNotesRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))
@@ -470,7 +467,7 @@ func (h *Controller) searchNotes(c *gin.Context) {
 // @Description Переместить заметку между лейаутами
 // @Tags notes
 // @Produce json
-// @Param data body request.DragNoteRequest true "data"
+// @Param data body dto.DragNoteRequest true "data"
 // @Param X-Request-Id header string true "Request id identity"
 // @Param Authorization header string true "auth token"
 // @Success 200 {object} response.Response{}
@@ -481,7 +478,7 @@ func (h *Controller) searchNotes(c *gin.Context) {
 func (h *Controller) dragNote(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	var req request.DragNoteRequest
+	var req dto.DragNoteRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		_ = c.Error(apperror.NewBadRequestError(err.Error(), constants.BindBodyError))

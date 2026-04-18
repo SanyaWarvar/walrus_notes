@@ -1,4 +1,4 @@
-package user
+package entity
 
 import (
 	"time"
@@ -15,9 +15,4 @@ type User struct {
 	ImgUrl         string    `json:"imgUrl"`
 	ConfirmedEmail bool      `json:"confirmedEmail"`
 	CreatedAt      time.Time `json:"createdAt"`
-}
-
-type Role struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
 }
