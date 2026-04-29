@@ -145,6 +145,11 @@ func (s *Service) Broadcast(msg *dto.SocketMessage) {
 
 // Отправка конкретному соединению
 func (s *Service) SendTo(connID dto.ConnectionID, msg *dto.SocketMessage) error {
+	fmt.Println("map keys:")
+	s.connections.Range(func(key, value any) bool {
+		fmt.Println(key, value)
+		return true
+	})
 	if conn, ok := s.connections.Load(connID); ok {
 		return conn.(dto.Connection).Send(msg)
 	}
