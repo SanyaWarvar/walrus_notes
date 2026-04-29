@@ -114,3 +114,25 @@ func (srv *Service) CheckPermissionByNoteId(ctx context.Context, targetId, userI
 
 	return nil
 }
+
+func (srv *Service) GetAssociatedUsersByLayout(ctx context.Context, layoutId uuid.UUID) ([]uuid.UUID, error) {
+	perms, err := srv.permissionsRepository.GetPermissions(ctx, &dto.GetPermissionsFilter{
+		TargetId: &layoutId,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "srv.permissionsRepository.GetPermissions")
+	}
+
+	l, err := srv.layoutRepo.GetById(ctx, layoutId)
+	if err != nil {
+		return nil, errors.Wrap(err, "layoutRepo.GetById")
+	}
+
+	userIds := make([]uuid.UUID, 0, len(perms)+1)
+	for _, p := range perms {
+		userIds = append(userIds, p.ToUserId)
+	}
+	userIds = append(userIds, l.OwnerId)
+
+	return userIds, nil
+}

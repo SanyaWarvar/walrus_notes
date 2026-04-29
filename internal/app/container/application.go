@@ -78,6 +78,7 @@ func (s *applications) getLayoutApplicationService() *layout.Service {
 
 			s.c.getServices().getLayoutService(),
 			s.c.getServices().getPermissionsService(),
+			s.c.getProducers().getLayoutProducer(),
 		)
 	}
 	return s.layout

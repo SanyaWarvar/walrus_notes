@@ -12,26 +12,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type ConnectionID string
-
-type Connection interface {
-	ID() ConnectionID
-	UserID() uuid.UUID
-	Send(msg *dto.SocketMessage) error
-	SendPing() error
-	Close() error
-	ReadMessage() (*dto.SocketMessage, error)
-}
-
 type MessageHandler func(msg *dto.SocketMessage, userId uuid.UUID) (*dto.SocketMessage, error)
 
 type Service struct {
 	lgr         applogger.Logger
-	connections sync.Map // map[ConnectionID]Connection
+	connections sync.Map // map[dto.ConnectionID]dto.Connection
 	handlers    map[string]MessageHandler
 	broadcast   chan *dto.SocketMessage
-	register    chan Connection
-	unregister  chan Connection
+	register    chan dto.Connection
+	unregister  chan dto.Connection
 	mu          sync.RWMutex
 }
 
@@ -40,8 +29,8 @@ func NewService(lgr applogger.Logger) *Service {
 		lgr:        lgr,
 		handlers:   map[string]MessageHandler{},
 		broadcast:  make(chan *dto.SocketMessage, 100),
-		register:   make(chan Connection, 10),
-		unregister: make(chan Connection, 10),
+		register:   make(chan dto.Connection, 10),
+		unregister: make(chan dto.Connection, 10),
 	}
 
 	go s.run()
@@ -54,12 +43,12 @@ func (s *Service) run() {
 		select {
 		case conn := <-s.register:
 			s.connections.Store(conn.ID(), conn)
-			s.lgr.Infof("connection registered: %s", conn.ID())
+			s.lgr.Infof("dto.Connection registered: %s", conn.ID())
 
 		case conn := <-s.unregister:
 			s.connections.Delete(conn.ID())
 			conn.Close()
-			s.lgr.Infof("connection unregistered: %s", conn.ID())
+			s.lgr.Infof("dto.Connection unregistered: %s", conn.ID())
 
 		case msg := <-s.broadcast:
 			s.broadcastMessage(msg)
@@ -68,7 +57,7 @@ func (s *Service) run() {
 }
 
 // HTTP хендлер для апгрейда соединения
-func (s *Service) HandleConnection(ctx context.Context, conn Connection) {
+func (s *Service) HandleConnection(ctx context.Context, conn dto.Connection) {
 	// Регистрируем соединение
 	s.register <- conn
 	defer func() {
@@ -105,7 +94,7 @@ func (s *Service) HandleConnection(ctx context.Context, conn Connection) {
 				s.lgr.Errorf("send ping error: %s", err.Error())
 				return
 			}
-			s.lgr.Debugf("ping sent to connection %s", conn.ID())
+			s.lgr.Debugf("ping sent to dto.Connection %s", conn.ID())
 
 		case msg := <-messageChan:
 			// Обрабатываем входящее сообщение
@@ -129,7 +118,7 @@ func (s *Service) HandleConnection(ctx context.Context, conn Connection) {
 }
 
 // Обработка входящих сообщений
-func (s *Service) handleMessage(connID ConnectionID, msg *dto.SocketMessage) (*dto.SocketMessage, error) {
+func (s *Service) handleMessage(connID dto.ConnectionID, msg *dto.SocketMessage) (*dto.SocketMessage, error) {
 	s.mu.RLock()
 	handler, exists := s.handlers[msg.Event]
 	s.mu.RUnlock()
@@ -138,7 +127,7 @@ func (s *Service) handleMessage(connID ConnectionID, msg *dto.SocketMessage) (*d
 		return nil, fmt.Errorf("no handler for event: %s", msg.Event)
 	}
 	connAny, _ := s.connections.Load(connID)
-	conn := connAny.(Connection)
+	conn := connAny.(dto.Connection)
 	return handler(msg, conn.UserID())
 }
 
@@ -155,17 +144,17 @@ func (s *Service) Broadcast(msg *dto.SocketMessage) {
 }
 
 // Отправка конкретному соединению
-func (s *Service) SendTo(connID ConnectionID, msg *dto.SocketMessage) error {
+func (s *Service) SendTo(connID dto.ConnectionID, msg *dto.SocketMessage) error {
 	if conn, ok := s.connections.Load(connID); ok {
-		return conn.(Connection).Send(msg)
+		return conn.(dto.Connection).Send(msg)
 	}
-	return fmt.Errorf("connection not found: %s", connID)
+	return fmt.Errorf("dto.Connection not found: %s", connID)
 }
 
 // Бродкаст сообщения
 func (s *Service) broadcastMessage(msg *dto.SocketMessage) {
 	s.connections.Range(func(key, value interface{}) bool {
-		if conn, ok := value.(Connection); ok {
+		if conn, ok := value.(dto.Connection); ok {
 			if err := conn.Send(msg); err != nil {
 				s.lgr.Errorf("broadcast error: connId: %s error: %s", key.(string), err.Error())
 			}
@@ -176,7 +165,7 @@ func (s *Service) broadcastMessage(msg *dto.SocketMessage) {
 
 type WSConnection struct {
 	conn   *websocket.Conn
-	id     ConnectionID
+	id     dto.ConnectionID
 	userID uuid.UUID
 	mu     sync.Mutex
 }
@@ -184,12 +173,12 @@ type WSConnection struct {
 func NewWSConnection(conn *websocket.Conn, userID uuid.UUID) *WSConnection {
 	return &WSConnection{
 		conn:   conn,
-		id:     ConnectionID(uuid.New().String()),
+		id:     dto.ConnectionID(uuid.New().String()),
 		userID: userID,
 	}
 }
 
-func (w *WSConnection) ID() ConnectionID {
+func (w *WSConnection) ID() dto.ConnectionID {
 	return w.id
 }
 
