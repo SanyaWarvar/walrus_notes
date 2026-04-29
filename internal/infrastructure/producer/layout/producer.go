@@ -39,10 +39,14 @@ func NewProducer(
 func (p *Producer) SendToAssociatedUsers(ctx context.Context, layoutId uuid.UUID, event events.Event) error {
 	recipients, err := p.permissionsService.GetAssociatedUsersByLayout(ctx, layoutId)
 	if err != nil {
+		p.lgr.Errorf("SendToAssociatedUsers for layout %s: p.permissionsService.GetAssociatedUsersByLayout: %s", layoutId.String(), err.Error())
 		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
 	}
 	for _, recipientId := range recipients {
-		p.socketService.SendTo(dto.ConnectionID(recipientId.String()), event.ToSocketEvent())
+		err = p.socketService.SendTo(dto.ConnectionID(recipientId.String()), event.ToSocketEvent())
+		if err != nil {
+			p.lgr.Errorf("SendToAssociatedUsers for layout %s: SendTo: %s", layoutId.String(), err.Error())
+		}
 	}
 	return nil
 }
