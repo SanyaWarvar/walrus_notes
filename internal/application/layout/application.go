@@ -8,6 +8,7 @@ import (
 	"wn/pkg/trx"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type layoutService interface {
@@ -21,10 +22,11 @@ type layoutService interface {
 
 type permissionsService interface {
 	CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error
+	GetAssociatedUsersByLayout(ctx context.Context, layoutId uuid.UUID) ([]uuid.UUID, error)
 }
 
 type eventProducer interface {
-	SendToAssociatedUsers(ctx context.Context, layoutId uuid.UUID, event events.Event) error
+	SendToAssociatedUsers(ctx context.Context, layoutId uuid.UUID, recipients []uuid.UUID, event events.Event) error
 }
 
 type Service struct {
@@ -70,12 +72,17 @@ func (srv *Service) DeleteLayout(ctx context.Context, req dto.LayoutIdRequest, u
 		return err
 	}
 
-	err := srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.LayoutId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.layoutService.DeleteLayoutById(ctx, req.LayoutId, userId)
 	if err != nil {
 		return err
 	}
 
-	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, &events.DeleteLayoutEvent{
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, recipients, &events.DeleteLayoutEvent{
 		LayoutId: req.LayoutId,
 	})
 
