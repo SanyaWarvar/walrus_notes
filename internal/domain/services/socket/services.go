@@ -178,7 +178,7 @@ type WSConnection struct {
 func NewWSConnection(conn *websocket.Conn, userID uuid.UUID) *WSConnection {
 	return &WSConnection{
 		conn:   conn,
-		id:     dto.ConnectionID(uuid.New().String()),
+		id:     dto.ConnectionID(userID.String()),
 		userID: userID,
 	}
 }
