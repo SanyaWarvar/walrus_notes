@@ -8,13 +8,25 @@ import (
 )
 
 type DeleteLayoutEvent struct {
-	LayoutId uuid.UUID
+	LayoutId uuid.UUID `json:"layoutId"`
 }
 
 func (e *DeleteLayoutEvent) ToSocketEvent() *dto.SocketMessage {
 	d, _ := json.Marshal(e)
 	return &dto.SocketMessage{
 		Event:   "DELETE_LAYOUT",
+		Payload: d,
+	}
+}
+
+type UpdateLayoutEvent struct {
+	LayoutId uuid.UUID `json:"layoutId"`
+}
+
+func (e *UpdateLayoutEvent) ToSocketEvent() *dto.SocketMessage {
+	d, _ := json.Marshal(e)
+	return &dto.SocketMessage{
+		Event:   "UPDATE_LAYOUT",
 		Payload: d,
 	}
 }

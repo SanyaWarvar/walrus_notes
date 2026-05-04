@@ -35,12 +35,12 @@ func NewProducer(
 	}
 }
 
-func (p *Producer) SendToAssociatedUsers(ctx context.Context, layoutId uuid.UUID, recipients []uuid.UUID, event events.Event) error {
+func (p *Producer) SendToAssociatedUsers(ctx context.Context, targetId uuid.UUID, recipients []uuid.UUID, event events.Event) error {
 
 	for _, recipientId := range recipients {
 		err := p.socketService.SendTo(dto.ConnectionID(recipientId.String()), event.ToSocketEvent())
 		if err != nil {
-			p.lgr.Errorf("SendToAssociatedUsers for layout %s: SendTo: %s", layoutId.String(), err.Error())
+			p.lgr.Errorf("SendToAssociatedUsers for id %s: SendTo: %s", targetId.String(), err.Error())
 		}
 	}
 	return nil

@@ -4,10 +4,12 @@ import (
 	"context"
 	"wn/internal/domain/dto"
 	"wn/internal/domain/entity"
+	"wn/internal/domain/events"
 	"wn/pkg/applogger"
 	"wn/pkg/trx"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 type noteService interface {
@@ -32,6 +34,12 @@ type layoutRepository interface {
 type permissionsService interface {
 	CheckPermissionByLayoutId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error
 	CheckPermissionByNoteId(ctx context.Context, targetId, userId uuid.UUID, read, write, edit bool) error
+	GetAssociatedUsersByLayout(ctx context.Context, layoutId uuid.UUID) ([]uuid.UUID, error)
+	GetAssociatedUsersByNote(ctx context.Context, noteId uuid.UUID) ([]uuid.UUID, error)
+}
+
+type eventProducer interface {
+	SendToAssociatedUsers(ctx context.Context, targetId uuid.UUID, recipients []uuid.UUID, event events.Event) error
 }
 
 type Service struct {
@@ -41,6 +49,7 @@ type Service struct {
 	noteService        noteService
 	permissionsService permissionsService
 	layoutRepository   layoutRepository
+	eventProducer      eventProducer
 }
 
 func NewService(
@@ -49,6 +58,7 @@ func NewService(
 	noteService noteService,
 	permissionsService permissionsService,
 	layoutRepository layoutRepository,
+	eventProducer eventProducer,
 ) *Service {
 	return &Service{
 		tx:                 tx,
@@ -56,6 +66,7 @@ func NewService(
 		noteService:        noteService,
 		permissionsService: permissionsService,
 		layoutRepository:   layoutRepository,
+		eventProducer:      eventProducer,
 	}
 }
 
@@ -64,7 +75,23 @@ func (srv *Service) CreateNote(ctx context.Context, req dto.NoteRequest, userId 
 		srv.logger.Warnf("CreateNote checkPerms: %s", err.Error())
 		return uuid.Nil, err
 	}
-	return srv.noteService.CreateNote(ctx, req.Title, req.Payload, userId, req.LayoutId, mainLayoutId)
+
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.LayoutId)
+	if err != nil {
+		return uuid.Nil, errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	id, err := srv.noteService.CreateNote(ctx, req.Title, req.Payload, userId, req.LayoutId, mainLayoutId)
+	if err != nil {
+		return uuid.Nil, errors.Wrap(err, "srv.noteService.CreateNote")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, recipients, &events.CreateNoteEvent{
+		LayoutId: req.LayoutId,
+		NoteId:   id,
+	})
+
+	return id, nil
 }
 
 func (srv *Service) UpdateNote(ctx context.Context, req dto.NoteWithIdRequest, userId uuid.UUID) error {
@@ -73,7 +100,21 @@ func (srv *Service) UpdateNote(ctx context.Context, req dto.NoteWithIdRequest, u
 		return err
 	}
 
-	return srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId)
+	recipients, err := srv.permissionsService.GetAssociatedUsersByNote(ctx, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.UpdateNote(ctx, req.Title, req.Payload, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.CreateNote")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.NoteId, recipients, &events.UpdateNoteEvent{
+		NoteId: req.NoteId,
+	})
+
+	return nil
 }
 
 func (srv *Service) DeleteNote(ctx context.Context, req dto.NoteId, userId, mainLayoutId uuid.UUID) error {
@@ -82,7 +123,21 @@ func (srv *Service) DeleteNote(ctx context.Context, req dto.NoteId, userId, main
 		return err
 	}
 
-	return srv.noteService.DeleteNoteById(ctx, req.NoteId)
+	recipients, err := srv.permissionsService.GetAssociatedUsersByNote(ctx, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.DeleteNoteById(ctx, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.DeleteNoteById")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.NoteId, recipients, &events.DeleteNoteEvent{
+		NoteId: req.NoteId,
+	})
+
+	return nil
 }
 
 func (srv *Service) GetNotesFromLayout(ctx context.Context, req dto.GetNotesFromLayoutRequest, userId uuid.UUID) ([]dto.Note, int, error) {
@@ -135,7 +190,22 @@ func (srv *Service) UpdateNotePosition(ctx context.Context, userId uuid.UUID, re
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.noteService.UpdateNotePosition(ctx, req.NoteId, req.XPos, req.YPos)
+
+	recipients, err := srv.permissionsService.GetAssociatedUsersByNote(ctx, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.UpdateNotePosition(ctx, req.NoteId, req.XPos, req.YPos)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.DeleteNoteById")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.NoteId, recipients, &events.ChangeNotePositionEvent{
+		LayoutId: req.LayoutId,
+	})
+
+	return nil
 }
 
 func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error {
@@ -143,7 +213,22 @@ func (srv *Service) CreateLink(ctx context.Context, userId uuid.UUID, req dto.Li
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.noteService.CreateLink(ctx, req.FirstNoteId, req.SecondNoteId)
+
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.LayoutId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.CreateLink(ctx, req.FirstNoteId, req.SecondNoteId)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.DeleteNoteById")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, recipients, &events.ChangeLinkEvent{
+		LayoutId: req.LayoutId,
+	})
+
+	return nil
 }
 
 func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req dto.LinkBetweenNotesRequest) error {
@@ -151,7 +236,22 @@ func (srv *Service) DeleteLink(ctx context.Context, userId uuid.UUID, req dto.Li
 		srv.logger.Warnf("GetNotesFromLayout checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.noteService.DeleteLink(ctx, req.FirstNoteId, req.SecondNoteId)
+
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.LayoutId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.DeleteLink(ctx, req.FirstNoteId, req.SecondNoteId)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.DeleteNoteById")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, recipients, &events.ChangeLinkEvent{
+		LayoutId: req.LayoutId,
+	})
+
+	return nil
 }
 
 func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req dto.DragNoteRequest) error {
@@ -164,7 +264,22 @@ func (srv *Service) DragNote(ctx context.Context, userId uuid.UUID, req dto.Drag
 		return err
 	}
 
-	return srv.noteService.DragNote(ctx, req.NoteId, req.ToLayoutId)
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.NoteId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+
+	err = srv.noteService.DragNote(ctx, req.NoteId, req.ToLayoutId)
+	if err != nil {
+		return errors.Wrap(err, "srv.noteService.DeleteNoteById")
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.NoteId, recipients, &events.DragNoteEvent{
+		ToLayoutId: req.ToLayoutId,
+		NoteId:     req.NoteId,
+	})
+
+	return nil
 }
 
 func (srv *Service) SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]dto.Note, error) {

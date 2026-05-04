@@ -65,6 +65,7 @@ func (s *applications) getNoteApplicationService() *note.Service {
 			s.c.getServices().getNoteService(),
 			s.c.getServices().getPermissionsService(),
 			s.c.getRepositories().getLayoutRepository(),
+			s.c.getProducers().getLayoutProducer(),
 		)
 	}
 	return s.note

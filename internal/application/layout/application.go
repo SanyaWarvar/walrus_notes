@@ -26,7 +26,7 @@ type permissionsService interface {
 }
 
 type eventProducer interface {
-	SendToAssociatedUsers(ctx context.Context, layoutId uuid.UUID, recipients []uuid.UUID, event events.Event) error
+	SendToAssociatedUsers(ctx context.Context, targetId uuid.UUID, recipients []uuid.UUID, event events.Event) error
 }
 
 type Service struct {
@@ -86,7 +86,7 @@ func (srv *Service) DeleteLayout(ctx context.Context, req dto.LayoutIdRequest, u
 		LayoutId: req.LayoutId,
 	})
 
-	return err
+	return nil
 }
 
 func (srv *Service) UpdateLayout(ctx context.Context, req dto.UpdateLayout, userId uuid.UUID) error {
@@ -94,7 +94,21 @@ func (srv *Service) UpdateLayout(ctx context.Context, req dto.UpdateLayout, user
 		srv.logger.Warnf("DeleteLayout checkPerms: %s", err.Error())
 		return err
 	}
-	return srv.layoutService.UpdateLayout(ctx, req, userId)
+
+	recipients, err := srv.permissionsService.GetAssociatedUsersByLayout(ctx, req.LayoutId)
+	if err != nil {
+		return errors.Wrap(err, "p.permissionsService.GetAssociatedUsersByLayout")
+	}
+	err = srv.layoutService.UpdateLayout(ctx, req, userId)
+	if err != nil {
+		return err
+	}
+
+	go srv.eventProducer.SendToAssociatedUsers(context.Background(), req.LayoutId, recipients, &events.UpdateLayoutEvent{
+		LayoutId: req.LayoutId,
+	})
+
+	return nil
 }
 
 func (srv *Service) ExportInfo(ctx context.Context, req dto.ExportInfoRequest) (*dto.ExportInfo, error) {
