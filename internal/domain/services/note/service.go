@@ -26,7 +26,7 @@ type noteRepo interface {
 	GetNotesWithoutPosition(ctx context.Context, layoutId, userId uuid.UUID) ([]entity.Note, error)
 	SearchNotes(ctx context.Context, userId uuid.UUID, search string) ([]entity.Note, error)
 	UpdateDraftById(ctx context.Context, noteId uuid.UUID, newDraft string) error
-	CommitDraft(ctx context.Context, noteId uuid.UUID) error
+	CommitDraft(ctx context.Context, noteId uuid.UUID, payload string) error
 	GetById(ctx context.Context, noteId uuid.UUID) (*entity.Note, error)
 }
 
@@ -293,7 +293,22 @@ func (srv *Service) HandleCommitDraft(msg *dto.SocketMessage, userId uuid.UUID) 
 		}, err
 	}
 
-	err = srv.noteRepo.CommitDraft(ctx, item.NoteId)
+	note, err := srv.noteRepo.GetById(ctx, item.NoteId)
+	if err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+
+	err = srv.noteRepo.CommitDraft(ctx, item.NoteId, note.Draft)
+	if err != nil {
+		return &dto.SocketMessage{
+			Event:   "COMMIT_DRAFT_RESPONSE",
+			Payload: []byte("{\"status\": \"false\"}"),
+		}, err
+	}
+
 	return &dto.SocketMessage{
 		Event:   "COMMIT_DRAFT_RESPONSE",
 		Payload: []byte("{\"status\": \"true\"}"),

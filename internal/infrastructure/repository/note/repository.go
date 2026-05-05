@@ -121,13 +121,13 @@ func (repo *Repository) UpdateDraftById(ctx context.Context, noteId uuid.UUID, n
 	return err
 }
 
-func (repo *Repository) CommitDraft(ctx context.Context, noteId uuid.UUID) error {
+func (repo *Repository) CommitDraft(ctx context.Context, noteId uuid.UUID, newPayload string) error {
 	query := `
 		update notes 
-		set payload = draft, draft = ''
-		where id = $1
+		set payload = $1
+		where id = $2
 	`
-	_, err := repo.conn.Exec(ctx, query, noteId)
+	_, err := repo.conn.Exec(ctx, query, newPayload, noteId)
 	return err
 }
 
