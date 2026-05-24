@@ -1,0 +1,10 @@
+# Render: только web-сервис. Postgres, Redis и секреты — отдельно.
+# Переменные из ./etc/secrets/.env добавь в Dashboard → Environment.
+
+services:
+  - type: web
+    name: walrus-notes
+    runtime: go
+    plan: free
+    buildCommand: go build -ldflags="-s -w" -o bin/wn ./cmd/app
+    startCommand: ./bin/wn
