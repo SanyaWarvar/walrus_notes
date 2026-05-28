@@ -140,8 +140,15 @@ func TestDecrypt_TamperedCiphertext(t *testing.T) {
 		t.Fatalf("Encrypt() error = %v", err)
 	}
 
-	// Портим зашифрованный текст
-	tampered := encrypted[:10] + "X" + encrypted[11:]
+	// Портим зашифрованный текст — меняем последний символ base64
+	tamperedBytes := []byte(encrypted)
+	last := tamperedBytes[len(tamperedBytes)-1]
+	if last == 'A' {
+		tamperedBytes[len(tamperedBytes)-1] = 'B'
+	} else {
+		tamperedBytes[len(tamperedBytes)-1] = 'A'
+	}
+	tampered := string(tamperedBytes)
 
 	_, err = encryptor.Decrypt(tampered)
 	if err == nil {
